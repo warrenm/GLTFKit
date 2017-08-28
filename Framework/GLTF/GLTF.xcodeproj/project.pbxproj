@@ -1,0 +1,492 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		83D6003B1F48C2FF00F71E0C /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 83D6003A1F48C2FF00F71E0C /* Accelerate.framework */; };
+		83D600B91F4A195400F71E0C /* GLTFBufferAllocator.h in Headers */ = {isa = PBXBuildFile; fileRef = 83D600B81F4A195400F71E0C /* GLTFBufferAllocator.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		83D6FF7F1F48BBFA00F71E0C /* GLTFAccessor.h in Headers */ = {isa = PBXBuildFile; fileRef = 83D6FF551F48BBFA00F71E0C /* GLTFAccessor.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		83D6FF801F48BBFA00F71E0C /* GLTFAnimation.h in Headers */ = {isa = PBXBuildFile; fileRef = 83D6FF561F48BBFA00F71E0C /* GLTFAnimation.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		83D6FF811F48BBFA00F71E0C /* GLTFAsset.h in Headers */ = {isa = PBXBuildFile; fileRef = 83D6FF571F48BBFA00F71E0C /* GLTFAsset.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		83D6FF821F48BBFA00F71E0C /* GLTFBuffer.h in Headers */ = {isa = PBXBuildFile; fileRef = 83D6FF581F48BBFA00F71E0C /* GLTFBuffer.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		83D6FF831F48BBFA00F71E0C /* GLTFBufferView.h in Headers */ = {isa = PBXBuildFile; fileRef = 83D6FF591F48BBFA00F71E0C /* GLTFBufferView.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		83D6FF841F48BBFA00F71E0C /* GLTFCamera.h in Headers */ = {isa = PBXBuildFile; fileRef = 83D6FF5A1F48BBFA00F71E0C /* GLTFCamera.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		83D6FF851F48BBFA00F71E0C /* GLTFEnums.h in Headers */ = {isa = PBXBuildFile; fileRef = 83D6FF5B1F48BBFA00F71E0C /* GLTFEnums.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		83D6FF861F48BBFA00F71E0C /* GLTFImage.h in Headers */ = {isa = PBXBuildFile; fileRef = 83D6FF5C1F48BBFA00F71E0C /* GLTFImage.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		83D6FF871F48BBFA00F71E0C /* GLTFMaterial.h in Headers */ = {isa = PBXBuildFile; fileRef = 83D6FF5D1F48BBFA00F71E0C /* GLTFMaterial.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		83D6FF881F48BBFA00F71E0C /* GLTFMesh.h in Headers */ = {isa = PBXBuildFile; fileRef = 83D6FF5E1F48BBFA00F71E0C /* GLTFMesh.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		83D6FF891F48BBFA00F71E0C /* GLTFNode.h in Headers */ = {isa = PBXBuildFile; fileRef = 83D6FF5F1F48BBFA00F71E0C /* GLTFNode.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		83D6FF8A1F48BBFA00F71E0C /* GLTFObject.h in Headers */ = {isa = PBXBuildFile; fileRef = 83D6FF601F48BBFA00F71E0C /* GLTFObject.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		83D6FF8B1F48BBFA00F71E0C /* GLTFScene.h in Headers */ = {isa = PBXBuildFile; fileRef = 83D6FF611F48BBFA00F71E0C /* GLTFScene.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		83D6FF8C1F48BBFA00F71E0C /* GLTFSkin.h in Headers */ = {isa = PBXBuildFile; fileRef = 83D6FF621F48BBFA00F71E0C /* GLTFSkin.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		83D6FF8D1F48BBFA00F71E0C /* GLTFSkin.m in Sources */ = {isa = PBXBuildFile; fileRef = 83D6FF631F48BBFA00F71E0C /* GLTFSkin.m */; };
+		83D6FF8E1F48BBFA00F71E0C /* GLTFTexture.h in Headers */ = {isa = PBXBuildFile; fileRef = 83D6FF641F48BBFA00F71E0C /* GLTFTexture.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		83D6FF8F1F48BBFA00F71E0C /* GLTFTextureSampler.h in Headers */ = {isa = PBXBuildFile; fileRef = 83D6FF651F48BBFA00F71E0C /* GLTFTextureSampler.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		83D6FF901F48BBFA00F71E0C /* GLTFUtilities.h in Headers */ = {isa = PBXBuildFile; fileRef = 83D6FF661F48BBFA00F71E0C /* GLTFUtilities.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		83D6FF911F48BBFA00F71E0C /* GLTFKHRLight.h in Headers */ = {isa = PBXBuildFile; fileRef = 83D6FF691F48BBFA00F71E0C /* GLTFKHRLight.h */; };
+		83D6FF921F48BBFA00F71E0C /* GLTFKHRLight.m in Sources */ = {isa = PBXBuildFile; fileRef = 83D6FF6A1F48BBFA00F71E0C /* GLTFKHRLight.m */; };
+		83D6FF931F48BBFA00F71E0C /* GLTFAccessor.m in Sources */ = {isa = PBXBuildFile; fileRef = 83D6FF6B1F48BBFA00F71E0C /* GLTFAccessor.m */; };
+		83D6FF941F48BBFA00F71E0C /* GLTFAnimation.m in Sources */ = {isa = PBXBuildFile; fileRef = 83D6FF6C1F48BBFA00F71E0C /* GLTFAnimation.m */; };
+		83D6FF951F48BBFA00F71E0C /* GLTFAsset.m in Sources */ = {isa = PBXBuildFile; fileRef = 83D6FF6D1F48BBFA00F71E0C /* GLTFAsset.m */; };
+		83D6FF981F48BBFA00F71E0C /* GLTFBufferView.m in Sources */ = {isa = PBXBuildFile; fileRef = 83D6FF701F48BBFA00F71E0C /* GLTFBufferView.m */; };
+		83D6FF991F48BBFA00F71E0C /* GLTFCamera.m in Sources */ = {isa = PBXBuildFile; fileRef = 83D6FF711F48BBFA00F71E0C /* GLTFCamera.m */; };
+		83D6FF9A1F48BBFA00F71E0C /* GLTFImage.m in Sources */ = {isa = PBXBuildFile; fileRef = 83D6FF721F48BBFA00F71E0C /* GLTFImage.m */; };
+		83D6FF9B1F48BBFA00F71E0C /* GLTFMaterial.m in Sources */ = {isa = PBXBuildFile; fileRef = 83D6FF731F48BBFA00F71E0C /* GLTFMaterial.m */; };
+		83D6FF9C1F48BBFA00F71E0C /* GLTFMesh.m in Sources */ = {isa = PBXBuildFile; fileRef = 83D6FF741F48BBFA00F71E0C /* GLTFMesh.m */; };
+		83D6FF9D1F48BBFA00F71E0C /* GLTFNode.m in Sources */ = {isa = PBXBuildFile; fileRef = 83D6FF751F48BBFA00F71E0C /* GLTFNode.m */; };
+		83D6FF9E1F48BBFA00F71E0C /* GLTFObject.m in Sources */ = {isa = PBXBuildFile; fileRef = 83D6FF761F48BBFA00F71E0C /* GLTFObject.m */; };
+		83D6FF9F1F48BBFA00F71E0C /* GLTFScene.m in Sources */ = {isa = PBXBuildFile; fileRef = 83D6FF771F48BBFA00F71E0C /* GLTFScene.m */; };
+		83D6FFA01F48BBFA00F71E0C /* GLTFTexture.m in Sources */ = {isa = PBXBuildFile; fileRef = 83D6FF781F48BBFA00F71E0C /* GLTFTexture.m */; };
+		83D6FFA11F48BBFA00F71E0C /* GLTFTextureSampler.m in Sources */ = {isa = PBXBuildFile; fileRef = 83D6FF791F48BBFA00F71E0C /* GLTFTextureSampler.m */; };
+		83D6FFA21F48BBFA00F71E0C /* GLTFUtilities.m in Sources */ = {isa = PBXBuildFile; fileRef = 83D6FF7A1F48BBFA00F71E0C /* GLTFUtilities.m */; };
+		83D6FFA31F48BBFA00F71E0C /* GLTFVertexDescriptor.h in Headers */ = {isa = PBXBuildFile; fileRef = 83D6FF7B1F48BBFA00F71E0C /* GLTFVertexDescriptor.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		83D6FFA41F48BBFA00F71E0C /* GLTFVertexDescriptor.m in Sources */ = {isa = PBXBuildFile; fileRef = 83D6FF7C1F48BBFA00F71E0C /* GLTFVertexDescriptor.m */; };
+		83D6FFA51F48BBFA00F71E0C /* GLTF.h in Headers */ = {isa = PBXBuildFile; fileRef = 83D6FF7D1F48BBFA00F71E0C /* GLTF.h */; settings = {ATTRIBUTES = (Public, ); }; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		83D6003A1F48C2FF00F71E0C /* Accelerate.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Accelerate.framework; path = System/Library/Frameworks/Accelerate.framework; sourceTree = SDKROOT; };
+		83D600B81F4A195400F71E0C /* GLTFBufferAllocator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GLTFBufferAllocator.h; sourceTree = "<group>"; };
+		83D6FF481F48BB3A00F71E0C /* GLTF.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = GLTF.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		83D6FF551F48BBFA00F71E0C /* GLTFAccessor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GLTFAccessor.h; sourceTree = "<group>"; };
+		83D6FF561F48BBFA00F71E0C /* GLTFAnimation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GLTFAnimation.h; sourceTree = "<group>"; };
+		83D6FF571F48BBFA00F71E0C /* GLTFAsset.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GLTFAsset.h; sourceTree = "<group>"; };
+		83D6FF581F48BBFA00F71E0C /* GLTFBuffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GLTFBuffer.h; sourceTree = "<group>"; };
+		83D6FF591F48BBFA00F71E0C /* GLTFBufferView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GLTFBufferView.h; sourceTree = "<group>"; };
+		83D6FF5A1F48BBFA00F71E0C /* GLTFCamera.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GLTFCamera.h; sourceTree = "<group>"; };
+		83D6FF5B1F48BBFA00F71E0C /* GLTFEnums.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GLTFEnums.h; sourceTree = "<group>"; };
+		83D6FF5C1F48BBFA00F71E0C /* GLTFImage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GLTFImage.h; sourceTree = "<group>"; };
+		83D6FF5D1F48BBFA00F71E0C /* GLTFMaterial.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GLTFMaterial.h; sourceTree = "<group>"; };
+		83D6FF5E1F48BBFA00F71E0C /* GLTFMesh.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GLTFMesh.h; sourceTree = "<group>"; };
+		83D6FF5F1F48BBFA00F71E0C /* GLTFNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GLTFNode.h; sourceTree = "<group>"; };
+		83D6FF601F48BBFA00F71E0C /* GLTFObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GLTFObject.h; sourceTree = "<group>"; };
+		83D6FF611F48BBFA00F71E0C /* GLTFScene.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GLTFScene.h; sourceTree = "<group>"; };
+		83D6FF621F48BBFA00F71E0C /* GLTFSkin.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GLTFSkin.h; sourceTree = "<group>"; };
+		83D6FF631F48BBFA00F71E0C /* GLTFSkin.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GLTFSkin.m; sourceTree = "<group>"; };
+		83D6FF641F48BBFA00F71E0C /* GLTFTexture.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GLTFTexture.h; sourceTree = "<group>"; };
+		83D6FF651F48BBFA00F71E0C /* GLTFTextureSampler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GLTFTextureSampler.h; sourceTree = "<group>"; };
+		83D6FF661F48BBFA00F71E0C /* GLTFUtilities.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GLTFUtilities.h; sourceTree = "<group>"; };
+		83D6FF691F48BBFA00F71E0C /* GLTFKHRLight.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GLTFKHRLight.h; sourceTree = "<group>"; };
+		83D6FF6A1F48BBFA00F71E0C /* GLTFKHRLight.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GLTFKHRLight.m; sourceTree = "<group>"; };
+		83D6FF6B1F48BBFA00F71E0C /* GLTFAccessor.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GLTFAccessor.m; sourceTree = "<group>"; };
+		83D6FF6C1F48BBFA00F71E0C /* GLTFAnimation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GLTFAnimation.m; sourceTree = "<group>"; };
+		83D6FF6D1F48BBFA00F71E0C /* GLTFAsset.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GLTFAsset.m; sourceTree = "<group>"; };
+		83D6FF701F48BBFA00F71E0C /* GLTFBufferView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GLTFBufferView.m; sourceTree = "<group>"; };
+		83D6FF711F48BBFA00F71E0C /* GLTFCamera.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GLTFCamera.m; sourceTree = "<group>"; };
+		83D6FF721F48BBFA00F71E0C /* GLTFImage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GLTFImage.m; sourceTree = "<group>"; };
+		83D6FF731F48BBFA00F71E0C /* GLTFMaterial.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GLTFMaterial.m; sourceTree = "<group>"; };
+		83D6FF741F48BBFA00F71E0C /* GLTFMesh.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GLTFMesh.m; sourceTree = "<group>"; };
+		83D6FF751F48BBFA00F71E0C /* GLTFNode.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GLTFNode.m; sourceTree = "<group>"; };
+		83D6FF761F48BBFA00F71E0C /* GLTFObject.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GLTFObject.m; sourceTree = "<group>"; };
+		83D6FF771F48BBFA00F71E0C /* GLTFScene.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GLTFScene.m; sourceTree = "<group>"; };
+		83D6FF781F48BBFA00F71E0C /* GLTFTexture.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GLTFTexture.m; sourceTree = "<group>"; };
+		83D6FF791F48BBFA00F71E0C /* GLTFTextureSampler.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GLTFTextureSampler.m; sourceTree = "<group>"; };
+		83D6FF7A1F48BBFA00F71E0C /* GLTFUtilities.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GLTFUtilities.m; sourceTree = "<group>"; };
+		83D6FF7B1F48BBFA00F71E0C /* GLTFVertexDescriptor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GLTFVertexDescriptor.h; sourceTree = "<group>"; };
+		83D6FF7C1F48BBFA00F71E0C /* GLTFVertexDescriptor.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GLTFVertexDescriptor.m; sourceTree = "<group>"; };
+		83D6FF7D1F48BBFA00F71E0C /* GLTF.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GLTF.h; sourceTree = SOURCE_ROOT; };
+		83D6FF7E1F48BBFA00F71E0C /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = SOURCE_ROOT; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		83D6FF441F48BB3A00F71E0C /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				83D6003B1F48C2FF00F71E0C /* Accelerate.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		83D600391F48C2FF00F71E0C /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				83D6003A1F48C2FF00F71E0C /* Accelerate.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		83D6FF3E1F48BB3A00F71E0C = {
+			isa = PBXGroup;
+			children = (
+				83D6FF541F48BBFA00F71E0C /* Headers */,
+				83D6FF671F48BBFA00F71E0C /* Source */,
+				83D6FF7D1F48BBFA00F71E0C /* GLTF.h */,
+				83D6FF7E1F48BBFA00F71E0C /* Info.plist */,
+				83D6FF491F48BB3A00F71E0C /* Products */,
+				83D600391F48C2FF00F71E0C /* Frameworks */,
+			);
+			sourceTree = "<group>";
+		};
+		83D6FF491F48BB3A00F71E0C /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				83D6FF481F48BB3A00F71E0C /* GLTF.framework */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		83D6FF541F48BBFA00F71E0C /* Headers */ = {
+			isa = PBXGroup;
+			children = (
+				83D6FF551F48BBFA00F71E0C /* GLTFAccessor.h */,
+				83D6FF561F48BBFA00F71E0C /* GLTFAnimation.h */,
+				83D6FF571F48BBFA00F71E0C /* GLTFAsset.h */,
+				83D6FF581F48BBFA00F71E0C /* GLTFBuffer.h */,
+				83D600B81F4A195400F71E0C /* GLTFBufferAllocator.h */,
+				83D6FF591F48BBFA00F71E0C /* GLTFBufferView.h */,
+				83D6FF5A1F48BBFA00F71E0C /* GLTFCamera.h */,
+				83D6FF5B1F48BBFA00F71E0C /* GLTFEnums.h */,
+				83D6FF5C1F48BBFA00F71E0C /* GLTFImage.h */,
+				83D6FF5D1F48BBFA00F71E0C /* GLTFMaterial.h */,
+				83D6FF5E1F48BBFA00F71E0C /* GLTFMesh.h */,
+				83D6FF5F1F48BBFA00F71E0C /* GLTFNode.h */,
+				83D6FF601F48BBFA00F71E0C /* GLTFObject.h */,
+				83D6FF611F48BBFA00F71E0C /* GLTFScene.h */,
+				83D6FF621F48BBFA00F71E0C /* GLTFSkin.h */,
+				83D6FF631F48BBFA00F71E0C /* GLTFSkin.m */,
+				83D6FF641F48BBFA00F71E0C /* GLTFTexture.h */,
+				83D6FF651F48BBFA00F71E0C /* GLTFTextureSampler.h */,
+				83D6FF661F48BBFA00F71E0C /* GLTFUtilities.h */,
+			);
+			path = Headers;
+			sourceTree = SOURCE_ROOT;
+		};
+		83D6FF671F48BBFA00F71E0C /* Source */ = {
+			isa = PBXGroup;
+			children = (
+				83D6FF681F48BBFA00F71E0C /* Extensions */,
+				83D6FF6B1F48BBFA00F71E0C /* GLTFAccessor.m */,
+				83D6FF6C1F48BBFA00F71E0C /* GLTFAnimation.m */,
+				83D6FF6D1F48BBFA00F71E0C /* GLTFAsset.m */,
+				83D6FF701F48BBFA00F71E0C /* GLTFBufferView.m */,
+				83D6FF711F48BBFA00F71E0C /* GLTFCamera.m */,
+				83D6FF721F48BBFA00F71E0C /* GLTFImage.m */,
+				83D6FF731F48BBFA00F71E0C /* GLTFMaterial.m */,
+				83D6FF741F48BBFA00F71E0C /* GLTFMesh.m */,
+				83D6FF751F48BBFA00F71E0C /* GLTFNode.m */,
+				83D6FF761F48BBFA00F71E0C /* GLTFObject.m */,
+				83D6FF771F48BBFA00F71E0C /* GLTFScene.m */,
+				83D6FF781F48BBFA00F71E0C /* GLTFTexture.m */,
+				83D6FF791F48BBFA00F71E0C /* GLTFTextureSampler.m */,
+				83D6FF7A1F48BBFA00F71E0C /* GLTFUtilities.m */,
+				83D6FF7B1F48BBFA00F71E0C /* GLTFVertexDescriptor.h */,
+				83D6FF7C1F48BBFA00F71E0C /* GLTFVertexDescriptor.m */,
+			);
+			path = Source;
+			sourceTree = SOURCE_ROOT;
+		};
+		83D6FF681F48BBFA00F71E0C /* Extensions */ = {
+			isa = PBXGroup;
+			children = (
+				83D6FF691F48BBFA00F71E0C /* GLTFKHRLight.h */,
+				83D6FF6A1F48BBFA00F71E0C /* GLTFKHRLight.m */,
+			);
+			path = Extensions;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		83D6FF451F48BB3A00F71E0C /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				83D6FFA51F48BBFA00F71E0C /* GLTF.h in Headers */,
+				83D6FF7F1F48BBFA00F71E0C /* GLTFAccessor.h in Headers */,
+				83D6FF801F48BBFA00F71E0C /* GLTFAnimation.h in Headers */,
+				83D6FF811F48BBFA00F71E0C /* GLTFAsset.h in Headers */,
+				83D6FF821F48BBFA00F71E0C /* GLTFBuffer.h in Headers */,
+				83D600B91F4A195400F71E0C /* GLTFBufferAllocator.h in Headers */,
+				83D6FF831F48BBFA00F71E0C /* GLTFBufferView.h in Headers */,
+				83D6FF841F48BBFA00F71E0C /* GLTFCamera.h in Headers */,
+				83D6FF851F48BBFA00F71E0C /* GLTFEnums.h in Headers */,
+				83D6FF861F48BBFA00F71E0C /* GLTFImage.h in Headers */,
+				83D6FF871F48BBFA00F71E0C /* GLTFMaterial.h in Headers */,
+				83D6FF881F48BBFA00F71E0C /* GLTFMesh.h in Headers */,
+				83D6FF891F48BBFA00F71E0C /* GLTFNode.h in Headers */,
+				83D6FF8A1F48BBFA00F71E0C /* GLTFObject.h in Headers */,
+				83D6FF8B1F48BBFA00F71E0C /* GLTFScene.h in Headers */,
+				83D6FF8C1F48BBFA00F71E0C /* GLTFSkin.h in Headers */,
+				83D6FF8E1F48BBFA00F71E0C /* GLTFTexture.h in Headers */,
+				83D6FF8F1F48BBFA00F71E0C /* GLTFTextureSampler.h in Headers */,
+				83D6FF901F48BBFA00F71E0C /* GLTFUtilities.h in Headers */,
+				83D6FFA31F48BBFA00F71E0C /* GLTFVertexDescriptor.h in Headers */,
+				83D6FF911F48BBFA00F71E0C /* GLTFKHRLight.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
+/* Begin PBXNativeTarget section */
+		83D6FF471F48BB3A00F71E0C /* GLTF */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 83D6FF501F48BB3A00F71E0C /* Build configuration list for PBXNativeTarget "GLTF" */;
+			buildPhases = (
+				83D6FF431F48BB3A00F71E0C /* Sources */,
+				83D6FF441F48BB3A00F71E0C /* Frameworks */,
+				83D6FF451F48BB3A00F71E0C /* Headers */,
+				83D6FF461F48BB3A00F71E0C /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = GLTF;
+			productName = GLTF;
+			productReference = 83D6FF481F48BB3A00F71E0C /* GLTF.framework */;
+			productType = "com.apple.product-type.framework";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		83D6FF3F1F48BB3A00F71E0C /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0900;
+				ORGANIZATIONNAME = "Warren Moore";
+				TargetAttributes = {
+					83D6FF471F48BB3A00F71E0C = {
+						CreatedOnToolsVersion = 8.3.3;
+						DevelopmentTeam = 5XU8G72NQS;
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = 83D6FF421F48BB3A00F71E0C /* Build configuration list for PBXProject "GLTF" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 83D6FF3E1F48BB3A00F71E0C;
+			productRefGroup = 83D6FF491F48BB3A00F71E0C /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				83D6FF471F48BB3A00F71E0C /* GLTF */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		83D6FF461F48BB3A00F71E0C /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		83D6FF431F48BB3A00F71E0C /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				83D6FF9D1F48BBFA00F71E0C /* GLTFNode.m in Sources */,
+				83D6FFA11F48BBFA00F71E0C /* GLTFTextureSampler.m in Sources */,
+				83D6FF9A1F48BBFA00F71E0C /* GLTFImage.m in Sources */,
+				83D6FF9E1F48BBFA00F71E0C /* GLTFObject.m in Sources */,
+				83D6FF8D1F48BBFA00F71E0C /* GLTFSkin.m in Sources */,
+				83D6FF921F48BBFA00F71E0C /* GLTFKHRLight.m in Sources */,
+				83D6FF951F48BBFA00F71E0C /* GLTFAsset.m in Sources */,
+				83D6FFA21F48BBFA00F71E0C /* GLTFUtilities.m in Sources */,
+				83D6FF9F1F48BBFA00F71E0C /* GLTFScene.m in Sources */,
+				83D6FF9C1F48BBFA00F71E0C /* GLTFMesh.m in Sources */,
+				83D6FF931F48BBFA00F71E0C /* GLTFAccessor.m in Sources */,
+				83D6FF991F48BBFA00F71E0C /* GLTFCamera.m in Sources */,
+				83D6FF981F48BBFA00F71E0C /* GLTFBufferView.m in Sources */,
+				83D6FF941F48BBFA00F71E0C /* GLTFAnimation.m in Sources */,
+				83D6FFA41F48BBFA00F71E0C /* GLTFVertexDescriptor.m in Sources */,
+				83D6FF9B1F48BBFA00F71E0C /* GLTFMaterial.m in Sources */,
+				83D6FFA01F48BBFA00F71E0C /* GLTFTexture.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		83D6FF4E1F48BB3A00F71E0C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "-";
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Debug;
+		};
+		83D6FF4F1F48BB3A00F71E0C /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "-";
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = macosx;
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Release;
+		};
+		83D6FF511F48BB3A00F71E0C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_IDENTITY = "";
+				COMBINE_HIDPI_IMAGES = YES;
+				DEFINES_MODULE = YES;
+				DEVELOPMENT_TEAM = 5XU8G72NQS;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				FRAMEWORK_VERSION = A;
+				INFOPLIST_FILE = Info.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = net.warrenmoore.GLTF;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "macosx iphoneos iphonesimulator";
+				VALID_ARCHS = "i386 x86_64 arm64 armv7 armv7s";
+			};
+			name = Debug;
+		};
+		83D6FF521F48BB3A00F71E0C /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_IDENTITY = "";
+				COMBINE_HIDPI_IMAGES = YES;
+				DEFINES_MODULE = YES;
+				DEVELOPMENT_TEAM = 5XU8G72NQS;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				FRAMEWORK_VERSION = A;
+				INFOPLIST_FILE = Info.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = net.warrenmoore.GLTF;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "macosx iphoneos iphonesimulator";
+				VALID_ARCHS = "i386 x86_64 arm64 armv7 armv7s";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		83D6FF421F48BB3A00F71E0C /* Build configuration list for PBXProject "GLTF" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				83D6FF4E1F48BB3A00F71E0C /* Debug */,
+				83D6FF4F1F48BB3A00F71E0C /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		83D6FF501F48BB3A00F71E0C /* Build configuration list for PBXNativeTarget "GLTF" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				83D6FF511F48BB3A00F71E0C /* Debug */,
+				83D6FF521F48BB3A00F71E0C /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 83D6FF3F1F48BB3A00F71E0C /* Project object */;
+}

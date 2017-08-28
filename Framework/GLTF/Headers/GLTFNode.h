@@ -1,0 +1,37 @@
+//
+//  Copyright (c) 2017 Warren Moore. All rights reserved.
+//
+//  Permission to use, copy, modify, and distribute this software for any
+//  purpose with or without fee is hereby granted, provided that the above
+//  copyright notice and this permission notice appear in all copies.
+//
+//  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+//  WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+//  MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+//  ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+//  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+//  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+//  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+//
+
+#import "GLTFObject.h"
+#import "GLTFUtilities.h"
+
+@import simd;
+
+@class GLTFCamera, GLTFSkin, GLTFMesh;
+
+@interface GLTFNode : GLTFObject
+@property (nonatomic, weak) GLTFCamera *camera;
+@property (nonatomic, weak) GLTFNode *parent;
+@property (nonatomic, copy) NSArray<GLTFNode *> *children;
+@property (nonatomic, weak) GLTFSkin *skin;
+@property (nonatomic, copy) NSString *jointName;
+@property (nonatomic, weak) GLTFMesh *mesh;
+@property (nonatomic, assign) vector_float4 rotationQuaternion;
+@property (nonatomic, assign) vector_float3 scale;
+@property (nonatomic, assign) vector_float3 translation;
+@property (nonatomic, assign) matrix_float4x4 localTransform;
+@property (nonatomic, readonly, assign) matrix_float4x4 globalTransform;
+@property (nonatomic, readonly, assign) GLTFBoundingBox approximateBounds; // axis-aligned; in local coordinates
+@end
