@@ -100,95 +100,95 @@ Below is a checklist of glTF features and their current level of support.
 ### Status
 
 #### Encodings
-+ JSON
-- Binary (.glb)
+- [x] JSON
+- [x] Binary (.glb)
 
 #### Buffer Storage
-+ External references (`buffer.uri`)
-+ Base-64 encoded buffers
+- [x] External references (`buffer.uri`)
+- [x] Base-64 encoded buffers
 
 #### Well-Known Vertex Accessor Semantics
   
-+ POSITION
-+ NORMAL
-+ TANGENT
-+ TEXCOORD_0
-- TEXCOORD_1
-- COLOR_0
-+ JOINTS_0
-+ WEIGHTS_0
+- [x] POSITION
+- [x] NORMAL
+- [x] TANGENT
+- [x] TEXCOORD_0
+- [ ] TEXCOORD_1
+- [ ] COLOR_0
+- [x] JOINTS_0
+- [x] WEIGHTS_0
 
 #### Primitive Types
-- Points
-- Lines
-- Line Loop
-- Line Strip
-+ Triangles
-- Triangle Strip
-- Triangle Fan
+- [ ] Points
+- [ ] Lines
+- [ ] Line Loop
+- [ ] Line Strip
+- [x] Triangles
+- [x] Triangle Strip
+- [ ] Triangle Fan
 
 #### Images
-- External image references (`image.uri`)
-+ Base-64 encoded images
-+ PNG
-+ JPEG
-- TIFF
-- OpenEXR
-- Radiance
+- [x] External image references (`image.uri`)
+- [x] Base-64 encoded images
+- [x] PNG
+- [x] JPEG
+- [ ] TIFF
+- [ ] OpenEXR
+- [ ] Radiance
 
 #### Materials
-+ Base color factor
-+ Metallic factor
-+ Roughness factor
-- Emissive factor
-+ Base color map
-+ Metallic-roughness map
-+ Occlusion map
-+ Emissive map
-- Normal texture scale
-- Normal texture coordinate set selection
-- Alpha mode
-	+ Opaque alpha mode
-	- Mask alpha mode
-	- Blend alpha mode
-- Double-sided material
+- [x] Base color factor
+- [x] Metallic factor
+- [x] Roughness factor
+- [ ] Emissive factor
+- [x] Base color map
+- [x] Metallic-roughness map
+- [x] Occlusion map
+- [x] Emissive map
+- [ ] Normal texture scale
+- [ ] Normal texture coordinate set selection
+- [ ] Alpha mode
+	- [x] Opaque alpha mode
+	- [ ] Mask alpha mode
+	- [ ] Blend alpha mode
+- [ ] Double-sided material
 
 #### Samplers
-- Wrap mode
-- Minification/magnification filters
-- Mipmaps
+- [ ] Wrap mode
+- [ ] Minification/magnification filters
+- [ ] Mipmaps
 
 #### Cameras
-- Perspective cameras
-- Orthographic cameras
+- [ ] Perspective cameras
+- [ ] Orthographic cameras
 
 #### Morph Targets
-- Morph targets
+- [ ] Morph targets
   
 #### Animation
-+ Translation animations
-+ Rotation animations
-+ Scale animations
-- Morph target weight animations
-+ Linear interpolation
-- Discrete animations
-- Cubic spline interpolation
-- Catmull-Rom interpolation
+- [x] Translation animations
+- [x] Rotation animations
+- [x] Scale animations
+- [ ] Morph target weight animations
+- [x] Linear interpolation
+- [ ] Discrete animations
+- [ ] Cubic spline interpolation
+- [ ] Catmull-Rom interpolation
 
 #### Skinning
-+ Joint matrix calculation
-+ GPU-based vertex skinning
+- [x] Joint matrix calculation
+- [x] GPU-based vertex skinning
 
 #### Sparse Accessors
-- Sparse accessors
+- [ ] Sparse accessors
 
 #### Extensions
-- KHR_materials_pbrSpecularGlossiness
-- KHR_materials_common
-- KHR_technique_webgl (_No support planned_)
-- KHR_binary_glTF
-- CESIUM_RTC
-- WEB3D_quantized_attributes
+- [ ] KHR_materials_pbrSpecularGlossiness
+- [ ] KHR_materials_common
+- [ ] KHR_technique_webgl (_No support planned_)
+- [ ] KHR_binary_glTF
+- [ ] CESIUM_RTC
+- [ ] WEB3D_quantized_attributes
 
 ### Conformance
 
