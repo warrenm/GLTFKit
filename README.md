@@ -101,7 +101,7 @@ Below is a checklist of glTF features and their current level of support.
 
 #### Encodings
 - [x] JSON
-- [x] Binary (.glb)
+- [ ] Binary (.glb)
 
 #### Buffer Storage
 - [x] External references (`buffer.uri`)
