@@ -298,7 +298,7 @@ fragment float4 fragment_main(VertexOut in [[stage_in]],
     
     #if USE_IBL
     float mipCount(SPECULAR_ENV_MAP_LOD_LEVELS);
-        float lod = (perceptualRoughness * mipCount);w
+        float lod = (perceptualRoughness * mipCount);
         float3 brdf = brdfLUT.sample(linearSampler, float2(NdotV, 1.0 - perceptualRoughness)).rgb;
         float3 diffuseLight = diffuseEnvTexture.sample(linearSampler, n).rgb;
         
