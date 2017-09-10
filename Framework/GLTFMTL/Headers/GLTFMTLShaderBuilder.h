@@ -18,9 +18,12 @@
 
 @import Metal;
 
+@class GLTFMTLLightingEnvironment;
+
 @interface GLTFMTLShaderBuilder : NSObject
 
 - (id<MTLRenderPipelineState>)renderPipelineStateForSubmesh:(GLTFSubmesh *)submesh
+                                        lightingEnvironment:(GLTFMTLLightingEnvironment *)lightingEnvironment
                                            colorPixelFormat:(MTLPixelFormat)colorPixelFormat
                                     depthStencilPixelFormat:(MTLPixelFormat)depthStencilPixelFormat
                                                      device:(id<MTLDevice>)device;

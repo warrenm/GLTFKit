@@ -19,7 +19,7 @@
 @import simd;
 
 const CGFloat GLTFViewerDefaultCameraDistance = 2;
-const CGFloat GLTFViewerLinearDrag = 0.95;
+const CGFloat GLTFViewerZoomDrag = 0.95;
 
 const CGFloat GLTFViewerRotationDrag = 0.95;
 const CGFloat GLTFViewerRotationScaleFactor = 0.0033;
@@ -30,6 +30,8 @@ const CGFloat GLTFViewerRotationMomentumScaleFactor = 0.2;
 
 @property (nonatomic, strong) id <MTLDevice> device;
 @property (nonatomic, strong) id <MTLCommandQueue> commandQueue;
+
+@property (nonatomic, strong) id<MTLRenderPipelineState> skyboxPipelineState;
 
 @property (nonatomic, strong) GLTFMTLRenderer *renderer;
 @property (nonatomic, strong) id<GLTFBufferAllocator> bufferAllocator;
@@ -57,6 +59,8 @@ const CGFloat GLTFViewerRotationMomentumScaleFactor = 0.2;
     [self setupMetal];
     [self setupView];
     [self setupRenderer];
+    [self loadLightingEnvironment];
+    [self loadSkyboxPipeline];
 }
 
 - (void)setupMetal {
@@ -82,6 +86,42 @@ const CGFloat GLTFViewerRotationMomentumScaleFactor = 0.2;
     self.renderer.drawableSize = self.metalView.drawableSize;
     self.renderer.colorPixelFormat = self.metalView.colorPixelFormat;
     self.renderer.depthStencilPixelFormat = self.metalView.depthStencilPixelFormat;
+}
+
+- (void)loadLightingEnvironment {
+    NSError *error = nil;
+    NSURL *diffuseURL = [[NSBundle mainBundle] URLForResource:@"output_iem" withExtension:@"png"];
+    NSMutableArray *specularURLs = [NSMutableArray array];
+    [specularURLs addObject:[[NSBundle mainBundle] URLForResource:@"output_pmrem_0" withExtension:@"png"]];
+    [specularURLs addObject:[[NSBundle mainBundle] URLForResource:@"output_pmrem_1" withExtension:@"png"]];
+    [specularURLs addObject:[[NSBundle mainBundle] URLForResource:@"output_pmrem_2" withExtension:@"png"]];
+    [specularURLs addObject:[[NSBundle mainBundle] URLForResource:@"output_pmrem_3" withExtension:@"png"]];
+    [specularURLs addObject:[[NSBundle mainBundle] URLForResource:@"output_pmrem_4" withExtension:@"png"]];
+    [specularURLs addObject:[[NSBundle mainBundle] URLForResource:@"output_pmrem_5" withExtension:@"png"]];
+    NSURL *brdfURL = [[NSBundle mainBundle] URLForResource:@"brdfLUT" withExtension:@"png"];
+    self.lightingEnvironment = [[GLTFMTLLightingEnvironment alloc] initWithDiffuseCubeURL:diffuseURL
+                                                                         specularCubeURLs:specularURLs
+                                                                               brdfLUTURL:brdfURL
+                                                                                   device:self.device
+                                                                                    error:&error];
+    self.renderer.lightingEnvironment = self.lightingEnvironment;
+}
+
+- (void)loadSkyboxPipeline {
+    NSError *error = nil;
+    id <MTLLibrary> library = [self.device newDefaultLibrary];
+    
+    MTLRenderPipelineDescriptor *descriptor = [MTLRenderPipelineDescriptor new];
+    descriptor.vertexFunction = [library newFunctionWithName:@"skybox_vertex_main"];
+    descriptor.fragmentFunction = [library newFunctionWithName:@"skybox_fragment_main"];
+    descriptor.colorAttachments[0].pixelFormat = self.metalView.colorPixelFormat;
+    descriptor.depthAttachmentPixelFormat = self.metalView.depthStencilPixelFormat;
+    descriptor.stencilAttachmentPixelFormat = self.metalView.depthStencilPixelFormat;
+    
+    self.skyboxPipelineState = [self.device newRenderPipelineStateWithDescriptor:descriptor error:&error];
+    if (self.skyboxPipelineState == nil) {
+        NSLog(@"Error occurred when creating render pipeline state: %@", error);
+    }
 }
 
 - (matrix_float4x4)viewMatrix {
@@ -137,7 +177,7 @@ const CGFloat GLTFViewerRotationMomentumScaleFactor = 0.2;
     self.azimuthalVelocity = self.azimuthalVelocity * GLTFViewerRotationDrag;
     
     self.cameraDistance += self.cameraVelocity * timestep;
-    self.cameraVelocity = self.cameraVelocity * GLTFViewerLinearDrag;
+    self.cameraVelocity = self.cameraVelocity * GLTFViewerZoomDrag;
     
     [self computeViewMatrix];
     [self.asset runAnimationsAtTime:self.globalTime];
@@ -145,6 +185,71 @@ const CGFloat GLTFViewerRotationMomentumScaleFactor = 0.2;
 
 - (void)mtkView:(MTKView *)view drawableSizeWillChange:(CGSize)size {
     self.renderer.drawableSize = size;
+}
+
+- (void)drawSkyboxWithCommandEncoder:(id<MTLRenderCommandEncoder>)renderEncoder {
+    float vertexData[] = {
+        // +Z
+        -1,  1,  1,
+         1, -1,  1,
+        -1, -1,  1,
+         1, -1,  1,
+        -1,  1,  1,
+         1,  1,  1,
+        // +X
+         1,  1,  1,
+         1, -1, -1,
+         1, -1,  1,
+         1, -1, -1,
+         1,  1,  1,
+         1,  1, -1,
+        // -Z
+         1,  1, -1,
+        -1, -1, -1,
+         1, -1, -1,
+        -1, -1, -1,
+         1,  1, -1,
+        -1,  1, -1,
+        // -X
+        -1,  1, -1,
+        -1, -1,  1,
+        -1, -1, -1,
+        -1, -1,  1,
+        -1,  1, -1,
+        -1,  1,  1,
+        // +Y
+        -1,  1, -1,
+         1,  1,  1,
+        -1,  1,  1,
+         1,  1,  1,
+        -1,  1, -1,
+         1,  1, -1,
+        // -Y
+        -1, -1,  1,
+         1, -1, -1,
+        -1, -1, -1,
+         1, -1, -1,
+        -1, -1,  1,
+         1, -1,  1,
+    };
+    
+    // TODO: Pass the projection matrix to the renderer so we're sure they match up
+    CGSize drawableSize = self.metalView.drawableSize;
+    matrix_float4x4 projectionMatrix = GLTFPerspectiveProjectionMatrixAspectFovRH(M_PI / 4, drawableSize.width / drawableSize.height, 0.1, 1000);
+    
+    struct VertexUniforms {
+        simd_float4x4 modelMatrix;
+        simd_float4x4 modelViewProjectionMatrix;
+    } vertexUniforms;
+    
+    vertexUniforms.modelMatrix = matrix_multiply(GLTFMatrixFromUniformScale(100), self.regularizationMatrix);
+    vertexUniforms.modelViewProjectionMatrix = matrix_multiply(matrix_multiply(projectionMatrix, self.viewMatrix), vertexUniforms.modelMatrix);
+    
+    [renderEncoder setRenderPipelineState:self.skyboxPipelineState];
+    [renderEncoder setVertexBytes:vertexData length:sizeof(float) * 36 * 3 atIndex:0];
+    [renderEncoder setVertexBytes:&vertexUniforms length:sizeof(vertexUniforms) atIndex:1];
+    [renderEncoder setFragmentTexture:self.lightingEnvironment.specularCube atIndex:0];
+    [renderEncoder drawPrimitives:MTLPrimitiveTypeTriangle vertexStart:0 vertexCount:36];
 }
 
 - (void)drawInMTKView:(MTKView *)view {
@@ -160,8 +265,12 @@ const CGFloat GLTFViewerRotationMomentumScaleFactor = 0.2;
     {
         id <MTLRenderCommandEncoder> renderEncoder = [commandBuffer renderCommandEncoderWithDescriptor:renderPassDescriptor];
         
-        [renderEncoder pushDebugGroup:@"DrawGLTFScene"];
-        [self.renderer renderAsset:self.asset
+        [renderEncoder pushDebugGroup:@"Draw Backdrop"];
+        [self drawSkyboxWithCommandEncoder:renderEncoder];
+        [renderEncoder popDebugGroup];
+        
+        [renderEncoder pushDebugGroup:@"Draw glTF Scene"];
+        [self.renderer renderScene:self.asset.defaultScene
                        modelMatrix:self.regularizationMatrix
                      commandBuffer:commandBuffer
                     commandEncoder:renderEncoder];

@@ -140,7 +140,7 @@ Below is a checklist of glTF features and their current level of support.
 - [x] Base color factor
 - [x] Metallic factor
 - [x] Roughness factor
-- [ ] Emissive factor
+- [x] Emissive factor
 - [x] Base color map
 - [x] Metallic-roughness map
 - [x] Occlusion map

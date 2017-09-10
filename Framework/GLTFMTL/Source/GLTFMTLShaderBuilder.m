@@ -16,12 +16,14 @@
 
 #import <GLTF/GLTF.h>
 
+#import "GLTFMTLLightingEnvironment.h"
 #import "GLTFMTLShaderBuilder.h"
 #import "GLTFMTLUtilities.h"
 
 @implementation GLTFMTLShaderBuilder
 
 - (id<MTLRenderPipelineState>)renderPipelineStateForSubmesh:(GLTFSubmesh *)submesh
+                                        lightingEnvironment:(GLTFMTLLightingEnvironment *)lightingEnvironment
                                            colorPixelFormat:(MTLPixelFormat)colorPixelFormat
                                     depthStencilPixelFormat:(MTLPixelFormat)depthStencilPixelFormat
                                                      device:(id<MTLDevice>)device
@@ -33,7 +35,7 @@
     NSError *error = nil;
     NSString *shaderSource = [self shaderSourceForMaterial:submesh.material];
     
-    shaderSource = [self rewriteSource:shaderSource forSubmesh:submesh];
+    shaderSource = [self rewriteSource:shaderSource forSubmesh:submesh lightingEnvironment:lightingEnvironment];
     
     id<MTLLibrary> library = [device newLibraryWithSource:shaderSource options:nil error:&error];
     if (!library) {
@@ -78,14 +80,19 @@
 
 - (NSString *)shaderSourceForMaterial:(GLTFMaterial *)material {
     NSError *error = nil;
-    NSURL *shaderURL = [[NSBundle mainBundle] URLForResource:@"Shaders" withExtension:@"metal"];
+    NSURL *shaderURL = [[NSBundle mainBundle] URLForResource:@"pbr" withExtension:@"metal"];
+    if (shaderURL == nil) {
+        NSLog(@"ERROR: Shader source not found in main bundle; pipeline states cannot be generated");
+    }
     return [NSString stringWithContentsOfURL:shaderURL encoding:NSUTF8StringEncoding error:&error];
 }
 
-- (NSString *)rewriteSource:(NSString *)source forSubmesh:(GLTFSubmesh *)submesh {
+- (NSString *)rewriteSource:(NSString *)source
+                 forSubmesh:(GLTFSubmesh *)submesh
+        lightingEnvironment:(GLTFMTLLightingEnvironment *)lightingEnvironment {
     
     BOOL usePBR = YES;
-    BOOL useIBL = YES;
+    BOOL useIBL = lightingEnvironment != nil;
     BOOL hasTexCoord0 = submesh.accessorsForAttributes[GLTFAttributeSemanticTexCoord0] != nil;
     BOOL hasNormals = submesh.accessorsForAttributes[GLTFAttributeSemanticNormal] != nil;
     BOOL hasTangents = submesh.accessorsForAttributes[GLTFAttributeSemanticTangent] != nil;
@@ -109,7 +116,7 @@
     [shaderFeatures appendFormat:@"#define HAS_METALLIC_ROUGHNESS_MAP %d\n", hasMetallicRoughnessMap];
     [shaderFeatures appendFormat:@"#define HAS_OCCLUSION_MAP %d\n", hasOcclusionMap];
     [shaderFeatures appendFormat:@"#define HAS_EMISSIVE_MAP %d\n", hasEmissiveMap];
-    [shaderFeatures appendFormat:@"#define SPECULAR_ENV_MAP_LOD_LEVELS %d\n\n", 8]; // log2(512)
+    [shaderFeatures appendFormat:@"#define SPECULAR_ENV_MAP_LOD_LEVELS %d\n\n", (int)lightingEnvironment.specularLODLevelCount];
     
     NSString *preamble = @"struct VertexIn {\n";
     NSString *epilogue = @"\n};";

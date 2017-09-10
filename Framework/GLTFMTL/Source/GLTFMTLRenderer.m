@@ -18,13 +18,14 @@
 #import "GLTFMTLShaderBuilder.h"
 #import "GLTFMTLUtilities.h"
 #import "GLTFMTLBufferAllocator.h"
+#import "GLTFMTLLightingEnvironment.h"
 
 @import ImageIO;
 @import MetalKit;
 
 struct VertexUniforms {
-    matrix_float4x4 modelViewProjectionMatrix;
     matrix_float4x4 modelMatrix;
+    matrix_float4x4 modelViewProjectionMatrix;
 };
 
 struct FragmentUniforms {
@@ -54,10 +55,6 @@ struct FragmentUniforms {
 @property (nonatomic, strong) NSMutableDictionary<NSUUID *, id<MTLRenderPipelineState>> *pipelineStatesForSubmeshes;
 @property (nonatomic, strong) NSMutableDictionary<NSNumber *, id<MTLDepthStencilState>> *depthStencilStateMap;
 @property (nonatomic, strong) NSMutableDictionary<NSUUID *, id<MTLTexture>> *texturesForImageIdentifiers;
-
-@property (nonatomic, retain) id<MTLTexture> diffuseCube;
-@property (nonatomic, retain) id<MTLTexture> specularCube;
-@property (nonatomic, retain) id<MTLTexture> brdfLUT;
 
 @end
 
@@ -91,82 +88,9 @@ struct FragmentUniforms {
         _depthStencilStateMap = [NSMutableDictionary dictionary];
         _texturesForImageIdentifiers = [NSMutableDictionary dictionary];
         _pipelineStatesForSubmeshes = [NSMutableDictionary dictionary];
-        
-        [self loadIBLTextures];
     }
     
     return self;
-}
-
-- (void)loadIBLTextures {
-    id<MTLCommandBuffer> commandBuffer = [_commandQueue commandBuffer];
-    id<MTLBlitCommandEncoder> blitEncoder = [commandBuffer blitCommandEncoder];
-    
-    NSURL *brdfLUTURL = [[NSBundle mainBundle] URLForResource:@"brdfLUT" withExtension:@"png"];
-    id options = @{ MTKTextureLoaderOptionOrigin : MTKTextureLoaderOriginTopLeft,
-                    MTKTextureLoaderOptionSRGB : @(NO)
-                  };
-    NSError *error = nil;
-    _brdfLUT = [_textureLoader newTextureWithContentsOfURL:brdfLUTURL options:options error:&error];
-    
-    NSURL *diffuseURL = [[NSBundle mainBundle] URLForResource:@"output_iem" withExtension:@"png"];
-    id<MTLTexture> diffuseStrip = [_textureLoader newTextureWithContentsOfURL:diffuseURL options:options error:&error];
-    
-    int diffuseCubeSize = (int)[diffuseStrip width];
-    
-    MTLTextureDescriptor *cubeDescriptor = [MTLTextureDescriptor textureCubeDescriptorWithPixelFormat:MTLPixelFormatBGRA8Unorm size:diffuseCubeSize mipmapped:NO];
-    
-    _diffuseCube = [_device newTextureWithDescriptor:cubeDescriptor];
-    
-    for (int i = 0; i < 6; ++i) {
-        [blitEncoder copyFromTexture:diffuseStrip
-                         sourceSlice:0
-                         sourceLevel:0
-                        sourceOrigin:MTLOriginMake(0, i * diffuseCubeSize, 0)
-                          sourceSize:MTLSizeMake(diffuseCubeSize, diffuseCubeSize, 1)
-                           toTexture:_diffuseCube
-                    destinationSlice:i
-                    destinationLevel:0
-                   destinationOrigin:MTLOriginMake(0, 0, 0)];
-    }
-    
-    int specularMipLevel = 0;
-    int specularCubeSize = 0;
-    do {
-        NSString *specularCubeName = [NSString stringWithFormat:@"output_pmrem_%d", specularMipLevel];
-        
-        NSURL *specularURL = [[NSBundle mainBundle] URLForResource:specularCubeName withExtension:@"png"];
-        id<MTLTexture> specularStrip = [_textureLoader newTextureWithContentsOfURL:specularURL options:options error:&error];
-        
-        if (specularStrip == nil) {
-            break;
-        }
-        
-        if (specularCubeSize == 0) {
-            specularCubeSize = (int)[specularStrip width];
-            MTLTextureDescriptor *cubeDescriptor = [MTLTextureDescriptor textureCubeDescriptorWithPixelFormat:MTLPixelFormatBGRA8Unorm size:specularCubeSize mipmapped:YES];
-            _specularCube = [_device newTextureWithDescriptor:cubeDescriptor];
-        }
-        
-        for (int i = 0; i < 6; ++i) {
-            [blitEncoder copyFromTexture:specularStrip
-                             sourceSlice:0
-                             sourceLevel:0
-                            sourceOrigin:MTLOriginMake(0, i * specularCubeSize, 0)
-                              sourceSize:MTLSizeMake(specularCubeSize, specularCubeSize, 1)
-                               toTexture:_specularCube
-                        destinationSlice:i
-                        destinationLevel:specularMipLevel
-                       destinationOrigin:MTLOriginMake(0, 0, 0)];
-        }
-        
-        specularCubeSize = specularCubeSize / 2;
-        ++specularMipLevel;
-    } while (specularCubeSize >= 1);
-    
-    [blitEncoder endEncoding];
-    [commandBuffer commit];
-    [commandBuffer waitUntilCompleted];
 }
 
 - (id<MTLTexture>)textureForImage:(GLTFImage *)image {
@@ -188,20 +112,26 @@ struct FragmentUniforms {
         CGImageSourceRef imageSource = CGImageSourceCreateWithURL((__bridge CFURLRef)image.url, nil);
         CGImageRef cgImage = CGImageSourceCreateImageAtIndex(imageSource, 0, nil);
         
-        // TODO: Remove this once the image decode bugs in MetalKit are fixed.
-        size_t width = CGImageGetWidth(cgImage);
-        size_t height = CGImageGetHeight(cgImage);
-        size_t bpc = 8;
-        size_t Bpr = width * 4;
-        CGColorSpaceRef colorSpace = CGColorSpaceCreateWithName(kCGColorSpaceSRGB);
-        CGContextRef context = CGBitmapContextCreate(nil, width, height, bpc, Bpr, colorSpace, kCGImageAlphaPremultipliedLast);
-        CGContextDrawImage(context, CGRectMake(0, 0, width, height), cgImage);
-        CGImageRef redrawnImage = CGBitmapContextCreateImage(context);
+        CGColorSpaceRef sourceColorSpace = CGImageGetColorSpace(cgImage);
         
-        texture = [self.textureLoader newTextureWithCGImage:redrawnImage options:options error:&error];
+        CGColorSpaceModel sourceColorModel = CGColorSpaceGetModel(sourceColorSpace);
         
-        CGImageRelease(redrawnImage);
-        CGContextRelease(context);
+        if (sourceColorModel != kCGColorSpaceModelRGB) {
+            // TODO: Remove this once the indexed image decode bug in MetalKit is fixed.
+            size_t width = CGImageGetWidth(cgImage);
+            size_t height = CGImageGetHeight(cgImage);
+            size_t bpc = 8;
+            size_t Bpr = width * 4;
+            CGColorSpaceRef colorSpace = CGColorSpaceCreateWithName(kCGColorSpaceSRGB);
+            CGContextRef context = CGBitmapContextCreate(nil, width, height, bpc, Bpr, colorSpace, kCGImageAlphaPremultipliedLast);
+            CGContextDrawImage(context, CGRectMake(0, 0, width, height), cgImage);
+            CGImageRelease(cgImage);
+            cgImage = CGBitmapContextCreateImage(context);
+            CGContextRelease(context);
+        }
+        
+        texture = [self.textureLoader newTextureWithCGImage:cgImage options:options error:&error];
+        
         CGImageRelease(cgImage);
         if (imageSource != NULL) {
             CFRelease(imageSource);
@@ -223,6 +153,7 @@ struct FragmentUniforms {
     if (pipeline == nil) {
         GLTFMTLShaderBuilder *shaderBuilder = [[GLTFMTLShaderBuilder alloc] init];
         pipeline = [shaderBuilder renderPipelineStateForSubmesh: submesh
+                                            lightingEnvironment:self.lightingEnvironment
                                                colorPixelFormat:self.colorPixelFormat
                                         depthStencilPixelFormat:self.depthStencilPixelFormat
                                                          device:self.device];
@@ -256,11 +187,15 @@ struct FragmentUniforms {
     return depthStencilState;
 }
 
-- (void)renderAsset:(GLTFAsset *)asset
+- (void)renderScene:(GLTFScene *)scene
         modelMatrix:(matrix_float4x4)modelMatrix
       commandBuffer:(id<MTLCommandBuffer>)commandBuffer
      commandEncoder:(id<MTLRenderCommandEncoder>)renderEncoder
 {
+    if (scene == nil) {
+        return;
+    }
+    
     long timedOut = dispatch_semaphore_wait(self.frameBoundarySemaphore, dispatch_time(0, 1 * NSEC_PER_SEC));
     if (timedOut) {
         NSLog(@"Failed to receive frame boundary signal before timing out; calling signalFrameCompletion manually. "
@@ -269,9 +204,7 @@ struct FragmentUniforms {
         [self signalFrameCompletion];
     }
     
-    GLTFScene *defaultScene = asset.defaultScene;
-    
-    for (GLTFNode *rootNode in defaultScene.nodes) {
+    for (GLTFNode *rootNode in scene.nodes) {
         [self renderNodeRecursive:rootNode
                       modelMatrix:modelMatrix
              renderCommandEncoder:renderEncoder];
@@ -304,16 +237,10 @@ struct FragmentUniforms {
         [renderEncoder setFragmentTexture:texture atIndex:GLTFTextureBindIndexOcclusion];
     }
     
-    if (self.specularCube) {
-        [renderEncoder setFragmentTexture:self.specularCube atIndex:GLTFTextureBindIndexSpecularEnvironment];
-    }
-    
-    if (self.diffuseCube) {
-        [renderEncoder setFragmentTexture:self.diffuseCube atIndex:GLTFTextureBindIndexDiffuseEnvironment];
-    }
-    
-    if (self.brdfLUT) {
-        [renderEncoder setFragmentTexture:self.brdfLUT atIndex:GLTFTextureBindIndexBRDFLookup];
+    if (self.lightingEnvironment) {
+        [renderEncoder setFragmentTexture:self.lightingEnvironment.specularCube atIndex:GLTFTextureBindIndexSpecularEnvironment];
+        [renderEncoder setFragmentTexture:self.lightingEnvironment.diffuseCube atIndex:GLTFTextureBindIndexDiffuseEnvironment];
+        [renderEncoder setFragmentTexture:self.lightingEnvironment.brdfLUT atIndex:GLTFTextureBindIndexBRDFLookup];
     }
 }
 
@@ -374,7 +301,7 @@ struct FragmentUniforms {
             vertexUniforms.modelViewProjectionMatrix = matrix_multiply(matrix_multiply(projectionMatrix, self.viewMatrix), modelMatrix);
             
             struct FragmentUniforms fragmentUniforms;
-            fragmentUniforms.lightDirection = (vector_float3){ 0, 0, -1 };
+            fragmentUniforms.lightDirection = (vector_float3){ 0, 1, 0 };
             fragmentUniforms.lightColor = (vector_float3) { 1, 1, 1 };
             fragmentUniforms.normalScale = material.normalTextureScale;
             fragmentUniforms.emissiveFactor = material.emissiveFactor;

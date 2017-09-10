@@ -63,8 +63,8 @@ struct VertexOut {
 };
 
 struct VertexUniforms {
-    float4x4 modelViewProjectionMatrix;
     float4x4 modelMatrix;
+    float4x4 modelViewProjectionMatrix;
 };
 
 struct FragmentUniforms {
@@ -142,28 +142,28 @@ vertex VertexOut vertex_main(VertexIn in [[stage_in]],
     return out;
 }
 
-static float3 lambertianDiffuse(LightingParameters pbrInputs)
+static float3 diffuse(LightingParameters pbrInputs)
 {
     return pbrInputs.baseColor / pi;
 }
 
-static float3 fresnelSchlick2(LightingParameters pbrInputs)
+static float3 fresnelReflectance(LightingParameters pbrInputs)
 {
     return pbrInputs.reflectance0 + (pbrInputs.reflectance90 - pbrInputs.reflectance0) * pow(clamp(1.0 - pbrInputs.VdotH, 0.0, 1.0), 5.0);
 }
 
-static float SmithG1_var2(float NdotV, float r)
+static float SmithG1(float NdotV, float r)
 {
     float tanSquared = (1.0 - NdotV * NdotV) / max((NdotV * NdotV), 0.00001);
     return 2.0 / (1.0 + sqrt(1.0 + r * r * tanSquared));
 }
 
-static float geometricOcclusionSmithGGX(LightingParameters pbrInputs)
+static float geometricOcclusion(LightingParameters pbrInputs)
 {
-    return SmithG1_var2(pbrInputs.NdotL, pbrInputs.alphaRoughness) * SmithG1_var2(pbrInputs.NdotV, pbrInputs.alphaRoughness);
+    return SmithG1(pbrInputs.NdotL, pbrInputs.alphaRoughness) * SmithG1(pbrInputs.NdotV, pbrInputs.alphaRoughness);
 }
 
-static float GGX(LightingParameters pbrInputs)
+static float ndf(LightingParameters pbrInputs)
 {
     float roughnessSq = pbrInputs.alphaRoughness*pbrInputs.alphaRoughness;
     float f = (pbrInputs.NdotH * roughnessSq - pbrInputs.NdotH) * pbrInputs.NdotH + 1.0;
@@ -285,11 +285,11 @@ fragment float4 fragment_main(VertexOut in [[stage_in]],
             .alphaRoughness = alphaRoughness
         };
         
-        float3 F = fresnelSchlick2(pbrInputs);
-        float G = geometricOcclusionSmithGGX(pbrInputs);
-        float D = GGX(pbrInputs);
+        float3 F = fresnelReflectance(pbrInputs);
+        float G = geometricOcclusion(pbrInputs);
+        float D = ndf(pbrInputs);
         
-        float3 diffuseContrib = (1.0 - F) * lambertianDiffuse(pbrInputs);
+        float3 diffuseContrib = (1.0 - F) * diffuse(pbrInputs);
 
         float3 specContrib = F * G * D / (4.0 * NdotL * NdotV);
         
@@ -297,7 +297,7 @@ fragment float4 fragment_main(VertexOut in [[stage_in]],
     #endif
     
     #if USE_IBL
-    float mipCount(SPECULAR_ENV_MAP_LOD_LEVELS);
+        float mipCount(SPECULAR_ENV_MAP_LOD_LEVELS);
         float lod = (perceptualRoughness * mipCount);
         float3 brdf = brdfLUT.sample(linearSampler, float2(NdotV, 1.0 - perceptualRoughness)).rgb;
         float3 diffuseLight = diffuseEnvTexture.sample(linearSampler, n).rgb;

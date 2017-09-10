@@ -14,13 +14,14 @@
 //  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 //
 
-@import Foundation;
 #import <GLTF/GLTF.h>
-
+@import Foundation;
 @import Metal;
 
 #define GLTFMTLRendererDynamicConstantsBufferSize (1024 * 1024)
 #define GLTFMTLRendererMaxInflightFrames 3
+
+@class GLTFMTLLightingEnvironment;
 
 @interface GLTFMTLRenderer : NSObject
 
@@ -31,9 +32,11 @@
 @property (nonatomic, assign) MTLPixelFormat colorPixelFormat;
 @property (nonatomic, assign) MTLPixelFormat depthStencilPixelFormat;
 
+@property (nonatomic, strong) GLTFMTLLightingEnvironment *lightingEnvironment;
+
 - (instancetype)initWithDevice:(id<MTLDevice>)device;
 
-- (void)renderAsset:(GLTFAsset *)asset
+- (void)renderScene:(GLTFScene *)scene
         modelMatrix:(matrix_float4x4)modelMatrix
       commandBuffer:(id<MTLCommandBuffer>)commandBuffer
      commandEncoder:(id<MTLRenderCommandEncoder>)renderEncoder;

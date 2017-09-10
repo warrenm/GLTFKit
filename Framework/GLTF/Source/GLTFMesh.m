@@ -23,6 +23,10 @@
 @implementation GLTFMesh
 @end
 
+@interface GLTFSubmesh ()
+@property (nonatomic, strong) GLTFVertexDescriptor *cachedVertexDescriptor;
+@end
+
 @implementation GLTFSubmesh
 
 - (instancetype)init {
@@ -32,22 +36,31 @@
     return self;
 }
 
+- (void)setAccessorsForAttributes:(NSDictionary *)accessorsForAttributes {
+    _accessorsForAttributes = accessorsForAttributes;
+    _cachedVertexDescriptor = nil;
+}
+
 - (GLTFVertexDescriptor *)vertexDescriptor {
-    GLTFVertexDescriptor *descriptor = [GLTFVertexDescriptor new];
-    __block NSUInteger index = 0;
-    [self.accessorsForAttributes enumerateKeysAndObjectsUsingBlock:^(NSString *name, GLTFAccessor *accessor, BOOL *stop) {
-        descriptor.attributes[index].componentType = accessor.componentType;
-        descriptor.attributes[index].dimension = accessor.dimension;
-        descriptor.attributes[index].offset = accessor.offset;
-        descriptor.attributes[index].semantic = name;
-        if (accessor.bufferView.stride > 0) {
-            descriptor.bufferLayouts[index].stride = accessor.bufferView.stride;
-        } else {
-            descriptor.bufferLayouts[index].stride = GLTFSizeOfComponentTypeWithDimension(accessor.componentType, accessor.dimension);
-        }
-        ++index;
-    }];
-    return descriptor;
+    if (self.cachedVertexDescriptor == nil) {
+        GLTFVertexDescriptor *descriptor = [GLTFVertexDescriptor new];
+        __block NSUInteger index = 0;
+        [self.accessorsForAttributes enumerateKeysAndObjectsUsingBlock:^(NSString *name, GLTFAccessor *accessor, BOOL *stop) {
+            descriptor.attributes[index].componentType = accessor.componentType;
+            descriptor.attributes[index].dimension = accessor.dimension;
+            descriptor.attributes[index].offset = accessor.offset;
+            descriptor.attributes[index].semantic = name;
+            if (accessor.bufferView.stride > 0) {
+                descriptor.bufferLayouts[index].stride = accessor.bufferView.stride;
+            } else {
+                descriptor.bufferLayouts[index].stride = GLTFSizeOfComponentTypeWithDimension(accessor.componentType, accessor.dimension);
+            }
+            ++index;
+        }];
+        self.cachedVertexDescriptor = descriptor;
+    }
+    
+    return self.cachedVertexDescriptor;
 }
 
 @end

@@ -30,6 +30,8 @@ typedef UIViewController NSUIViewController;
 
 @property (nonatomic, assign) matrix_float4x4 viewMatrix;
 
+@property (nonatomic, strong) GLTFMTLLightingEnvironment *lightingEnvironment;
+
 @property (nonatomic, strong) GLTFAsset *asset;
 
 @end

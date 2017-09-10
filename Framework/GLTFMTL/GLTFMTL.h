@@ -29,6 +29,8 @@ FOUNDATION_EXPORT double GLTFMTLVersionNumber;
 FOUNDATION_EXPORT const unsigned char GLTFMTLVersionString[];
 
 #import <GLTFMTL/GLTFMTLBufferAllocator.h>
+#import <GLTFMTL/GLTFMTLLightingEnvironment.h>
+#import <GLTFMTL/GLTFMTLRenderer.h>
 #import <GLTFMTL/GLTFMTLShaderBuilder.h>
 #import <GLTFMTL/GLTFMTLUtilities.h>
-#import <GLTFMTL/GLTFMTLRenderer.h>
+
