@@ -152,7 +152,7 @@ static float3 diffuse(LightingParameters pbrInputs)
 
 static float3 fresnelReflectance(LightingParameters pbrInputs)
 {
-    return pbrInputs.reflectance0 + (pbrInputs.reflectance90 - pbrInputs.reflectance0) * pow(clamp(1.0 - pbrInputs.VdotH, 0.0, 1.0), 5.0);
+    return pbrInputs.reflectance0 + (pbrInputs.reflectance90 - pbrInputs.reflectance0) * pow(saturate(1.0 - pbrInputs.VdotH), 5.0);
 }
 
 static float SmithG1(float NdotV, float r)
@@ -168,7 +168,7 @@ static float geometricOcclusion(LightingParameters pbrInputs)
 
 static float ndf(LightingParameters pbrInputs)
 {
-    float roughnessSq = pbrInputs.alphaRoughness*pbrInputs.alphaRoughness;
+    float roughnessSq = pbrInputs.alphaRoughness * pbrInputs.alphaRoughness;
     float f = (pbrInputs.NdotH * roughnessSq - pbrInputs.NdotH) * pbrInputs.NdotH + 1.0;
     return roughnessSq / (pi * f * f);
 }
@@ -205,8 +205,8 @@ fragment float4 fragment_main(VertexOut in [[stage_in]],
     #if !HAS_TANGENTS
         float3 pos_dx = dfdx(in.worldPosition);
         float3 pos_dy = dfdy(in.worldPosition);
-        float3 tex_dx = dfdx(float3(in.texCoords, 0.0));
-        float3 tex_dy = dfdy(float3(in.texCoords, 0.0));
+        float3 tex_dx = dfdx(float3(in.texCoords, 0));
+        float3 tex_dy = dfdy(float3(in.texCoords, 0));
         float3 t = (tex_dy.y * pos_dx - tex_dx.y * pos_dy) / (tex_dx.x * tex_dy.y - tex_dy.x * tex_dx.y);
         
         float3 ng(0);
@@ -235,11 +235,11 @@ fragment float4 fragment_main(VertexOut in [[stage_in]],
     float3 h = normalize(l + v);
     float3 reflection = -normalize(reflect(v, n));
     
-    float NdotL = clamp(dot(n, l), 0.001, 1.0);
-    float NdotV = abs(dot(n, v)) + 0.001;
-    float NdotH = clamp(dot(n, h), 0.0, 1.0);
-    float LdotH = clamp(dot(l, h), 0.0, 1.0);
-    float VdotH = clamp(dot(v, h), 0.0, 1.0);
+    float NdotL = max(0.001, saturate(dot(n, l)));
+    float NdotV = max(0.001, saturate(dot(n, v)));
+    float NdotH = saturate(dot(n, h));
+    float LdotH = saturate(dot(l, h));
+    float VdotH = saturate(dot(v, h));
     
     float perceptualRoughness = uniforms.metallicRoughnessValues.y;
     float metallic = uniforms.metallicRoughnessValues.x;
@@ -251,7 +251,7 @@ fragment float4 fragment_main(VertexOut in [[stage_in]],
     #endif
     
     perceptualRoughness = clamp(perceptualRoughness, minRoughness, 1.0);
-    metallic = clamp(metallic, 0.0, 1.0);
+    metallic = saturate(metallic);
     
     float4 baseColor;
     #if HAS_BASE_COLOR_MAP
@@ -262,18 +262,18 @@ fragment float4 fragment_main(VertexOut in [[stage_in]],
     
     float3 f0 = float3(0.04);
 
-    float3 diffuseColor = mix(baseColor.rgb * (1.0 - f0), float3(0.0, 0.0, 0.0), metallic);
+    float3 diffuseColor = mix(baseColor.rgb * (1 - f0), float3(0), metallic);
 
     float3 specularColor = mix(f0, baseColor.rgb, metallic);
     
-    float3 color = diffuseColor + specularColor;
+    float3 color(0);
     
     #if USE_PBR
         float reflectance = max(max(specularColor.r, specularColor.g), specularColor.b);
         
-        float reflectance90 = clamp(reflectance * 25.0, 0.0, 1.0);
+        float reflectance90 = saturate(reflectance * 25);
         float3 specularEnvironmentR0 = specularColor.rgb;
-        float3 specularEnvironmentR90 = float3(1.0, 1.0, 1.0) * reflectance90;
+        float3 specularEnvironmentR90 = float3(reflectance90);
     
         float alphaRoughness = perceptualRoughness * perceptualRoughness;
         
@@ -317,9 +317,12 @@ fragment float4 fragment_main(VertexOut in [[stage_in]],
             specularLight = specularEnvTexture.sample(linearSampler, reflection).rgb;
         }
     
-        float3 IBLcolor = (diffuseLight * diffuseColor) + (specularLight * (specularColor * brdf.x + brdf.y));
+        float3 iblDiffuse = diffuseLight * diffuseColor;
+        float3 iblSpecular = specularLight * ((specularColor * brdf.x) + brdf.y);
     
-        color += IBLcolor;
+        float3 iblColor = iblDiffuse + iblSpecular;
+    
+        color += iblColor;
     #endif
     
     #if HAS_OCCLUSION_MAP
