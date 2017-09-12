@@ -101,6 +101,8 @@ vertex VertexOut vertex_main(VertexIn in [[stage_in]],
 {
     VertexOut out;
     
+    float4x4 normalMatrix = uniforms.modelMatrix;
+    
     #if USE_VERTEX_SKINNING
         ushort4 jointIndices = ushort4(in.joints);
         float4 jointWeights = float4(in.weights);
@@ -111,6 +113,7 @@ vertex VertexOut vertex_main(VertexIn in [[stage_in]],
                               jointWeights[3] * jointMatrices[jointIndices[3]];
         
         float4 skinnedPosition = skinMatrix * float4(in.position.xyz, 1);
+        normalMatrix = skinMatrix * normalMatrix;
     #else
         float4 skinnedPosition = float4(in.position.xyz, 1);
     #endif
@@ -122,14 +125,14 @@ vertex VertexOut vertex_main(VertexIn in [[stage_in]],
 
     #if HAS_NORMALS
         #if HAS_TANGENTS
-            float3 normalW = normalize(float3(uniforms.modelMatrix * float4(in.normal.xyz, 0.0)));
-            float3 tangentW = normalize(float3(uniforms.modelMatrix * float4(in.tangent.xyz, 0.0)));
+            float3 normalW = normalize(float3(normalMatrix * float4(in.normal.xyz, 0.0)));
+            float3 tangentW = normalize(float3(normalMatrix * float4(in.tangent.xyz, 0.0)));
             float3 bitangentW = cross(normalW, tangentW) * in.tangent.w;
             out.tangent = tangentW;
             out.bitangent = bitangentW;
             out.normal = normalW;
         #else
-            out.normal = normalize(float3(uniforms.modelMatrix * float4(in.normal.xyz, 0.0)));
+            out.normal = normalize(float3(normalMatrix * float4(in.normal.xyz, 0.0)));
         #endif
     #endif
 
