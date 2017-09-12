@@ -9,8 +9,7 @@ This project consists of several related parts:
  - **GLTF.framework**: A glTF 2.0 loader framework written in Objective-C (and suitable for use in Swift)
  - **GLTFMTL.framework**: A framework for rendering glTF assets with Metal
  - A viewer app for macOS
- - A viewer app for iOS
-
+ 
 ## Usage
 
 ### Using the Framework Projects
@@ -73,7 +72,7 @@ id <MTLRenderCommandEncoder> renderEncoder = [commandBuffer renderCommandEncoder
 
 // ... additional command encoder configuration and draw calls ...
 
-[renderer renderAsset:asset
+[renderer renderScene:asset.defaultScene
           modelMatrix:matrix_float4x4_identity
         commandBuffer:commandBuffer
        commandEncoder:renderEncoder];
@@ -154,7 +153,7 @@ Below is a checklist of glTF features and their current level of support.
 - [ ] Double-sided material
 
 #### Samplers
-- [ ] Wrap mode
+- [x] Wrap mode
 - [ ] Minification/magnification filters
 - [ ] Mipmaps
 
