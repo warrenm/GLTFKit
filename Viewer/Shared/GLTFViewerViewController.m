@@ -152,6 +152,7 @@ const CGFloat GLTFViewerRotationMomentumScaleFactor = 0.2;
 
 - (void)mouseDown:(NSEvent *)event {
     self.cursorPosition = [event locationInWindow];
+    self.cursorVelocity = CGVectorMake(0, 0);
 }
 
 - (void)mouseDragged:(NSEvent *)event {
