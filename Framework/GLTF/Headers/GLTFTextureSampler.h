@@ -17,7 +17,8 @@
 #import "GLTFObject.h"
 #import "GLTFEnums.h"
 
-@interface GLTFTextureSampler : GLTFObject
+@interface GLTFTextureSampler : GLTFObject <NSCopying>
+
 // GLTFSamplingFilterLinear
 @property (nonatomic, assign) GLTFSamplingFilter magFilter;
 // GLTFSamplingFilterNearestMipLinear

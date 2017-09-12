@@ -28,5 +28,33 @@
     return self;
 }
 
+- (BOOL)isEqual:(id)other {
+    if (![other isKindOfClass:[GLTFTextureSampler class]]) {
+        return NO;
+    }
+    
+    GLTFTextureSampler *otherSampler = (GLTFTextureSampler *)other;
+    BOOL areEqual =
+        (otherSampler.magFilter == self.magFilter) &&
+        (otherSampler.minFilter == self.minFilter) &&
+        (otherSampler.sAddressMode == self.sAddressMode) &&
+        (otherSampler.tAddressMode == self.tAddressMode);
+    return areEqual;
+}
+
+- (NSUInteger)hash {
+    NSUInteger hashValue = ((_sAddressMode << 16) | _tAddressMode) + ((_magFilter << 16) | _minFilter);
+    return hashValue;
+}
+
+- (id)copyWithZone:(NSZone *)zone {
+    GLTFTextureSampler *copy = [[GLTFTextureSampler allocWithZone:zone] init];
+    copy.magFilter = self.magFilter;
+    copy.minFilter = self.minFilter;
+    copy.sAddressMode = self.sAddressMode;
+    copy.tAddressMode = self.tAddressMode;
+    return copy;
+}
+
 @end
 

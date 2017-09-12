@@ -173,18 +173,23 @@ static float ndf(LightingParameters pbrInputs)
 fragment float4 fragment_main(VertexOut in [[stage_in]],
 #if HAS_BASE_COLOR_MAP
                               texture2d<float, access::sample> baseColorTexture [[texture(textureIndexBaseColor)]],
+                              sampler baseColorSampler [[sampler(textureIndexBaseColor)]],
 #endif
 #if HAS_NORMAL_MAP
                               texture2d<float, access::sample> normalTexture [[texture(textureIndexNormal)]],
+                              sampler normalSampler [[sampler(textureIndexNormal)]],
 #endif
 #if HAS_EMISSIVE_MAP
                               texture2d<float, access::sample> emissiveTexture [[texture(textureIndexEmissive)]],
+                              sampler emissiveSampler [[sampler(textureIndexEmissive)]],
 #endif
 #if HAS_METALLIC_ROUGHNESS_MAP
                               texture2d<float, access::sample> metallicRoughnessTexture [[texture(textureIndexMetallicRoughness)]],
+                              sampler metallicRoughnessSampler [[sampler(textureIndexMetallicRoughness)]],
 #endif
 #if HAS_OCCLUSION_MAP
                               texture2d<float, access::sample> occlusionTexture [[texture(textureIndexOcclusion)]],
+                              sampler occlusionSampler [[sampler(textureIndexOcclusion)]],
 #endif
 #if USE_IBL
                               texturecube<float, access::sample> diffuseEnvTexture [[texture(textureIndexDiffuseEnvironment)]],
@@ -193,8 +198,6 @@ fragment float4 fragment_main(VertexOut in [[stage_in]],
 #endif
                               constant FragmentUniforms &uniforms [[buffer(0)]])
 {
-    constexpr sampler linearSampler(coord::normalized, min_filter::linear, mag_filter::linear, mip_filter::linear, address::repeat);
-    
     float3x3 tbn;
     #if !HAS_TANGENTS
         float3 pos_dx = dfdx(in.worldPosition);
@@ -218,8 +221,8 @@ fragment float4 fragment_main(VertexOut in [[stage_in]],
     
     float3 n(0);
     #if HAS_NORMAL_MAP
-        n = normalTexture.sample(linearSampler, in.texCoords).rgb;
-        n = normalize(tbn * ((2.0 * n - 1.0) * float3(uniforms.normalScale, uniforms.normalScale, 1.0)));
+        n = normalTexture.sample(normalSampler, in.texCoords).rgb;
+        n = normalize(tbn * ((2 * n - 1) * float3(uniforms.normalScale, uniforms.normalScale, 1)));
     #else
         n = tbn[2].xyz;
     #endif
@@ -239,7 +242,7 @@ fragment float4 fragment_main(VertexOut in [[stage_in]],
     float metallic = uniforms.metallicRoughnessValues.x;
     
     #if HAS_METALLIC_ROUGHNESS_MAP
-        float4 mrSample = metallicRoughnessTexture.sample(linearSampler, in.texCoords);
+        float4 mrSample = metallicRoughnessTexture.sample(metallicRoughnessSampler, in.texCoords);
         perceptualRoughness = mrSample.g * perceptualRoughness;
         metallic = mrSample.b * metallic;
     #endif
@@ -249,7 +252,7 @@ fragment float4 fragment_main(VertexOut in [[stage_in]],
     
     float4 baseColor;
     #if HAS_BASE_COLOR_MAP
-    baseColor = baseColorTexture.sample(linearSampler, in.texCoords) * uniforms.baseColorFactor;
+    baseColor = baseColorTexture.sample(baseColorSampler, in.texCoords) * uniforms.baseColorFactor;
     #else
         baseColor = uniforms.baseColorFactor;
     #endif
@@ -297,9 +300,11 @@ fragment float4 fragment_main(VertexOut in [[stage_in]],
     #endif
     
     #if USE_IBL
+        constexpr sampler linearSampler(coord::normalized, min_filter::linear, mag_filter::linear, mip_filter::linear, address::clamp_to_edge);
+    
         float mipCount(SPECULAR_ENV_MAP_LOD_LEVELS);
-        float lod = (perceptualRoughness * mipCount);
-        float3 brdf = brdfLUT.sample(linearSampler, float2(NdotV, 1.0 - perceptualRoughness)).rgb;
+        float lod = perceptualRoughness * mipCount;
+        float3 brdf = brdfLUT.sample(linearSampler, float2(NdotV, perceptualRoughness)).rgb;
         float3 diffuseLight = diffuseEnvTexture.sample(linearSampler, n).rgb;
         
         float3 specularLight;
@@ -315,12 +320,12 @@ fragment float4 fragment_main(VertexOut in [[stage_in]],
     #endif
     
     #if HAS_OCCLUSION_MAP
-        float ao = occlusionTexture.sample(linearSampler, in.texCoords).r;
+        float ao = occlusionTexture.sample(occlusionSampler, in.texCoords).r;
         color = mix(color, color * ao, uniforms.occlusionStrength);
     #endif
     
     #if HAS_EMISSIVE_MAP
-        float3 emissive = emissiveTexture.sample(linearSampler, in.texCoords).rgb * uniforms.emissiveFactor;
+        float3 emissive = emissiveTexture.sample(emissiveSampler, in.texCoords).rgb * uniforms.emissiveFactor;
         color += emissive;
     #else
         color += uniforms.emissiveFactor;

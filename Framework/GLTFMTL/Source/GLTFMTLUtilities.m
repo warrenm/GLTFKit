@@ -123,6 +123,39 @@ MTLCullMode GLTFMTLCullModeForCullFace(GLTFFace face) {
     }
 }
 
+MTLSamplerMinMagFilter GLTFMTLSamplerMinMagFilterForSamplingFilter(GLTFSamplingFilter mode) {
+    switch (mode) {
+        case GLTFSamplingFilterNearest:
+            return MTLSamplerMinMagFilterNearest;
+        default:
+            return MTLSamplerMinMagFilterLinear;
+    }
+}
+
+MTLSamplerMipFilter GLTFMTLSamplerMipFilterForSamplingFilter(GLTFSamplingFilter mode) {
+    switch (mode) {
+        case GLTFSamplingFilterNearest:
+        case GLTFSamplingFilterLinear:
+            return MTLSamplerMipFilterNotMipmapped;
+        case GLTFSamplingFilterNearestMipNearest:
+        case GLTFSamplingFilterLinearMipNearest:
+            return MTLSamplerMipFilterNearest;
+        default:
+            return MTLSamplerMipFilterLinear;
+    }
+}
+
+MTLSamplerAddressMode GLTFMTLSamplerAddressModeForSamplerAddressMode(GLTFAddressMode mode) {
+    switch (mode) {
+        case GLTFAddressModeClampToEdge:
+            return MTLSamplerAddressModeClampToEdge;
+        case GLTFAddressModeMirroredRepeat:
+            return MTLSamplerAddressModeMirrorRepeat;
+        default:
+            return MTLSamplerAddressModeRepeat;
+    }
+}
+
 NSString *GLTFMTLTypeNameForType(GLTFDataType baseType, GLTFDataDimension dimension, BOOL packed) {
     NSString *typeName = @"float";
     NSString *packingPrefix = @"";

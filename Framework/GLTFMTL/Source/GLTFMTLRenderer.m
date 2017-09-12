@@ -55,6 +55,7 @@ struct FragmentUniforms {
 @property (nonatomic, strong) NSMutableDictionary<NSUUID *, id<MTLRenderPipelineState>> *pipelineStatesForSubmeshes;
 @property (nonatomic, strong) NSMutableDictionary<NSNumber *, id<MTLDepthStencilState>> *depthStencilStateMap;
 @property (nonatomic, strong) NSMutableDictionary<NSUUID *, id<MTLTexture>> *texturesForImageIdentifiers;
+@property (nonatomic, strong) NSMutableDictionary<GLTFTextureSampler *, id<MTLSamplerState>> *samplerStatesForSamplers;
 
 @end
 
@@ -88,6 +89,7 @@ struct FragmentUniforms {
         _depthStencilStateMap = [NSMutableDictionary dictionary];
         _texturesForImageIdentifiers = [NSMutableDictionary dictionary];
         _pipelineStatesForSubmeshes = [NSMutableDictionary dictionary];
+        _samplerStatesForSamplers = [NSMutableDictionary dictionary];
     }
     
     return self;
@@ -145,6 +147,24 @@ struct FragmentUniforms {
     }
     
     return texture;
+}
+
+- (id<MTLSamplerState>)samplerStateForSampler:(GLTFTextureSampler *)sampler {
+    NSParameterAssert(sampler != nil);
+    
+    id<MTLSamplerState> samplerState = self.samplerStatesForSamplers[sampler];
+    if (samplerState == nil) {
+        MTLSamplerDescriptor *descriptor = [MTLSamplerDescriptor new];
+        descriptor.magFilter = GLTFMTLSamplerMinMagFilterForSamplingFilter(sampler.magFilter);
+        descriptor.minFilter = GLTFMTLSamplerMinMagFilterForSamplingFilter(sampler.minFilter);
+        descriptor.mipFilter = GLTFMTLSamplerMipFilterForSamplingFilter(sampler.minFilter);
+        descriptor.sAddressMode = GLTFMTLSamplerAddressModeForSamplerAddressMode(sampler.sAddressMode);
+        descriptor.tAddressMode = GLTFMTLSamplerAddressModeForSamplerAddressMode(sampler.tAddressMode);
+        descriptor.normalizedCoordinates = YES;
+        samplerState = [self.device newSamplerStateWithDescriptor:descriptor];
+        self.samplerStatesForSamplers[sampler] = samplerState;
+    }
+    return samplerState;
 }
 
 - (id<MTLRenderPipelineState>)renderPipelineStateForSubmesh:(GLTFSubmesh *)submesh {
@@ -214,27 +234,37 @@ struct FragmentUniforms {
 - (void)bindTexturesForMaterial:(GLTFMaterial *)material commandEncoder:(id<MTLRenderCommandEncoder>)renderEncoder {
     if (material.baseColorTexture != nil) {
         id<MTLTexture> texture = [self textureForImage:material.baseColorTexture.image];
+        id<MTLSamplerState> sampler = [self samplerStateForSampler:material.baseColorTexture.sampler];
         [renderEncoder setFragmentTexture:texture atIndex:GLTFTextureBindIndexBaseColor];
+        [renderEncoder setFragmentSamplerState:sampler atIndex:GLTFTextureBindIndexBaseColor];
     }
     
     if (material.normalTexture != nil) {
         id<MTLTexture> texture = [self textureForImage:material.normalTexture.image];
+        id<MTLSamplerState> sampler = [self samplerStateForSampler:material.normalTexture.sampler];
         [renderEncoder setFragmentTexture:texture atIndex:GLTFTextureBindIndexNormal];
+        [renderEncoder setFragmentSamplerState:sampler atIndex:GLTFTextureBindIndexNormal];
     }
     
     if (material.metallicRoughnessTexture != nil) {
         id<MTLTexture> texture = [self textureForImage:material.metallicRoughnessTexture.image];
+        id<MTLSamplerState> sampler = [self samplerStateForSampler:material.metallicRoughnessTexture.sampler];
         [renderEncoder setFragmentTexture:texture atIndex:GLTFTextureBindIndexMetallicRoughness];
+        [renderEncoder setFragmentSamplerState:sampler atIndex:GLTFTextureBindIndexMetallicRoughness];
     }
     
     if (material.emissiveTexture != nil) {
         id<MTLTexture> texture = [self textureForImage:material.emissiveTexture.image];
+        id<MTLSamplerState> sampler = [self samplerStateForSampler:material.emissiveTexture.sampler];
         [renderEncoder setFragmentTexture:texture atIndex:GLTFTextureBindIndexEmissive];
+        [renderEncoder setFragmentSamplerState:sampler atIndex:GLTFTextureBindIndexEmissive];
     }
     
     if (material.occlusionTexture != nil) {
         id<MTLTexture> texture = [self textureForImage:material.occlusionTexture.image];
+        id<MTLSamplerState> sampler = [self samplerStateForSampler:material.occlusionTexture.sampler];
         [renderEncoder setFragmentTexture:texture atIndex:GLTFTextureBindIndexOcclusion];
+        [renderEncoder setFragmentSamplerState:sampler atIndex:GLTFTextureBindIndexOcclusion];
     }
     
     if (self.lightingEnvironment) {

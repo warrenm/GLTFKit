@@ -42,6 +42,12 @@ extern MTLWinding GLTFMTLWindingForWinding(GLTFWinding w);
 
 extern MTLCullMode GLTFMTLCullModeForCullFace(GLTFFace face);
 
+extern MTLSamplerMinMagFilter GLTFMTLSamplerMinMagFilterForSamplingFilter(GLTFSamplingFilter mode);
+
+extern MTLSamplerMipFilter GLTFMTLSamplerMipFilterForSamplingFilter(GLTFSamplingFilter mode);
+
+extern MTLSamplerAddressMode GLTFMTLSamplerAddressModeForSamplerAddressMode(GLTFAddressMode mode);
+
 extern NSString *GLTFMTLTypeNameForType(GLTFDataType baseType, GLTFDataDimension dimension, BOOL packedIfPossible);
 
 extern MTLVertexFormat GLTFMTLVertexFormatForComponentTypeAndDimension(GLTFDataType baseType, GLTFDataDimension dimension);
