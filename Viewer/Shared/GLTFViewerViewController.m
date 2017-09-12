@@ -243,14 +243,18 @@ const CGFloat GLTFViewerRotationMomentumScaleFactor = 0.2;
         simd_float4x4 modelViewProjectionMatrix;
     } vertexUniforms;
     
-    vertexUniforms.modelMatrix = matrix_multiply(GLTFMatrixFromUniformScale(100), self.regularizationMatrix);
+    vertexUniforms.modelMatrix = GLTFMatrixFromUniformScale(100);
     vertexUniforms.modelViewProjectionMatrix = matrix_multiply(matrix_multiply(projectionMatrix, self.viewMatrix), vertexUniforms.modelMatrix);
     
     [renderEncoder setRenderPipelineState:self.skyboxPipelineState];
+    [renderEncoder setFrontFacingWinding:MTLWindingCounterClockwise];
+    [renderEncoder setCullMode:MTLCullModeBack];
     [renderEncoder setVertexBytes:vertexData length:sizeof(float) * 36 * 3 atIndex:0];
     [renderEncoder setVertexBytes:&vertexUniforms length:sizeof(vertexUniforms) atIndex:1];
     [renderEncoder setFragmentTexture:self.lightingEnvironment.specularCube atIndex:0];
     [renderEncoder drawPrimitives:MTLPrimitiveTypeTriangle vertexStart:0 vertexCount:36];
+    [renderEncoder setCullMode:MTLCullModeNone];
+    
 }
 
 - (void)drawInMTKView:(MTKView *)view {
