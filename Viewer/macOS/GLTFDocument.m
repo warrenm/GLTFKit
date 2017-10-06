@@ -54,6 +54,8 @@
         origin = [[mostRecentWindowController window] cascadeTopLeftFromPoint:origin];
         [window setFrameOrigin:origin];
     }
+    
+    [windowController.window makeFirstResponder:windowController.contentViewController];
 }
 
 - (NSData *)dataOfType:(NSString *)typeName error:(NSError **)outError {

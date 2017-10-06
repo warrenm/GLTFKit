@@ -66,7 +66,16 @@
     pipelineDescriptor.vertexFunction = vertexFunction;
     pipelineDescriptor.fragmentFunction = fragmentFunction;
     pipelineDescriptor.vertexDescriptor = vertexDescriptor;
+
     pipelineDescriptor.colorAttachments[0].pixelFormat = colorPixelFormat;
+    pipelineDescriptor.colorAttachments[0].blendingEnabled = YES;
+    pipelineDescriptor.colorAttachments[0].sourceRGBBlendFactor = MTLBlendFactorSourceAlpha;
+    pipelineDescriptor.colorAttachments[0].destinationRGBBlendFactor = MTLBlendFactorOneMinusSourceAlpha;
+    pipelineDescriptor.colorAttachments[0].rgbBlendOperation = MTLBlendOperationAdd;
+    pipelineDescriptor.colorAttachments[0].sourceAlphaBlendFactor = MTLBlendFactorSourceAlpha;
+    pipelineDescriptor.colorAttachments[0].destinationAlphaBlendFactor = MTLBlendFactorOneMinusSourceAlpha;
+    pipelineDescriptor.colorAttachments[0].alphaBlendOperation = MTLBlendOperationAdd;
+
     pipelineDescriptor.depthAttachmentPixelFormat = depthStencilPixelFormat;
     pipelineDescriptor.stencilAttachmentPixelFormat = depthStencilPixelFormat;
     
@@ -94,6 +103,7 @@
     BOOL usePBR = YES;
     BOOL useIBL = lightingEnvironment != nil;
     BOOL hasTexCoord0 = submesh.accessorsForAttributes[GLTFAttributeSemanticTexCoord0] != nil;
+    BOOL hasTexCoord1 = submesh.accessorsForAttributes[GLTFAttributeSemanticTexCoord1] != nil;
     BOOL hasNormals = submesh.accessorsForAttributes[GLTFAttributeSemanticNormal] != nil;
     BOOL hasTangents = submesh.accessorsForAttributes[GLTFAttributeSemanticTangent] != nil;
     BOOL hasBaseColorMap = submesh.material.baseColorTexture != nil;
@@ -108,7 +118,8 @@
     [shaderFeatures appendFormat:@"#define USE_PBR %d\n", usePBR];
     [shaderFeatures appendFormat:@"#define USE_IBL %d\n", useIBL];
     [shaderFeatures appendFormat:@"#define USE_VERTEX_SKINNING %d\n", hasSkinningData];
-    [shaderFeatures appendFormat:@"#define HAS_TEXCOORDS %d\n", hasTexCoord0];
+    [shaderFeatures appendFormat:@"#define HAS_TEXCOORD_0 %d\n", hasTexCoord0];
+    [shaderFeatures appendFormat:@"#define HAS_TEXCOORD_1 %d\n", hasTexCoord1];
     [shaderFeatures appendFormat:@"#define HAS_NORMALS %d\n", hasNormals];
     [shaderFeatures appendFormat:@"#define HAS_TANGENTS %d\n", hasTangents];
     [shaderFeatures appendFormat:@"#define HAS_BASE_COLOR_MAP %d\n", hasBaseColorMap];
@@ -117,7 +128,13 @@
     [shaderFeatures appendFormat:@"#define HAS_OCCLUSION_MAP %d\n", hasOcclusionMap];
     [shaderFeatures appendFormat:@"#define HAS_EMISSIVE_MAP %d\n", hasEmissiveMap];
     [shaderFeatures appendFormat:@"#define SPECULAR_ENV_MAP_LOD_LEVELS %d\n\n", (int)lightingEnvironment.specularLODLevelCount];
-    
+
+    [shaderFeatures appendFormat:@"#define baseColorTexCoord          texCoord%d\n", (int)submesh.material.baseColorTexCoord];
+    [shaderFeatures appendFormat:@"#define normalTexCoord             texCoord%d\n", (int)submesh.material.normalTexCoord];
+    [shaderFeatures appendFormat:@"#define metallicRoughnessTexCoord  texCoord%d\n", (int)submesh.material.metallicRoughnessTexCoord];
+    [shaderFeatures appendFormat:@"#define emissiveTexCoord           texCoord%d\n", (int)submesh.material.emissiveTexCoord];
+    [shaderFeatures appendFormat:@"#define occlusionTexCoord          texCoord%d\n", (int)submesh.material.occlusionTexCoord];
+
     NSString *preamble = @"struct VertexIn {\n";
     NSString *epilogue = @"\n};";
     
@@ -126,17 +143,19 @@
     for (GLTFVertexAttribute *attribute in submesh.vertexDescriptor.attributes) {
         if (attribute.componentType == 0) { continue; }
         if ([attribute.semantic isEqualToString:GLTFAttributeSemanticPosition]) {
-            [attribs addObject:[NSString stringWithFormat:@"    %@ position [[attribute(%d)]];", GLTFMTLTypeNameForType(attribute.componentType, attribute.dimension, false), i]];
+            [attribs addObject:[NSString stringWithFormat:@"    %@ position  [[attribute(%d)]];", GLTFMTLTypeNameForType(attribute.componentType, attribute.dimension, false), i]];
         } else if ([attribute.semantic isEqualToString:GLTFAttributeSemanticNormal]) {
-            [attribs addObject:[NSString stringWithFormat:@"    %@ normal [[attribute(%d)]];", GLTFMTLTypeNameForType(attribute.componentType, attribute.dimension, false), i]];
+            [attribs addObject:[NSString stringWithFormat:@"    %@ normal    [[attribute(%d)]];", GLTFMTLTypeNameForType(attribute.componentType, attribute.dimension, false), i]];
         } else if ([attribute.semantic isEqualToString:GLTFAttributeSemanticTangent]) {
-            [attribs addObject:[NSString stringWithFormat:@"    %@ tangent [[attribute(%d)]];", GLTFMTLTypeNameForType(attribute.componentType, attribute.dimension, false), i]];
+            [attribs addObject:[NSString stringWithFormat:@"    %@ tangent   [[attribute(%d)]];", GLTFMTLTypeNameForType(attribute.componentType, attribute.dimension, false), i]];
         } else if ([attribute.semantic isEqualToString:GLTFAttributeSemanticTexCoord0]) {
-            [attribs addObject:[NSString stringWithFormat:@"    %@ texCoords [[attribute(%d)]];", GLTFMTLTypeNameForType(attribute.componentType, attribute.dimension, false), i]];
+            [attribs addObject:[NSString stringWithFormat:@"    %@ texCoord0 [[attribute(%d)]];", GLTFMTLTypeNameForType(attribute.componentType, attribute.dimension, false), i]];
+        } else if ([attribute.semantic isEqualToString:GLTFAttributeSemanticTexCoord1]) {
+            [attribs addObject:[NSString stringWithFormat:@"    %@ texCoord1 [[attribute(%d)]];", GLTFMTLTypeNameForType(attribute.componentType, attribute.dimension, false), i]];
         } else if ([attribute.semantic isEqualToString:GLTFAttributeSemanticJoints0]) {
-            [attribs addObject:[NSString stringWithFormat:@"    %@ joints [[attribute(%d)]];", GLTFMTLTypeNameForType(attribute.componentType, attribute.dimension, false), i]];
+            [attribs addObject:[NSString stringWithFormat:@"    %@ joints    [[attribute(%d)]];", GLTFMTLTypeNameForType(attribute.componentType, attribute.dimension, false), i]];
         }else if ([attribute.semantic isEqualToString:GLTFAttributeSemanticWeights0]) {
-            [attribs addObject:[NSString stringWithFormat:@"    %@ weights [[attribute(%d)]];", GLTFMTLTypeNameForType(attribute.componentType, attribute.dimension, false), i]];
+            [attribs addObject:[NSString stringWithFormat:@"    %@ weights   [[attribute(%d)]];", GLTFMTLTypeNameForType(attribute.componentType, attribute.dimension, false), i]];
         }
         
         ++i;

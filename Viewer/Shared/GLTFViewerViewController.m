@@ -47,11 +47,17 @@ const CGFloat GLTFViewerRotationMomentumScaleFactor = 0.2;
 @property (nonatomic, assign) CGFloat cameraVelocity;
 @property (nonatomic, assign) CGFloat zoomVelocity;
 
+@property (nonatomic, assign) NSInteger lastCameraIndex;
+
 @property (nonatomic, assign) NSTimeInterval globalTime;
 
 @end
 
 @implementation GLTFViewerViewController
+
+- (BOOL)acceptsFirstResponder {
+    return YES;
+}
 
 - (void)setView:(NSView *)view {
     [super setView:view];
@@ -132,10 +138,18 @@ const CGFloat GLTFViewerRotationMomentumScaleFactor = 0.2;
     self.renderer.viewMatrix = viewMatrix;
 }
 
+- (matrix_float4x4)projectionMatrix {
+    return self.renderer.projectionMatrix;
+}
+
+- (void)setProjectionMatrix:(matrix_float4x4)projectionMatrix {
+    self.renderer.projectionMatrix = projectionMatrix;
+}
+
 - (void)setAsset:(GLTFAsset *)asset {
     _asset = asset;
     [self computeRegularizationMatrix];
-    [self computeViewMatrix];
+    [self computeTransforms];
 }
 
 - (void)computeRegularizationMatrix {
@@ -146,8 +160,19 @@ const CGFloat GLTFViewerRotationMomentumScaleFactor = 0.2;
     self.regularizationMatrix = matrix_multiply(centerScale, centerTranslation);
 }
 
-- (void)computeViewMatrix {
+- (void)computeTransforms {
     self.viewMatrix = matrix_multiply(GLTFMatrixFromTranslation(0, 0, -self.cameraDistance), GLTFMatrixFromRotationAxisAngle(self.azimuthalAngle, 0, 1, 0));
+
+    if (_lastCameraIndex >= 0 && _lastCameraIndex < self.asset.cameras.count) {
+        GLTFCamera *camera = self.asset.cameras[_lastCameraIndex];
+        if (camera.referencingNodes.count > 0) {
+            GLTFNode *cameraNode = camera.referencingNodes.firstObject;
+            self.viewMatrix = matrix_invert(cameraNode.globalTransform);
+        }
+    }
+    
+    float aspectRatio = self.renderer.drawableSize.width / self.renderer.drawableSize.height;
+    self.projectionMatrix = GLTFPerspectiveProjectionMatrixAspectFovRH(M_PI / 4, aspectRatio, 0.1, 1000);
 }
 
 - (void)mouseDown:(NSEvent *)event {
@@ -171,6 +196,22 @@ const CGFloat GLTFViewerRotationMomentumScaleFactor = 0.2;
     self.cameraVelocity = 2 * event.deltaY;
 }
 
+- (void)keyDown:(NSEvent *)event {
+    switch (event.keyCode) {
+        case 29: _lastCameraIndex = 0; break;
+        case 18: _lastCameraIndex = 1; break;
+        case 19: _lastCameraIndex = 2; break;
+        case 20: _lastCameraIndex = 3; break;
+        case 21: _lastCameraIndex = 4; break;
+        case 23: _lastCameraIndex = 5; break;
+        case 22: _lastCameraIndex = 6; break;
+        case 26: _lastCameraIndex = 7; break;
+        case 28: _lastCameraIndex = 8; break;
+        case 25: _lastCameraIndex = 9; break;
+        default: _lastCameraIndex = -1; break;
+    }
+}
+
 - (void)updateWithTimestep:(NSTimeInterval)timestep {
     self.globalTime += timestep;
     
@@ -180,7 +221,7 @@ const CGFloat GLTFViewerRotationMomentumScaleFactor = 0.2;
     self.cameraDistance += self.cameraVelocity * timestep;
     self.cameraVelocity = self.cameraVelocity * GLTFViewerZoomDrag;
     
-    [self computeViewMatrix];
+    [self computeTransforms];
     [self.asset runAnimationsAtTime:self.globalTime];
 }
 
@@ -234,17 +275,13 @@ const CGFloat GLTFViewerRotationMomentumScaleFactor = 0.2;
          1, -1,  1,
     };
     
-    // TODO: Pass the projection matrix to the renderer so we're sure they match up
-    CGSize drawableSize = self.metalView.drawableSize;
-    matrix_float4x4 projectionMatrix = GLTFPerspectiveProjectionMatrixAspectFovRH(M_PI / 4, drawableSize.width / drawableSize.height, 0.1, 1000);
-    
     struct VertexUniforms {
         simd_float4x4 modelMatrix;
         simd_float4x4 modelViewProjectionMatrix;
     } vertexUniforms;
     
     vertexUniforms.modelMatrix = GLTFMatrixFromUniformScale(100);
-    vertexUniforms.modelViewProjectionMatrix = matrix_multiply(matrix_multiply(projectionMatrix, self.viewMatrix), vertexUniforms.modelMatrix);
+    vertexUniforms.modelViewProjectionMatrix = matrix_multiply(matrix_multiply(self.projectionMatrix, self.viewMatrix), vertexUniforms.modelMatrix);
     
     [renderEncoder setRenderPipelineState:self.skyboxPipelineState];
     [renderEncoder setFrontFacingWinding:MTLWindingCounterClockwise];
@@ -276,7 +313,7 @@ const CGFloat GLTFViewerRotationMomentumScaleFactor = 0.2;
         
         [renderEncoder pushDebugGroup:@"Draw glTF Scene"];
         [self.renderer renderScene:self.asset.defaultScene
-                       modelMatrix:self.regularizationMatrix
+                       modelMatrix:self.regularizationMatrix // TODO: Use identity here instead when using an asset-provided camera
                      commandBuffer:commandBuffer
                     commandEncoder:renderEncoder];
         [renderEncoder popDebugGroup];

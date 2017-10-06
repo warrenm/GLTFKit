@@ -68,6 +68,7 @@ struct FragmentUniforms {
         _commandQueue = [_device newCommandQueue];
         
         _viewMatrix = matrix_identity_float4x4;
+        _projectionMatrix = GLTFPerspectiveProjectionMatrixAspectFovRH(M_PI / 4, self.drawableSize.width / self.drawableSize.height, 0.1, 100);
 
         _drawableSize = CGSizeMake(1, 1);
         _colorPixelFormat = MTLPixelFormatBGRA8Unorm;
@@ -133,6 +134,7 @@ struct FragmentUniforms {
         }
         
         texture = [self.textureLoader newTextureWithCGImage:cgImage options:options error:&error];
+        texture.label = image.url.lastPathComponent;
         
         CGImageRelease(cgImage);
         if (imageSource != NULL) {
@@ -318,9 +320,7 @@ struct FragmentUniforms {
             MTLPrimitiveType primitiveType = GLTFMTLPrimitiveTypeForPrimitiveType(submesh.primitiveType);
             
             [self bindTexturesForMaterial:material commandEncoder: renderEncoder];
-            
-            matrix_float4x4 projectionMatrix =  GLTFPerspectiveProjectionMatrixAspectFovRH(M_PI / 4, self.drawableSize.width / self.drawableSize.height, 0.1, 1000);
-            
+
             struct VertexUniforms vertexUniforms;
             
             matrix_float3x3 viewAffine = matrix_invert(GLTFMatrixUpperLeft3x3(self.viewMatrix));
@@ -328,10 +328,10 @@ struct FragmentUniforms {
             vector_float3 cameraWorldPos = matrix_multiply(viewAffine, -cameraPos);
             
             vertexUniforms.modelMatrix = modelMatrix;
-            vertexUniforms.modelViewProjectionMatrix = matrix_multiply(matrix_multiply(projectionMatrix, self.viewMatrix), modelMatrix);
+            vertexUniforms.modelViewProjectionMatrix = matrix_multiply(matrix_multiply(self.projectionMatrix, self.viewMatrix), modelMatrix);
             
             struct FragmentUniforms fragmentUniforms;
-            fragmentUniforms.lightDirection = (vector_float3){ 0, 1, 0 };
+            fragmentUniforms.lightDirection = (vector_float3){ 0, 0, -1 };
             fragmentUniforms.lightColor = (vector_float3) { 1, 1, 1 };
             fragmentUniforms.normalScale = material.normalTextureScale;
             fragmentUniforms.emissiveFactor = material.emissiveFactor;
@@ -360,6 +360,8 @@ struct FragmentUniforms {
             }
             
             [renderEncoder setDepthStencilState:[self depthStencilStateForDepthWriteEnabled:YES depthTestEnabled:YES compareFunction:MTLCompareFunctionLess]];
+            
+            [renderEncoder setCullMode:MTLCullModeBack];
             
             if (useIndexBuffer) {
                 GLTFMTLBuffer *indexBuffer = (GLTFMTLBuffer *)indexAccessor.bufferView.buffer;

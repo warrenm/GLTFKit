@@ -19,13 +19,15 @@
 #import "GLTFObject.h"
 #import "GLTFEnums.h"
 
-@class GLTFScene;
+@class GLTFScene, GLTFCamera;
 @protocol GLTFBufferAllocator;
 
 @interface GLTFAsset : NSObject
 
-@property (nonatomic, readonly) NSArray *scenes;
+@property (nonatomic, readonly, copy) NSArray<GLTFScene *> *scenes;
 @property (nonatomic, readonly) GLTFScene *defaultScene;
+
+@property (nonatomic, readonly, copy) NSArray<GLTFCamera *> *cameras;
 
 @property (nonatomic, copy) NSString *generator;
 @property (nonatomic, copy) NSString *copyright;

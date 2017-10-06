@@ -33,6 +33,8 @@
 
 @import simd;
 
+static NSString *const GLTFExtensionKHRMaterialsPBRSpecularGlossiness = @"KHR_materials_pbrSpecularGlossiness";
+
 typedef struct {
     float x, y, z;
 } packed_float3;
@@ -47,7 +49,6 @@ typedef struct {
 @property (nonatomic, copy) NSArray *samplers;
 @property (nonatomic, copy) NSArray *textures;
 @property (nonatomic, copy) NSArray *meshes;
-@property (nonatomic, copy) NSArray *cameras;
 @property (nonatomic, copy) NSArray *materials;
 @property (nonatomic, copy) NSArray *lights;
 @property (nonatomic, copy) NSArray *nodes;
@@ -55,6 +56,7 @@ typedef struct {
 @property (nonatomic, copy) NSArray<GLTFSkin *> *skins;
 @property (nonatomic, strong) GLTFMaterial *defaultMaterial;
 @property (nonatomic, strong) GLTFTextureSampler *defaultSampler;
+@property (nonatomic, assign) BOOL usesPBRSpecularGlossiness;
 @end
 
 @implementation GLTFAsset
@@ -172,6 +174,8 @@ typedef struct {
     
     _extensionsUsed = [rootObject[@"extensionsUsed"] ?: @[] copy];
     
+    [self toggleExtensionFeatureFlags];
+
     _defaultSampler =  [GLTFTextureSampler new];
     
     _defaultMaterial = [GLTFMaterial new];
@@ -202,6 +206,16 @@ typedef struct {
     [self loadDefaultScene:rootObject[@"scene"]];
 
     return YES;
+}
+
+- (void)toggleExtensionFeatureFlags {
+    for (NSString *extension in _extensionsUsed) {
+        if ([extension isEqualToString:GLTFExtensionKHRMaterialsPBRSpecularGlossiness]) {
+            _usesPBRSpecularGlossiness = YES;
+        } else {
+            NSLog(@"WARNING: Unsupported extension \"%@\" used", extension);
+        }
+    }
 }
 
 - (BOOL)loadAssetProperties:(NSDictionary *)propertiesMap {
@@ -301,7 +315,8 @@ typedef struct {
         bufferView.target = [properties[@"target"] integerValue];
         
         if ((bufferView.buffer != nil) && (bufferView.offset % 16 != 0)) {
-            NSLog(@"WARNING: Buffer view %d had misaligned offset of %d. Creating auxilliary buffer and continuing...", (int)index, (int)bufferView.offset);
+            NSLog(@"WARNING: Buffer view %d had misaligned offset of %d. Creating auxilliary buffer of length %d and continuing...",
+                  (int)index, (int)bufferView.offset, (int)bufferView.length);
             id<GLTFBuffer> alignedBuffer = [_bufferAllocator newBufferWithLength:bufferView.length];
             _buffers = [_buffers arrayByAddingObject:alignedBuffer];
             memcpy([alignedBuffer contents], bufferView.buffer.contents + bufferView.offset, bufferView.length);
@@ -442,7 +457,12 @@ typedef struct {
         }
         
         camera.znear = [params[@"znear"] floatValue];
-        camera.zfar = [params[@"zfar"] floatValue];
+        
+        if (camera.cameraType == GLTFCameraTypePerspective && (params[@"zfar"] == nil)) {
+            camera.zfar = FLT_MAX;
+        } else {
+            camera.zfar = [params[@"zfar"] floatValue];
+        }
 
         camera.extensions = properties[@"extensions"];
         camera.extras = properties[@"extras"];
@@ -598,12 +618,10 @@ typedef struct {
         _materials = @[];
         return YES;
     }
-
+    
     NSMutableArray *materials = [NSMutableArray arrayWithCapacity:materialsMap.count];
     for (NSDictionary *properties in materialsMap) {
         GLTFMaterial *material = [[GLTFMaterial alloc] init];
-
-        // TODO: read per-texture texcoord index instead of assuming 0
 
         NSDictionary *pbrValuesMap = properties[@"pbrMetallicRoughness"];
         if (pbrValuesMap) {
@@ -615,7 +633,11 @@ typedef struct {
                     material.baseColorTexture = _textures[baseColorTextureIndex];
                 }
             }
-            
+            NSNumber *baseColorTexCoordValue = baseColorTextureMap[@"texCoord"];
+            if (baseColorTexCoordValue != nil) {
+                material.baseColorTexCoord = baseColorTexCoordValue.integerValue;
+            }
+
             NSArray *baseColorFactorComponents = pbrValuesMap[@"baseColorFactor"];
             if (baseColorFactorComponents.count == 4) {
                 material.baseColorFactor = GLTFVectorFloat4FromArray(baseColorFactorComponents);
@@ -634,6 +656,11 @@ typedef struct {
                     material.metallicRoughnessTexture = _textures[metallicRoughnessTextureIndex];
                 }
             }
+
+            NSNumber *metallicRoughnessTexCoordValue = metallicRoughnessTextureMap[@"texCoord"];
+            if (metallicRoughnessTexCoordValue != nil) {
+                material.metallicRoughnessTexCoord = metallicRoughnessTexCoordValue.integerValue;
+            }
         }
         
         NSDictionary *normalTextureMap = properties[@"normalTexture"];
@@ -645,6 +672,11 @@ typedef struct {
             }
             NSNumber *normalTextureScaleValue = normalTextureMap[@"scale"];
             material.normalTextureScale = (normalTextureScaleValue != nil) ? normalTextureScaleValue.floatValue : 1.0;
+
+            NSNumber *normalTexCoordValue = normalTextureMap[@"texCoord"];
+            if (normalTexCoordValue != nil) {
+                material.normalTexCoord = normalTexCoordValue.integerValue;
+            }
         }
 
         NSDictionary *emissiveTextureMap = properties[@"emissiveTexture"];
@@ -653,6 +685,10 @@ typedef struct {
             NSUInteger emissiveTextureIndex = emissiveTextureIndexValue.integerValue;
             if (emissiveTextureIndex < _textures.count) {
                 material.emissiveTexture = _textures[emissiveTextureIndex];
+            }
+            NSNumber *emissiveTexCoordValue = emissiveTextureMap[@"texCoord"];
+            if (emissiveTexCoordValue != nil) {
+                material.emissiveTexCoord = emissiveTexCoordValue.integerValue;
             }
         }
         
@@ -668,11 +704,44 @@ typedef struct {
             if (occlusionTextureIndex < _textures.count) {
                 material.occlusionTexture = _textures[occlusionTextureIndex];
             }
+            NSNumber *occlusionTexCoordValue = occlusionTextureMap[@"texCoord"];
+            if (occlusionTexCoordValue != nil) {
+                material.occlusionTexCoord = occlusionTexCoordValue.integerValue;
+            }
         }
         
         material.name = properties[@"name"];
         material.extensions = properties[@"extensions"];
         material.extras = properties[@"extras"];
+
+        if (self.usesPBRSpecularGlossiness) {
+            NSDictionary *pbrSpecularGlossinessProperties = material.extensions[GLTFExtensionKHRMaterialsPBRSpecularGlossiness];
+            if (pbrSpecularGlossinessProperties != nil) {
+                NSDictionary *diffuseTextureMap = pbrSpecularGlossinessProperties[@"diffuseTexture"];
+                if (diffuseTextureMap != nil) {
+                    NSNumber *diffuseTextureIndexValue = diffuseTextureMap[@"index"];
+                    if (diffuseTextureIndexValue != nil) {
+                        NSUInteger diffuseTextureIndex = diffuseTextureIndexValue.integerValue;
+                        if (diffuseTextureIndex < _textures.count) {
+                            material.baseColorTexture = _textures[diffuseTextureIndex];
+                        }
+                    }
+                    NSNumber *diffuseTexCoordValue = diffuseTextureMap[@"texCoord"];
+                    if (diffuseTexCoordValue != nil) {
+                        material.baseColorTexCoord = diffuseTexCoordValue.integerValue;
+                    }
+                }
+
+                NSArray *diffuseFactorComponents = pbrSpecularGlossinessProperties[@"diffuseFactor"];
+                material.baseColorFactor = GLTFVectorFloat4FromArray(diffuseFactorComponents);
+                
+                NSNumber *glossinessFactorValue = pbrSpecularGlossinessProperties[@"glossinessFactor"];
+                material.glossinessFactor = (glossinessFactorValue != nil) ? glossinessFactorValue.floatValue : 0.0;
+
+                NSArray *specularFactorComponents = pbrSpecularGlossinessProperties[@"specularFactor"];
+                material.specularFactor = GLTFVectorFloat3FromArray(specularFactorComponents);
+            }
+        }
 
         [materials addObject: material];
     }
@@ -696,7 +765,9 @@ typedef struct {
         if (cameraIdentifierString) {
             NSUInteger cameraIndex = cameraIdentifierString.integerValue;
             if (cameraIndex < _cameras.count) {
-                node.camera = _cameras[cameraIndex];
+                GLTFCamera *camera = _cameras[cameraIndex];
+                node.camera = camera;
+                camera.referencingNodes = [camera.referencingNodes arrayByAddingObject:node];
             }
         }
 

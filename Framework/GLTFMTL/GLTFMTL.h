@@ -33,4 +33,3 @@ FOUNDATION_EXPORT const unsigned char GLTFMTLVersionString[];
 #import <GLTFMTL/GLTFMTLRenderer.h>
 #import <GLTFMTL/GLTFMTLShaderBuilder.h>
 #import <GLTFMTL/GLTFMTLUtilities.h>
-

@@ -17,7 +17,6 @@
 #include <metal_stdlib>
 using namespace metal;
 
-constant float pi = 3.141592653589793;
 constant float minRoughness = 0.04;
 
 constant int textureIndexBaseColor           = 0;
@@ -33,7 +32,8 @@ constant int textureIndexBRDFLookup          = 7;
 #define USE_PBR 1
 #define USE_IBL 1
 #define USE_VERTEX_SKINNING 1
-#define HAS_TEXCOORDS 1
+#define HAS_TEXCOORD_0 1
+#define HAS_TEXCOORD_1 1
 #define HAS_NORMALS 1
 #define HAS_TANGENTS 1
 #define HAS_BASE_COLOR_MAP 1
@@ -43,20 +43,28 @@ constant int textureIndexBRDFLookup          = 7;
 #define HAS_EMISSIVE_MAP 1
 #define SPECULAR_ENV_MAP_LOD_LEVELS 9
 
+#define baseColorTexCoord          texCoord0
+#define normalTexCoord             texCoord0
+#define metallicRoughnessTexCoord  texCoord0
+#define emissiveTexCoord           texCoord0
+#define occlusionTexCoord          texCoord0
+
 struct VertexIn {
     float3 position  [[attribute(0)]];
     float3 normal    [[attribute(1)]];
     float4 tangent   [[attribute(2)]];
-    float2 texCoords [[attribute(3)]];
-    float4 weights   [[attribute(4)]];
-    ushort4 joints   [[attribute(5)]];
+    float2 texCoord0 [[attribute(3)]];
+    float2 texCoord1 [[attribute(4)]];
+    float4 weights   [[attribute(5)]];
+    ushort4 joints   [[attribute(6)]];
 };
 /*%end_replace_decls%*/
 
 struct VertexOut {
     float4 position [[position]];
     float3 worldPosition;
-    float2 texCoords;
+    float2 texCoord0;
+    float2 texCoord1;
     float3 tangent;
     float3 bitangent;
     float3 normal;
@@ -99,7 +107,7 @@ vertex VertexOut vertex_main(VertexIn in [[stage_in]],
 #endif
 )
 {
-    VertexOut out;
+    VertexOut out = { 0 };
     
     float4x4 normalMatrix = uniforms.modelMatrix;
     
@@ -136,18 +144,20 @@ vertex VertexOut vertex_main(VertexIn in [[stage_in]],
         #endif
     #endif
 
-    #if HAS_TEXCOORDS
-        out.texCoords = in.texCoords;
-    #else
-        out.texCoords = float2(0);
+    #if HAS_TEXCOORD_0
+        out.texCoord0 = in.texCoord0;
     #endif
     
+    #if HAS_TEXCOORD_1
+        out.texCoord1 = in.texCoord1;
+    #endif
+
     return out;
 }
 
 static float3 diffuse(LightingParameters pbrInputs)
 {
-    return pbrInputs.baseColor / pi;
+    return pbrInputs.baseColor / M_PI_F;
 }
 
 static float3 fresnelReflectance(LightingParameters pbrInputs)
@@ -170,7 +180,7 @@ static float ndf(LightingParameters pbrInputs)
 {
     float roughnessSq = pbrInputs.alphaRoughness * pbrInputs.alphaRoughness;
     float f = (pbrInputs.NdotH * roughnessSq - pbrInputs.NdotH) * pbrInputs.NdotH + 1.0;
-    return roughnessSq / (pi * f * f);
+    return roughnessSq / (M_PI_F * f * f);
 }
 
 fragment float4 fragment_main(VertexOut in [[stage_in]],
@@ -205,8 +215,8 @@ fragment float4 fragment_main(VertexOut in [[stage_in]],
     #if !HAS_TANGENTS
         float3 pos_dx = dfdx(in.worldPosition);
         float3 pos_dy = dfdy(in.worldPosition);
-        float3 tex_dx = dfdx(float3(in.texCoords, 0));
-        float3 tex_dy = dfdy(float3(in.texCoords, 0));
+        float3 tex_dx = dfdx(float3(in.texCoord0, 0));
+        float3 tex_dy = dfdy(float3(in.texCoord0, 0));
         float3 t = (tex_dy.y * pos_dx - tex_dx.y * pos_dy) / (tex_dx.x * tex_dy.y - tex_dy.x * tex_dx.y);
         
         float3 ng(0);
@@ -224,7 +234,7 @@ fragment float4 fragment_main(VertexOut in [[stage_in]],
     
     float3 n(0);
     #if HAS_NORMAL_MAP
-        n = normalTexture.sample(normalSampler, in.texCoords).rgb;
+        n = normalTexture.sample(normalSampler, in.normalTexCoord).rgb;
         n = normalize(tbn * ((2 * n - 1) * float3(uniforms.normalScale, uniforms.normalScale, 1)));
     #else
         n = tbn[2].xyz;
@@ -245,7 +255,7 @@ fragment float4 fragment_main(VertexOut in [[stage_in]],
     float metallic = uniforms.metallicRoughnessValues.x;
     
     #if HAS_METALLIC_ROUGHNESS_MAP
-        float4 mrSample = metallicRoughnessTexture.sample(metallicRoughnessSampler, in.texCoords);
+        float4 mrSample = metallicRoughnessTexture.sample(metallicRoughnessSampler, in.metallicRoughnessTexCoord);
         perceptualRoughness = mrSample.g * perceptualRoughness;
         metallic = mrSample.b * metallic;
     #endif
@@ -255,7 +265,7 @@ fragment float4 fragment_main(VertexOut in [[stage_in]],
     
     float4 baseColor;
     #if HAS_BASE_COLOR_MAP
-    baseColor = baseColorTexture.sample(baseColorSampler, in.texCoords) * uniforms.baseColorFactor;
+        baseColor = baseColorTexture.sample(baseColorSampler, in.baseColorTexCoord) * uniforms.baseColorFactor;
     #else
         baseColor = uniforms.baseColorFactor;
     #endif
@@ -309,7 +319,7 @@ fragment float4 fragment_main(VertexOut in [[stage_in]],
         float lod = perceptualRoughness * mipCount;
         float3 brdf = brdfLUT.sample(linearSampler, float2(NdotV, perceptualRoughness)).rgb;
         float3 diffuseLight = diffuseEnvTexture.sample(linearSampler, n).rgb;
-        
+    
         float3 specularLight;
         if (mipCount > 1) {
             specularLight = specularEnvTexture.sample(linearSampler, reflection, level(lod)).rgb;
@@ -326,12 +336,12 @@ fragment float4 fragment_main(VertexOut in [[stage_in]],
     #endif
     
     #if HAS_OCCLUSION_MAP
-        float ao = occlusionTexture.sample(occlusionSampler, in.texCoords).r;
+        float ao = occlusionTexture.sample(occlusionSampler, in.occlusionTexCoord).r;
         color = mix(color, color * ao, uniforms.occlusionStrength);
     #endif
     
     #if HAS_EMISSIVE_MAP
-        float3 emissive = emissiveTexture.sample(emissiveSampler, in.texCoords).rgb * uniforms.emissiveFactor;
+        float3 emissive = emissiveTexture.sample(emissiveSampler, in.emissiveTexCoord).rgb * uniforms.emissiveFactor;
         color += emissive;
     #else
         color += uniforms.emissiveFactor;

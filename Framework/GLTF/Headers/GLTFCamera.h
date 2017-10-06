@@ -19,6 +19,8 @@
 
 @import simd;
 
+@class GLTFNode;
+
 @interface GLTFCamera : GLTFObject
 @property (nonatomic, assign) GLTFCameraType cameraType;
 
@@ -30,6 +32,8 @@
 @property (nonatomic, assign) float zfar;
 
 @property (nonatomic, assign) matrix_float4x4 projectionMatrix;
+
+@property (nonatomic, copy) NSArray<GLTFNode *> *referencingNodes;
 
 - (void)buildProjectionMatrix;
 

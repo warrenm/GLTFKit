@@ -28,6 +28,7 @@
 @property (nonatomic, assign) CGSize drawableSize;
 
 @property (nonatomic, assign) matrix_float4x4 viewMatrix;
+@property (nonatomic, assign) matrix_float4x4 projectionMatrix;
 
 @property (nonatomic, assign) MTLPixelFormat colorPixelFormat;
 @property (nonatomic, assign) MTLPixelFormat depthStencilPixelFormat;

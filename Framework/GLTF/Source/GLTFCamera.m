@@ -18,16 +18,36 @@
 
 @implementation GLTFCamera
 
+- (instancetype)init {
+    if ((self = [super init])) {
+        _referencingNodes = @[];
+    }
+    return self;
+}
+
 - (void)buildProjectionMatrix {
-    // TODO: actually compute these
     switch (_cameraType) {
-        case GLTFCameraTypeOrthographic:
-            _projectionMatrix = matrix_identity_float4x4;
+        case GLTFCameraTypeOrthographic: {
+            vector_float4 X = (vector_float4){ 1 / _xmag, 0, 0, 0 };
+            vector_float4 Y = (vector_float4){ 0, 1 / _ymag, 0, 0 };
+            vector_float4 Z = (vector_float4){ 0, 0, 2 / (_znear - _zfar), 0 };
+            vector_float4 W = (vector_float4){ 0, 0, (_zfar + _znear) / (_znear - _zfar), 1 };
+            _projectionMatrix = (matrix_float4x4){ { X, Y, Z, W } };
             break;
+        }
         case GLTFCameraTypePerspective:
-        default:
-            _projectionMatrix = matrix_identity_float4x4;
+        default: {
+            vector_float4 X = (vector_float4){ 1 / (_aspectRatio * tanf(0.5 * _yfov)), 0, 0, 0 };
+            vector_float4 Y = (vector_float4){ 0, 1 / tanf(0.5 * _yfov), 0, 0 };
+            vector_float4 Z = (vector_float4){ 0, 0, -1, -1 };
+            vector_float4 W = (vector_float4){ 0, 0, -2 * _znear, 0 };
+            if (_zfar != FLT_MAX) {
+                Z = (vector_float4){ 0, 0, (_zfar + _znear) / (_znear - _zfar), -1 };
+                W = (vector_float4){ 0, 0, (2 * _zfar * _znear) / (_znear - _zfar), 0 };
+            }
+            _projectionMatrix = (matrix_float4x4){ { X, Y, Z, W } };
             break;
+        }
     }
 }
 

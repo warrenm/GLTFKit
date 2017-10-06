@@ -34,11 +34,20 @@ typedef NS_ENUM(NSInteger, GLTFAlphaMode) {
 @property (nonatomic, assign) float normalTextureScale;
 @property (nonatomic, assign) vector_float3 emissiveFactor;
 
+@property (nonatomic, assign) float glossinessFactor; // Only used by KHR_materials_pbrSpecularGlossiness extension
+@property (nonatomic, assign) vector_float3 specularFactor; // Only used by KHR_materials_pbrSpecularGlossiness extension
+
 @property (nonatomic, strong) GLTFTexture *baseColorTexture;
 @property (nonatomic, strong) GLTFTexture *metallicRoughnessTexture;
 @property (nonatomic, strong) GLTFTexture *normalTexture;
 @property (nonatomic, strong) GLTFTexture *emissiveTexture;
 @property (nonatomic, strong) GLTFTexture *occlusionTexture;
+
+@property (nonatomic, assign) NSInteger baseColorTexCoord;
+@property (nonatomic, assign) NSInteger metallicRoughnessTexCoord;
+@property (nonatomic, assign) NSInteger normalTexCoord;
+@property (nonatomic, assign) NSInteger emissiveTexCoord;
+@property (nonatomic, assign) NSInteger occlusionTexCoord;
 
 @property (nonatomic, assign, getter=isDoubleSided) BOOL doubleSided;
 
