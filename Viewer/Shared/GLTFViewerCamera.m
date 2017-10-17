@@ -14,22 +14,47 @@
 //  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 //
 
-#import <MetalKit/MetalKit.h>
+#import "GLTFViewerCamera.h"
 
-#if TARGET_OS_OSX
-#import <Cocoa/Cocoa.h>
-typedef NSViewController NSUIViewController;
-#else
-#import <UIKit/UIKit.h>
-typedef UIViewController NSUIViewController;
-#endif
+@implementation GLTFViewerCamera
 
-#import <GLTFMTL/GLTFMTL.h>
+- (instancetype)init {
+    if ((self = [super init])) {
+        _keysDown = malloc(UINT16_MAX + 1);
+        memset(_keysDown, 0, UINT16_MAX + 1);
+    }
+    return self;
+}
 
-@interface GLTFViewerViewController : NSUIViewController <MTKViewDelegate>
+- (void)dealloc {
+    free(_keysDown);
+}
 
-@property (nonatomic, strong) GLTFMTLLightingEnvironment *lightingEnvironment;
+- (simd_float4x4)viewMatrix {
+    return matrix_identity_float4x4;
+}
 
-@property (nonatomic, strong) GLTFAsset *asset;
+- (void)keyDown:(NSEvent *)event {
+    self.keysDown[event.keyCode] = YES;
+}
+
+- (void)keyUp:(NSEvent *)event {
+    self.keysDown[event.keyCode] = NO;
+}
+
+- (void)mouseDown:(NSEvent *)event {
+}
+
+- (void)mouseDragged:(NSEvent *)event {
+}
+
+- (void)mouseUp:(NSEvent *)event {
+}
+
+- (void)scrollWheel:(NSEvent *)event {
+}
+
+- (void)updateWithTimestep:(NSTimeInterval)timestep {
+}
 
 @end

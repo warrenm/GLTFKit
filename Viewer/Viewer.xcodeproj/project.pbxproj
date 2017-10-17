@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		834168101F8D70210052E7FE /* GLTFViewerOrbitCamera.m in Sources */ = {isa = PBXBuildFile; fileRef = 8341680F1F8D70210052E7FE /* GLTFViewerOrbitCamera.m */; };
+		834168131F8D70730052E7FE /* GLTFViewerFirstPersonCamera.m in Sources */ = {isa = PBXBuildFile; fileRef = 834168121F8D70730052E7FE /* GLTFViewerFirstPersonCamera.m */; };
 		83717B1C1F4FD343007F8BE8 /* output_pmrem_4.png in Resources */ = {isa = PBXBuildFile; fileRef = 83717B141F4FD343007F8BE8 /* output_pmrem_4.png */; };
 		83717B1D1F4FD343007F8BE8 /* output_pmrem_5.png in Resources */ = {isa = PBXBuildFile; fileRef = 83717B151F4FD343007F8BE8 /* output_pmrem_5.png */; };
 		83717B1E1F4FD343007F8BE8 /* output_pmrem_1.png in Resources */ = {isa = PBXBuildFile; fileRef = 83717B161F4FD343007F8BE8 /* output_pmrem_1.png */; };
@@ -29,6 +31,7 @@
 		839945CE1F64344400642E68 /* pbr.metal in Sources */ = {isa = PBXBuildFile; fileRef = 83D6007A1F48C78200F71E0C /* pbr.metal */; };
 		839945D01F654E3E00642E68 /* skybox.metal in Sources */ = {isa = PBXBuildFile; fileRef = 839945CF1F654E3E00642E68 /* skybox.metal */; };
 		839945D11F654E3E00642E68 /* skybox.metal in Sources */ = {isa = PBXBuildFile; fileRef = 839945CF1F654E3E00642E68 /* skybox.metal */; };
+		83A6C51B1F88208E0095A4DC /* GLTFViewerCamera.m in Sources */ = {isa = PBXBuildFile; fileRef = 83A6C51A1F88208E0095A4DC /* GLTFViewerCamera.m */; };
 		83D6000B1F48BECB00F71E0C /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 83D600091F48BECB00F71E0C /* Main.storyboard */; };
 		83D6000D1F48BECB00F71E0C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 83D6000C1F48BECB00F71E0C /* Assets.xcassets */; };
 		83D600101F48BECB00F71E0C /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 83D6000E1F48BECB00F71E0C /* LaunchScreen.storyboard */; };
@@ -88,6 +91,10 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		8341680E1F8D70210052E7FE /* GLTFViewerOrbitCamera.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = GLTFViewerOrbitCamera.h; path = Shared/GLTFViewerOrbitCamera.h; sourceTree = "<group>"; };
+		8341680F1F8D70210052E7FE /* GLTFViewerOrbitCamera.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = GLTFViewerOrbitCamera.m; path = Shared/GLTFViewerOrbitCamera.m; sourceTree = "<group>"; };
+		834168111F8D70730052E7FE /* GLTFViewerFirstPersonCamera.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = GLTFViewerFirstPersonCamera.h; path = Shared/GLTFViewerFirstPersonCamera.h; sourceTree = "<group>"; };
+		834168121F8D70730052E7FE /* GLTFViewerFirstPersonCamera.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = GLTFViewerFirstPersonCamera.m; path = Shared/GLTFViewerFirstPersonCamera.m; sourceTree = "<group>"; };
 		83717B141F4FD343007F8BE8 /* output_pmrem_4.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = output_pmrem_4.png; sourceTree = "<group>"; };
 		83717B151F4FD343007F8BE8 /* output_pmrem_5.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = output_pmrem_5.png; sourceTree = "<group>"; };
 		83717B161F4FD343007F8BE8 /* output_pmrem_1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = output_pmrem_1.png; sourceTree = "<group>"; };
@@ -106,6 +113,9 @@
 		83850FC91F4A616E00F9A444 /* GLTFDocument.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = GLTFDocument.m; sourceTree = "<group>"; };
 		83850FF61F4A714600F9A444 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Main.storyboard; sourceTree = "<group>"; };
 		839945CF1F654E3E00642E68 /* skybox.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = skybox.metal; sourceTree = "<group>"; };
+		83A6C5191F88208E0095A4DC /* GLTFViewerCamera.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = GLTFViewerCamera.h; path = Shared/GLTFViewerCamera.h; sourceTree = "<group>"; };
+		83A6C51A1F88208E0095A4DC /* GLTFViewerCamera.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = GLTFViewerCamera.m; path = Shared/GLTFViewerCamera.m; sourceTree = "<group>"; };
+		83A6C51C1F882DA40095A4DC /* HIToolboxEvents.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = HIToolboxEvents.h; path = Shared/HIToolboxEvents.h; sourceTree = "<group>"; };
 		83D600011F48BECB00F71E0C /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		83D6000A1F48BECB00F71E0C /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		83D6000C1F48BECB00F71E0C /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -141,6 +151,19 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		834168141F8D71A90052E7FE /* Cameras */ = {
+			isa = PBXGroup;
+			children = (
+				83A6C5191F88208E0095A4DC /* GLTFViewerCamera.h */,
+				83A6C51A1F88208E0095A4DC /* GLTFViewerCamera.m */,
+				8341680E1F8D70210052E7FE /* GLTFViewerOrbitCamera.h */,
+				8341680F1F8D70210052E7FE /* GLTFViewerOrbitCamera.m */,
+				834168111F8D70730052E7FE /* GLTFViewerFirstPersonCamera.h */,
+				834168121F8D70730052E7FE /* GLTFViewerFirstPersonCamera.m */,
+			);
+			name = Cameras;
+			sourceTree = "<group>";
+		};
 		83850FB91F4A5C5C00F9A444 /* macOS */ = {
 			isa = PBXGroup;
 			children = (
@@ -165,6 +188,8 @@
 		83D600151F48BED700F71E0C /* Shared */ = {
 			isa = PBXGroup;
 			children = (
+				834168141F8D71A90052E7FE /* Cameras */,
+				83A6C51C1F882DA40095A4DC /* HIToolboxEvents.h */,
 				83850FC61F4A5F2600F9A444 /* GLTFViewerViewController.h */,
 				83850FC51F4A5F2600F9A444 /* GLTFViewerViewController.m */,
 			);
@@ -373,10 +398,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				839945D01F654E3E00642E68 /* skybox.metal in Sources */,
+				83A6C51B1F88208E0095A4DC /* GLTFViewerCamera.m in Sources */,
 				839945CE1F64344400642E68 /* pbr.metal in Sources */,
+				834168101F8D70210052E7FE /* GLTFViewerOrbitCamera.m in Sources */,
 				83850FC71F4A5F4D00F9A444 /* GLTFViewerViewController.m in Sources */,
 				83850FCA1F4A616E00F9A444 /* GLTFDocument.m in Sources */,
 				83850FC21F4A5E8F00F9A444 /* main.m in Sources */,
+				834168131F8D70730052E7FE /* GLTFViewerFirstPersonCamera.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -112,7 +112,7 @@ Below is a checklist of glTF features and their current level of support.
 - [x] NORMAL
 - [x] TANGENT
 - [x] TEXCOORD_0
-- [ ] TEXCOORD_1
+- [x] TEXCOORD_1
 - [ ] COLOR_0
 - [x] JOINTS_0
 - [x] WEIGHTS_0
@@ -145,7 +145,6 @@ Below is a checklist of glTF features and their current level of support.
 - [x] Occlusion map
 - [x] Emissive map
 - [ ] Normal texture scale
-- [ ] Normal texture coordinate set selection
 - [ ] Alpha mode
 	- [x] Opaque alpha mode
 	- [ ] Mask alpha mode
@@ -154,12 +153,12 @@ Below is a checklist of glTF features and their current level of support.
 
 #### Samplers
 - [x] Wrap mode
-- [ ] Minification/magnification filters
+- [x] Minification/magnification filters
 - [ ] Mipmaps
 
 #### Cameras
-- [ ] Perspective cameras
-- [ ] Orthographic cameras
+- [x] Perspective cameras
+- [x] Orthographic cameras
 
 #### Morph Targets
 - [ ] Morph targets

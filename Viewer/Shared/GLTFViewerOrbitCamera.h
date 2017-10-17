@@ -14,22 +14,8 @@
 //  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 //
 
-#import <MetalKit/MetalKit.h>
+#import "GLTFViewerCamera.h"
 
-#if TARGET_OS_OSX
-#import <Cocoa/Cocoa.h>
-typedef NSViewController NSUIViewController;
-#else
-#import <UIKit/UIKit.h>
-typedef UIViewController NSUIViewController;
-#endif
-
-#import <GLTFMTL/GLTFMTL.h>
-
-@interface GLTFViewerViewController : NSUIViewController <MTKViewDelegate>
-
-@property (nonatomic, strong) GLTFMTLLightingEnvironment *lightingEnvironment;
-
-@property (nonatomic, strong) GLTFAsset *asset;
+@interface GLTFViewerOrbitCamera : GLTFViewerCamera
 
 @end

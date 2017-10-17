@@ -14,22 +14,23 @@
 //  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 //
 
-#import <MetalKit/MetalKit.h>
-
-#if TARGET_OS_OSX
 #import <Cocoa/Cocoa.h>
-typedef NSViewController NSUIViewController;
-#else
-#import <UIKit/UIKit.h>
-typedef UIViewController NSUIViewController;
-#endif
+@import simd;
 
-#import <GLTFMTL/GLTFMTL.h>
+@interface GLTFViewerCamera: NSObject
 
-@interface GLTFViewerViewController : NSUIViewController <MTKViewDelegate>
+@property (nonatomic, readonly, assign) simd_float4x4 viewMatrix;
 
-@property (nonatomic, strong) GLTFMTLLightingEnvironment *lightingEnvironment;
+@property (nonatomic, readonly, assign) BOOL *keysDown;
 
-@property (nonatomic, strong) GLTFAsset *asset;
+- (void)updateWithTimestep:(NSTimeInterval)timestep;
+
+- (void)mouseDown:(NSEvent *)event;
+- (void)mouseDragged:(NSEvent *)event;
+- (void)mouseUp:(NSEvent *)event;
+- (void)scrollWheel:(NSEvent *)event;
+- (void)keyDown:(NSEvent *)event;
+- (void)keyUp:(NSEvent *)event;
 
 @end
+

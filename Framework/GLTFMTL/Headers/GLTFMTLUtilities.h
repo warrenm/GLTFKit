@@ -52,11 +52,11 @@ extern NSString *GLTFMTLTypeNameForType(GLTFDataType baseType, GLTFDataDimension
 
 extern MTLVertexFormat GLTFMTLVertexFormatForComponentTypeAndDimension(GLTFDataType baseType, GLTFDataDimension dimension);
 
-extern matrix_float4x4 GLTFMatrixFromTranslation(float x, float y, float z);
-
-extern matrix_float4x4 GLTFMatrixFromUniformScale(float s);
-
-extern matrix_float4x4 GLTFMatrixFromRotationAxisAngle(float radians, float x, float y, float z);
+//extern matrix_float4x4 GLTFMatrixFromTranslation(float x, float y, float z);
+//
+//extern matrix_float4x4 GLTFMatrixFromUniformScale(float s);
+//
+//extern matrix_float4x4 GLTFMatrixFromRotationAxisAngle(float radians, float x, float y, float z);
 
 extern matrix_float3x3 GLTFMatrixUpperLeft3x3(matrix_float4x4 m);
 

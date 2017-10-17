@@ -39,7 +39,21 @@ extern GLTFBoundingSphere GLTFBoundingSphereFromBox(const GLTFBoundingBox b);
 
 extern void GLTFAxisAngleFromQuaternion(vector_float4 q, vector_float3 *outAxis, float *outAngle);
 
+extern simd_float4 GLTFQuaternionMultiply(vector_float4 q, vector_float4 r);
+
+extern vector_float4 GLTFQuaternionFromEulerAngles(float pitch, float yaw, float roll);
+
+extern matrix_float4x4 GLTFRotationMatrixFromQuaternion(vector_float4 q);
+
+extern matrix_float4x4 GLTFMatrixFromUniformScale(float s);
+
+extern matrix_float4x4 GLTFMatrixFromTranslation(float x, float y, float z);
+
 extern matrix_float4x4 GLTFRotationMatrixFromAxisAngle(vector_float3 axis, float angle);
+
+extern vector_float3 GLTFAxisX;
+extern vector_float3 GLTFAxisY;
+extern vector_float3 GLTFAxisZ;
 
 extern GLTFDataDimension GLTFDataDimensionForName(NSString *name);
 

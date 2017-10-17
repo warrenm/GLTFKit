@@ -100,6 +100,56 @@ void GLTFAxisAngleFromQuaternion(vector_float4 q, vector_float3 *outAxis, float 
     }
 }
 
+simd_float4 GLTFQuaternionMultiply(vector_float4 q, vector_float4 r) {
+    float w = r.w*q.w - r.x*q.x - r.y*q.y - r.z*q.z;
+    float x = r.w*q.x + r.x*q.w - r.y*q.z + r.z*q.y;
+    float y = r.w*q.y + r.x*q.z + r.y*q.w - r.z*q.x;
+    float z = r.w*q.z - r.x*q.y + r.y*q.x + r.z*q.w;
+    return (simd_float4){ x, y, z, w };
+}
+
+matrix_float4x4 GLTFRotationMatrixFromQuaternion(vector_float4 q) {
+    return (matrix_float4x4){{
+        { 1 - 2*q.y*q.y - 2*q.z*q.z,     2*q.x*q.y - 2*q.z*q.w,     2*q.x*q.z + 2*q.y*q.w, 0 },
+        {     2*q.x*q.y + 2*q.z*q.w, 1 - 2*q.x*q.x - 2*q.z*q.z,     2*q.y*q.z - 2*q.x*q.w, 0 },
+        {     2*q.x*q.z - 2*q.y*q.w,     2*q.y*q.z + 2*q.x*q.w, 1 - 2*q.x*q.x - 2*q.y*q.y, 0 },
+        {                         0,                         0,                         0, 1 }
+    }};
+}
+
+vector_float4 GLTFQuaternionFromEulerAngles(float pitch, float yaw, float roll) {
+    float cx = cos(pitch / 2);
+    float sx = sin(pitch / 2);
+    float cy = cos(yaw / 2);
+    float sy = sin(yaw / 2);
+    float cz = cos(roll / 2);
+    float sz = sin(roll / 2);
+    
+    vector_float4 q = (vector_float4){
+        sx*cy*cz + cx*sy*sz,
+        cx*sy*cz + sx*cy*sz,
+        cx*cy*sz - sx*sy*cz,
+        cx*cy*cz - sx*sy*sz
+    };
+    return q;
+}
+
+matrix_float4x4 GLTFMatrixFromUniformScale(float s)
+{
+    matrix_float4x4 m = matrix_identity_float4x4;
+    m.columns[0].x = s;
+    m.columns[1].y = s;
+    m.columns[2].z = s;
+    return m;
+}
+
+matrix_float4x4 GLTFMatrixFromTranslation(float x, float y, float z)
+{
+    matrix_float4x4 m = matrix_identity_float4x4;
+    m.columns[3] = (vector_float4) { x, y, z, 1.0 };
+    return m;
+}
+
 matrix_float4x4 GLTFRotationMatrixFromAxisAngle(vector_float3 axis, float angle) {
     float x = axis.x, y = axis.y, z = axis.z;
     float c = cosf(angle);
@@ -112,6 +162,40 @@ matrix_float4x4 GLTFRotationMatrixFromAxisAngle(vector_float3 axis, float angle)
     vector_float4 c3 = {                 0,                 0,             0,     1 };
     
     return (matrix_float4x4){ c0, c1, c2, c3 };
+}
+
+vector_float3 GLTFAxisX = (vector_float3){ 1, 0, 0 };
+vector_float3 GLTFAxisY = (vector_float3){ 0, 1, 0 };
+vector_float3 GLTFAxisZ = (vector_float3){ 0, 0, 1 };
+
+matrix_float3x3 GLTFMatrixUpperLeft3x3(matrix_float4x4 m) {
+    matrix_float3x3 mout = { {
+        { m.columns[0][0], m.columns[0][1], m.columns[0][2] },
+        { m.columns[1][0], m.columns[1][1], m.columns[1][2] },
+        { m.columns[2][0], m.columns[2][1], m.columns[2][2] }
+    } };
+    return mout;
+}
+
+matrix_float3x3 GLTFNormalMatrixFromModelMatrix(matrix_float4x4 m) {
+    matrix_float3x3 mout = GLTFMatrixUpperLeft3x3(m);
+    return matrix_invert(matrix_transpose(mout));
+}
+
+matrix_float4x4 GLTFPerspectiveProjectionMatrixAspectFovRH(const float fovY, const float aspect, const float nearZ, const float farZ)
+{
+    float yscale = 1 / tanf(fovY * 0.5f); // 1 / tan == cot
+    float xscale = yscale / aspect;
+    float q = -farZ / (farZ - nearZ);
+    
+    matrix_float4x4 m = {
+        .columns[0] = { xscale, 0, 0, 0 },
+        .columns[1] = { 0, yscale, 0, 0 },
+        .columns[2] = { 0, 0, q, -1 },
+        .columns[3] = { 0, 0, q * nearZ, 0 }
+    };
+    
+    return m;
 }
 
 GLTFDataDimension GLTFDataDimensionForName(NSString *name) {

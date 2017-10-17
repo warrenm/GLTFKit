@@ -15,15 +15,9 @@
 //
 
 #import "GLTFViewerViewController.h"
+#import "GLTFViewerFirstPersonCamera.h"
 
 @import simd;
-
-const CGFloat GLTFViewerDefaultCameraDistance = 2;
-const CGFloat GLTFViewerZoomDrag = 0.95;
-
-const CGFloat GLTFViewerRotationDrag = 0.95;
-const CGFloat GLTFViewerRotationScaleFactor = 0.0033;
-const CGFloat GLTFViewerRotationMomentumScaleFactor = 0.2;
 
 @interface GLTFViewerViewController ()
 @property (nonatomic, weak) MTKView *metalView;
@@ -36,18 +30,8 @@ const CGFloat GLTFViewerRotationMomentumScaleFactor = 0.2;
 @property (nonatomic, strong) GLTFMTLRenderer *renderer;
 @property (nonatomic, strong) id<GLTFBufferAllocator> bufferAllocator;
 
+@property (nonatomic, strong) GLTFViewerCamera *camera;
 @property (nonatomic, assign) matrix_float4x4 regularizationMatrix;
-
-@property (nonatomic, assign) CGPoint cursorPosition;
-@property (nonatomic, assign) CGVector cursorVelocity;
-@property (nonatomic, assign) CGFloat azimuthalAngle;
-@property (nonatomic, assign) CGFloat azimuthalVelocity;
-
-@property (nonatomic, assign) CGFloat cameraDistance;
-@property (nonatomic, assign) CGFloat cameraVelocity;
-@property (nonatomic, assign) CGFloat zoomVelocity;
-
-@property (nonatomic, assign) NSInteger lastCameraIndex;
 
 @property (nonatomic, assign) NSTimeInterval globalTime;
 
@@ -74,8 +58,7 @@ const CGFloat GLTFViewerRotationMomentumScaleFactor = 0.2;
     self.commandQueue = [self.device newCommandQueue];
 }
 
-- (void)setupView
-{
+- (void)setupView {
     self.metalView = (MTKView *)self.view;
     self.metalView.delegate = self;
     self.metalView.device = self.device;
@@ -84,7 +67,7 @@ const CGFloat GLTFViewerRotationMomentumScaleFactor = 0.2;
     self.metalView.clearColor = MTLClearColorMake(0.5, 0.5, 0.5, 1.0);
     self.metalView.depthStencilPixelFormat = MTLPixelFormatDepth32Float_Stencil8;
     
-    self.cameraDistance = GLTFViewerDefaultCameraDistance;
+    self.camera = [GLTFViewerFirstPersonCamera new];
 }
 
 - (void)setupRenderer {
@@ -161,72 +144,43 @@ const CGFloat GLTFViewerRotationMomentumScaleFactor = 0.2;
 }
 
 - (void)computeTransforms {
-    self.viewMatrix = matrix_multiply(GLTFMatrixFromTranslation(0, 0, -self.cameraDistance), GLTFMatrixFromRotationAxisAngle(self.azimuthalAngle, 0, 1, 0));
+    self.viewMatrix = matrix_multiply(self.camera.viewMatrix, self.regularizationMatrix);
 
-    if (_lastCameraIndex >= 0 && _lastCameraIndex < self.asset.cameras.count) {
-        GLTFCamera *camera = self.asset.cameras[_lastCameraIndex];
-        if (camera.referencingNodes.count > 0) {
-            GLTFNode *cameraNode = camera.referencingNodes.firstObject;
-            self.viewMatrix = matrix_invert(cameraNode.globalTransform);
-        }
-    }
+//    if (_lastCameraIndex >= 0 && _lastCameraIndex < self.asset.cameras.count) {
+//        GLTFCamera *camera = self.asset.cameras[_lastCameraIndex];
+//        if (camera.referencingNodes.count > 0) {
+//            GLTFNode *cameraNode = camera.referencingNodes.firstObject;
+//            self.viewMatrix = matrix_invert(cameraNode.globalTransform);
+//        }
+//    }
     
     float aspectRatio = self.renderer.drawableSize.width / self.renderer.drawableSize.height;
     self.projectionMatrix = GLTFPerspectiveProjectionMatrixAspectFovRH(M_PI / 4, aspectRatio, 0.1, 1000);
 }
 
-- (void)mouseDown:(NSEvent *)event {
-    self.cursorPosition = [event locationInWindow];
-    self.cursorVelocity = CGVectorMake(0, 0);
-}
-
-- (void)mouseDragged:(NSEvent *)event {
-    NSPoint currentCursorPosition = [event locationInWindow];
-    self.cursorVelocity = CGVectorMake(self.cursorPosition.x - currentCursorPosition.x, self.cursorPosition.y - currentCursorPosition.y);
-    
-    self.azimuthalAngle += GLTFViewerRotationScaleFactor * -self.cursorVelocity.dx;
-    self.cursorPosition = currentCursorPosition;
-}
-
-- (void)mouseUp:(NSEvent *)event {
-    self.azimuthalVelocity = GLTFViewerRotationMomentumScaleFactor * -self.cursorVelocity.dx;
-}
-
-- (void)scrollWheel:(NSEvent *)event {
-    self.cameraVelocity = 2 * event.deltaY;
-}
-
-- (void)keyDown:(NSEvent *)event {
-    switch (event.keyCode) {
-        case 29: _lastCameraIndex = 0; break;
-        case 18: _lastCameraIndex = 1; break;
-        case 19: _lastCameraIndex = 2; break;
-        case 20: _lastCameraIndex = 3; break;
-        case 21: _lastCameraIndex = 4; break;
-        case 23: _lastCameraIndex = 5; break;
-        case 22: _lastCameraIndex = 6; break;
-        case 26: _lastCameraIndex = 7; break;
-        case 28: _lastCameraIndex = 8; break;
-        case 25: _lastCameraIndex = 9; break;
-        default: _lastCameraIndex = -1; break;
-    }
-}
+//- (void)keyDown:(NSEvent *)event {
+//    switch (event.keyCode) {
+//        case 29: _lastCameraIndex = 0; break;
+//        case 18: _lastCameraIndex = 1; break;
+//        case 19: _lastCameraIndex = 2; break;
+//        case 20: _lastCameraIndex = 3; break;
+//        case 21: _lastCameraIndex = 4; break;
+//        case 23: _lastCameraIndex = 5; break;
+//        case 22: _lastCameraIndex = 6; break;
+//        case 26: _lastCameraIndex = 7; break;
+//        case 28: _lastCameraIndex = 8; break;
+//        case 25: _lastCameraIndex = 9; break;
+//        default: _lastCameraIndex = -1; break;
+//    }
+//}
 
 - (void)updateWithTimestep:(NSTimeInterval)timestep {
     self.globalTime += timestep;
-    
-    self.azimuthalAngle += self.azimuthalVelocity * timestep;
-    self.azimuthalVelocity = self.azimuthalVelocity * GLTFViewerRotationDrag;
-    
-    self.cameraDistance += self.cameraVelocity * timestep;
-    self.cameraVelocity = self.cameraVelocity * GLTFViewerZoomDrag;
-    
-    [self computeTransforms];
-    [self.asset runAnimationsAtTime:self.globalTime];
-}
 
-- (void)mtkView:(MTKView *)view drawableSizeWillChange:(CGSize)size {
-    self.renderer.drawableSize = size;
+    [self.asset runAnimationsAtTime:self.globalTime];
+
+    [self.camera updateWithTimestep:timestep];
+    [self computeTransforms];
 }
 
 - (void)drawSkyboxWithCommandEncoder:(id<MTLRenderCommandEncoder>)renderEncoder {
@@ -291,7 +245,38 @@ const CGFloat GLTFViewerRotationMomentumScaleFactor = 0.2;
     [renderEncoder setFragmentTexture:self.lightingEnvironment.specularCube atIndex:0];
     [renderEncoder drawPrimitives:MTLPrimitiveTypeTriangle vertexStart:0 vertexCount:36];
     [renderEncoder setCullMode:MTLCullModeNone];
-    
+}
+
+// MARK: - NSResponder
+
+- (void)mouseDown:(NSEvent *)event {
+    [self.camera mouseDown:event];
+}
+
+- (void)mouseDragged:(NSEvent *)event {
+    [self.camera mouseDragged:event];
+}
+
+- (void)mouseUp:(NSEvent *)event {
+    [self.camera mouseUp:event];
+}
+
+- (void)scrollWheel:(NSEvent *)event {
+    [self.camera scrollWheel:event];
+}
+
+- (void)keyDown:(NSEvent *)event {
+    [self.camera keyDown:event];
+}
+
+- (void)keyUp:(NSEvent *)event {
+    [self.camera keyUp:event];
+}
+
+// MARK: - MTKViewDelegate
+
+- (void)mtkView:(MTKView *)view drawableSizeWillChange:(CGSize)size {
+    self.renderer.drawableSize = size;
 }
 
 - (void)drawInMTKView:(MTKView *)view {
@@ -313,7 +298,7 @@ const CGFloat GLTFViewerRotationMomentumScaleFactor = 0.2;
         
         [renderEncoder pushDebugGroup:@"Draw glTF Scene"];
         [self.renderer renderScene:self.asset.defaultScene
-                       modelMatrix:self.regularizationMatrix // TODO: Use identity here instead when using an asset-provided camera
+                       modelMatrix:matrix_identity_float4x4
                      commandBuffer:commandBuffer
                     commandEncoder:renderEncoder];
         [renderEncoder popDebugGroup];

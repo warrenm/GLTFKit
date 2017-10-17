@@ -358,8 +358,12 @@ struct FragmentUniforms {
                                         offset:accessor.offset + accessor.bufferView.offset
                                        atIndex:i];
             }
-            
-            [renderEncoder setDepthStencilState:[self depthStencilStateForDepthWriteEnabled:YES depthTestEnabled:YES compareFunction:MTLCompareFunctionLess]];
+
+            // TODO: Disable depth-write when drawing translucent meshes
+            id<MTLDepthStencilState> depthStencilState = [self depthStencilStateForDepthWriteEnabled:YES
+                                                                                    depthTestEnabled:YES
+                                                                                     compareFunction:MTLCompareFunctionLess];
+            [renderEncoder setDepthStencilState:depthStencilState];
             
             [renderEncoder setCullMode:MTLCullModeBack];
             
