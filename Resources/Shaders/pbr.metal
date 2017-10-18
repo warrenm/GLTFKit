@@ -31,6 +31,7 @@ constant int textureIndexBRDFLookup          = 7;
 /*%begin_replace_decls%*/
 #define USE_PBR 1
 #define USE_IBL 1
+#define USE_ALPHA_TEST 0
 #define USE_VERTEX_SKINNING 1
 #define HAS_TEXCOORD_0 1
 #define HAS_TEXCOORD_1 1
@@ -84,6 +85,7 @@ struct FragmentUniforms {
     float2 metallicRoughnessValues;
     float4 baseColorFactor;
     float3 camera;
+    float alphaCutoff;
 };
 
 struct LightingParameters {
@@ -345,6 +347,12 @@ fragment float4 fragment_main(VertexOut in [[stage_in]],
         color += emissive;
     #else
         color += uniforms.emissiveFactor;
+    #endif
+    
+    #if USE_ALPHA_TEST
+        if (baseColor.a < uniforms.alphaCutoff) {
+            discard_fragment();
+        }
     #endif
     
     return float4(color, baseColor.a);

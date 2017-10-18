@@ -113,10 +113,12 @@
     BOOL hasMetallicRoughnessMap = submesh.material.metallicRoughnessTexture != nil;
     BOOL hasSkinningData = submesh.accessorsForAttributes[GLTFAttributeSemanticJoints0] != nil &&
                            submesh.accessorsForAttributes[GLTFAttributeSemanticWeights0] != nil;
+    BOOL useAlphaTest = submesh.material.alphaMode == GLTFAlphaModeMask;
 
     NSMutableString *shaderFeatures = [NSMutableString string];
     [shaderFeatures appendFormat:@"#define USE_PBR %d\n", usePBR];
     [shaderFeatures appendFormat:@"#define USE_IBL %d\n", useIBL];
+    [shaderFeatures appendFormat:@"#define USE_ALPHA_TEST %d\n", useAlphaTest];
     [shaderFeatures appendFormat:@"#define USE_VERTEX_SKINNING %d\n", hasSkinningData];
     [shaderFeatures appendFormat:@"#define HAS_TEXCOORD_0 %d\n", hasTexCoord0];
     [shaderFeatures appendFormat:@"#define HAS_TEXCOORD_1 %d\n", hasTexCoord1];

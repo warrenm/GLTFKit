@@ -37,6 +37,7 @@ struct FragmentUniforms {
     vector_float2 metallicRoughnessValues;
     vector_float4 baseColorFactor;
     vector_float3 camera;
+    float alphaCutoff;
 };
 
 @interface GLTFMTLRenderer ()
@@ -338,6 +339,7 @@ struct FragmentUniforms {
             fragmentUniforms.metallicRoughnessValues = (vector_float2){ material.metalnessFactor, material.roughnessFactor };
             fragmentUniforms.baseColorFactor = material.baseColorFactor;
             fragmentUniforms.camera = cameraWorldPos;
+            fragmentUniforms.alphaCutoff = material.alphaCutoff;
             
             [renderEncoder setVertexBytes:&vertexUniforms length:sizeof(vertexUniforms) atIndex:GLTFVertexDescriptorMaxAttributeCount + 0];
             
