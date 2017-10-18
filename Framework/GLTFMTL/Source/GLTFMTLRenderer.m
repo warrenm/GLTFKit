@@ -210,7 +210,6 @@ struct FragmentUniforms {
 }
 
 - (void)renderScene:(GLTFScene *)scene
-        modelMatrix:(matrix_float4x4)modelMatrix
       commandBuffer:(id<MTLCommandBuffer>)commandBuffer
      commandEncoder:(id<MTLRenderCommandEncoder>)renderEncoder
 {
@@ -228,7 +227,7 @@ struct FragmentUniforms {
     
     for (GLTFNode *rootNode in scene.nodes) {
         [self renderNodeRecursive:rootNode
-                      modelMatrix:modelMatrix
+                      modelMatrix:matrix_identity_float4x4
              renderCommandEncoder:renderEncoder];
     }
 }

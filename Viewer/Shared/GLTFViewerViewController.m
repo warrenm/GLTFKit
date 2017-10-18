@@ -163,7 +163,7 @@
 //    }
     
     float aspectRatio = self.renderer.drawableSize.width / self.renderer.drawableSize.height;
-    self.projectionMatrix = GLTFPerspectiveProjectionMatrixAspectFovRH(M_PI / 4, aspectRatio, 0.1, 1000);
+    self.projectionMatrix = GLTFPerspectiveProjectionMatrixAspectFovRH(M_PI / 3, aspectRatio, 0.1, 1000);
 }
 
 //- (void)keyDown:(NSEvent *)event {
@@ -296,7 +296,7 @@
     
     [self updateWithTimestep:timestep];
     
-    id <MTLCommandBuffer> commandBuffer = [_commandQueue commandBuffer];
+    id <MTLCommandBuffer> commandBuffer = [self.commandQueue commandBuffer];
     
     MTLRenderPassDescriptor *renderPassDescriptor = self.metalView.currentRenderPassDescriptor;
     
@@ -310,14 +310,13 @@
         
         [renderEncoder pushDebugGroup:@"Draw glTF Scene"];
         [self.renderer renderScene:self.asset.defaultScene
-                       modelMatrix:matrix_identity_float4x4
                      commandBuffer:commandBuffer
                     commandEncoder:renderEncoder];
         [renderEncoder popDebugGroup];
         
         [renderEncoder endEncoding];
         
-        [commandBuffer presentDrawable:_metalView.currentDrawable];
+        [commandBuffer presentDrawable:self.metalView.currentDrawable];
     }
     
     [commandBuffer addCompletedHandler:^(id<MTLCommandBuffer> buffer) {

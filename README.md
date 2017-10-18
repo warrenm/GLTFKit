@@ -73,7 +73,6 @@ id <MTLRenderCommandEncoder> renderEncoder = [commandBuffer renderCommandEncoder
 // ... additional command encoder configuration and draw calls ...
 
 [renderer renderScene:asset.defaultScene
-          modelMatrix:matrix_float4x4_identity
         commandBuffer:commandBuffer
        commandEncoder:renderEncoder];
 

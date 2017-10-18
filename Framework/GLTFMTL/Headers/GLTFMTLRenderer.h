@@ -38,7 +38,6 @@
 - (instancetype)initWithDevice:(id<MTLDevice>)device;
 
 - (void)renderScene:(GLTFScene *)scene
-        modelMatrix:(matrix_float4x4)modelMatrix
       commandBuffer:(id<MTLCommandBuffer>)commandBuffer
      commandEncoder:(id<MTLRenderCommandEncoder>)renderEncoder;
 

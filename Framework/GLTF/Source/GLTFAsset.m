@@ -697,6 +697,23 @@ typedef struct {
             material.emissiveFactor = GLTFVectorFloat3FromArray(emissiveFactorArray);
         }
         
+        NSNumber *doubleSidedValue = properties[@"doubleSided"];
+        material.doubleSided = (doubleSidedValue == nil) || (doubleSidedValue != nil && doubleSidedValue.boolValue);
+        
+        NSString *alphaMode = properties[@"alphaMode"];
+        if ([alphaMode isEqualToString:@"BLEND"]) {
+            material.alphaMode = GLTFAlphaModeBlend;
+        } else if ([alphaMode isEqualToString:@"MASK"]) {
+            material.alphaMode = GLTFAlphaModeMask;
+        } else {
+            material.alphaMode = GLTFAlphaModeOpaque;
+        }
+        
+        NSNumber *alphaCutoffValue = properties[@"alphaCutoff"];
+        if (alphaCutoffValue != nil) {
+            material.alphaCutoff = alphaCutoffValue.floatValue;
+        }
+
         NSDictionary *occlusionTextureMap = properties[@"occlusionTexture"];
         if (occlusionTextureMap) {
             NSNumber *occlusionTextureIndexValue = occlusionTextureMap[@"index"];
