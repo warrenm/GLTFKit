@@ -16,12 +16,13 @@
 
 #import "GLTFObject.h"
 #import "GLTFUtilities.h"
+#import "GLTFNodeVisitor.h"
 
 @import simd;
 
 @class GLTFCamera, GLTFSkin, GLTFMesh;
 
-@interface GLTFNode : GLTFObject
+@interface GLTFNode : GLTFObject <GLTFNodeVisitable>
 @property (nonatomic, weak) GLTFCamera *camera;
 @property (nonatomic, weak) GLTFNode *parent;
 @property (nonatomic, copy) NSArray<GLTFNode *> *children;

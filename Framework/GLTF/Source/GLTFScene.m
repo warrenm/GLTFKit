@@ -28,4 +28,11 @@
     return sceneBounds;
 }
 
+- (void)acceptVisitor:(GLTFNodeVisitor)visitor strategy:(GLTFVisitationStrategy)strategy {
+    for (GLTFNode *node in self.nodes) {
+        BOOL ignored = NO;
+        visitor(node, &ignored);
+    }
+}
+
 @end

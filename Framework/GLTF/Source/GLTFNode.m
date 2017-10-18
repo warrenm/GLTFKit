@@ -125,5 +125,20 @@
     return bounds;
 }
 
+- (void)acceptVisitor:(GLTFNodeVisitor)visitor strategy:(GLTFVisitationStrategy)strategy {
+    switch (strategy) {
+        case GLTFVisitationStrategyDepthFirst:
+        default:
+        {
+            BOOL recurse = YES;
+            visitor(self, &recurse);
+            if (recurse) {
+                for (GLTFNode *child in self.children) {
+                    visitor(child, &recurse);
+                }
+            }
+        }
+    }
+}
 
 @end

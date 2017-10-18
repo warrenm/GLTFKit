@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		83C900931F981AEE003893A9 /* GLTFNodeVisitor.h in Headers */ = {isa = PBXBuildFile; fileRef = 83C900921F981AEE003893A9 /* GLTFNodeVisitor.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		83D6003B1F48C2FF00F71E0C /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 83D6003A1F48C2FF00F71E0C /* Accelerate.framework */; };
 		83D600B91F4A195400F71E0C /* GLTFBufferAllocator.h in Headers */ = {isa = PBXBuildFile; fileRef = 83D600B81F4A195400F71E0C /* GLTFBufferAllocator.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		83D6FF7F1F48BBFA00F71E0C /* GLTFAccessor.h in Headers */ = {isa = PBXBuildFile; fileRef = 83D6FF551F48BBFA00F71E0C /* GLTFAccessor.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -49,6 +50,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		83C900921F981AEE003893A9 /* GLTFNodeVisitor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GLTFNodeVisitor.h; sourceTree = "<group>"; };
 		83D6003A1F48C2FF00F71E0C /* Accelerate.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Accelerate.framework; path = System/Library/Frameworks/Accelerate.framework; sourceTree = SDKROOT; };
 		83D600B81F4A195400F71E0C /* GLTFBufferAllocator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GLTFBufferAllocator.h; sourceTree = "<group>"; };
 		83D6FF481F48BB3A00F71E0C /* GLTF.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = GLTF.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -147,6 +149,7 @@
 				83D6FF5D1F48BBFA00F71E0C /* GLTFMaterial.h */,
 				83D6FF5E1F48BBFA00F71E0C /* GLTFMesh.h */,
 				83D6FF5F1F48BBFA00F71E0C /* GLTFNode.h */,
+				83C900921F981AEE003893A9 /* GLTFNodeVisitor.h */,
 				83D6FF601F48BBFA00F71E0C /* GLTFObject.h */,
 				83D6FF611F48BBFA00F71E0C /* GLTFScene.h */,
 				83D6FF621F48BBFA00F71E0C /* GLTFSkin.h */,
@@ -211,6 +214,7 @@
 				83D6FF871F48BBFA00F71E0C /* GLTFMaterial.h in Headers */,
 				83D6FF881F48BBFA00F71E0C /* GLTFMesh.h in Headers */,
 				83D6FF891F48BBFA00F71E0C /* GLTFNode.h in Headers */,
+				83C900931F981AEE003893A9 /* GLTFNodeVisitor.h in Headers */,
 				83D6FF8A1F48BBFA00F71E0C /* GLTFObject.h in Headers */,
 				83D6FF8B1F48BBFA00F71E0C /* GLTFScene.h in Headers */,
 				83D6FF8C1F48BBFA00F71E0C /* GLTFSkin.h in Headers */,

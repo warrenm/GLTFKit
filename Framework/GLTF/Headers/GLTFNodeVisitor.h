@@ -14,13 +14,16 @@
 //  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 //
 
-#import "GLTFObject.h"
-#import "GLTFUtilities.h"
-#import "GLTFNodeVisitor.h"
+#import <Foundation/Foundation.h>
 
 @class GLTFNode;
 
-@interface GLTFScene : GLTFObject <GLTFNodeVisitable>
-@property (nonatomic, copy) NSArray<GLTFNode *> *nodes;
-@property (nonatomic, readonly, assign) GLTFBoundingBox approximateBounds;
+typedef NS_ENUM(NSInteger, GLTFVisitationStrategy) {
+    GLTFVisitationStrategyDepthFirst
+};
+
+typedef void (^GLTFNodeVisitor)(GLTFNode *node, BOOL *stop);
+
+@protocol GLTFNodeVisitable <NSObject>
+- (void)acceptVisitor:(GLTFNodeVisitor)visitor strategy:(GLTFVisitationStrategy)strategy;
 @end
