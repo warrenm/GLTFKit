@@ -26,11 +26,12 @@ const CGFloat GLTFViewerFirstPersonCameraRotationScaleFactor = 0.0033;
 
 @interface GLTFViewerFirstPersonCamera ()
 
-@property (nonatomic, assign) CGPoint cursorPosition;
+//@property (nonatomic, assign) CGPoint cursorPosition;
 @property (nonatomic, assign) CGVector cursorVelocity;
 @property (nonatomic, assign) simd_float4 motionDirection;
 @property (nonatomic, assign) simd_float4 position;
 @property (nonatomic, assign) float pitch, yaw;
+@property (nonatomic, assign) BOOL capturedCursor;
 @end
 
 @implementation GLTFViewerFirstPersonCamera
@@ -47,15 +48,29 @@ const CGFloat GLTFViewerFirstPersonCameraRotationScaleFactor = 0.0033;
 }
 
 - (void)mouseDown:(NSEvent *)event {
-    self.cursorPosition = [event locationInWindow];
-    self.cursorVelocity = CGVectorMake(0, 0);
+    [super mouseDown:event];
+
+    if (!self.capturedCursor) {
+        CGAssociateMouseAndMouseCursorPosition(false);
+        [NSCursor hide];
+        self.capturedCursor = YES;
+    }
 }
 
-- (void)mouseDragged:(NSEvent *)event {
-    NSPoint currentCursorPosition = [event locationInWindow];
-    self.cursorVelocity = CGVectorMake(self.cursorPosition.x - currentCursorPosition.x, self.cursorPosition.y - currentCursorPosition.y);
+- (void)mouseMoved:(NSEvent *)event {
+    [super mouseMoved:event];
+
+    self.cursorVelocity = CGVectorMake(event.deltaX, event.deltaY);
+}
+
+- (void)keyUp:(NSEvent *)event {
+    [super keyUp:event];
     
-    self.cursorPosition = currentCursorPosition;
+    if (event.keyCode == kVK_Escape) {
+        CGAssociateMouseAndMouseCursorPosition(true);
+        [NSCursor unhide];
+        self.capturedCursor = NO;
+    }
 }
 
 - (void)updateWithTimestep:(NSTimeInterval)timestep {
@@ -78,7 +93,7 @@ const CGFloat GLTFViewerFirstPersonCameraRotationScaleFactor = 0.0033;
 
     self.motionDirection = motionDirection;
     
-    self.yaw += GLTFViewerFirstPersonCameraRotationScaleFactor * -self.cursorVelocity.dx;
+    self.yaw += GLTFViewerFirstPersonCameraRotationScaleFactor * self.cursorVelocity.dx;
     self.pitch += GLTFViewerFirstPersonCameraRotationScaleFactor * self.cursorVelocity.dy;
     
     self.cursorVelocity = CGVectorMake(self.cursorVelocity.dx * GLTFViewerFirstPersonCameraRotationDecayFactor,

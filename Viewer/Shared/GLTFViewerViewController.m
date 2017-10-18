@@ -22,6 +22,8 @@
 @interface GLTFViewerViewController ()
 @property (nonatomic, weak) MTKView *metalView;
 
+@property (nonatomic, strong) NSTrackingArea *trackingArea;
+
 @property (nonatomic, strong) id <MTLDevice> device;
 @property (nonatomic, strong) id <MTLCommandQueue> commandQueue;
 
@@ -51,6 +53,12 @@
     [self setupRenderer];
     [self loadLightingEnvironment];
     [self loadSkyboxPipeline];
+    
+    self.trackingArea = [[NSTrackingArea alloc] initWithRect:self.view.bounds
+                                                     options:(NSTrackingMouseEnteredAndExited | NSTrackingMouseMoved | NSTrackingActiveInKeyWindow )
+                                                       owner:self
+                                                    userInfo:nil];
+    [self.view addTrackingArea:self.trackingArea];
 }
 
 - (void)setupMetal {
@@ -251,6 +259,10 @@
 
 - (void)mouseDown:(NSEvent *)event {
     [self.camera mouseDown:event];
+}
+
+- (void)mouseMoved:(NSEvent *)event {
+    [self.camera mouseMoved:event];
 }
 
 - (void)mouseDragged:(NSEvent *)event {

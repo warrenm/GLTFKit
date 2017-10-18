@@ -45,6 +45,9 @@
 - (void)mouseDown:(NSEvent *)event {
 }
 
+- (void)mouseMoved:(NSEvent *)event {
+}
+
 - (void)mouseDragged:(NSEvent *)event {
 }
 
