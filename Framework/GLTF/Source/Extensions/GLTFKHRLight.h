@@ -29,9 +29,9 @@ typedef NS_ENUM(NSInteger, GLTFKHRLightType) {
 
 @property (nonatomic, assign) GLTFKHRLightType type;
 
-@property (nonatomic, assign) vector_float4 color;
+@property (nonatomic, assign) simd_float4 color;
 
-@property (nonatomic, assign) vector_float4 direction;
+@property (nonatomic, assign) simd_float4 direction;
 
 /// Distance, in world units, over which the light affects objects in the scene.
 /// A value of zero indicates infinite distance.

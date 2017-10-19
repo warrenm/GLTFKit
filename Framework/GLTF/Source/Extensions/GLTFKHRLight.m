@@ -21,8 +21,8 @@
 - (instancetype)init {
     if ((self = [super init])) {
         _type = GLTFKHRLightTypeDirectional;
-        _color = (vector_float4){ 0, 0, 0, 1 };
-        _direction = (vector_float4){ 0, 0, -1, 0 };
+        _color = (simd_float4){ 0, 0, 0, 1 };
+        _direction = (simd_float4){ 0, 0, -1, 0 };
         _distance = 0;
         _constantAttenuation = 0;
         _linearAttenuation = 1;

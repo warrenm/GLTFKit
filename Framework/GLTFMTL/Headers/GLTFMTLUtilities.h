@@ -52,14 +52,14 @@ extern NSString *GLTFMTLTypeNameForType(GLTFDataType baseType, GLTFDataDimension
 
 extern MTLVertexFormat GLTFMTLVertexFormatForComponentTypeAndDimension(GLTFDataType baseType, GLTFDataDimension dimension);
 
-//extern matrix_float4x4 GLTFMatrixFromTranslation(float x, float y, float z);
+//extern simd_float4x4 GLTFMatrixFromTranslation(float x, float y, float z);
 //
-//extern matrix_float4x4 GLTFMatrixFromUniformScale(float s);
+//extern simd_float4x4 GLTFMatrixFromUniformScale(float s);
 //
-//extern matrix_float4x4 GLTFMatrixFromRotationAxisAngle(float radians, float x, float y, float z);
+//extern simd_float4x4 GLTFMatrixFromRotationAxisAngle(float radians, float x, float y, float z);
 
-extern matrix_float3x3 GLTFMatrixUpperLeft3x3(matrix_float4x4 m);
+extern simd_float3x3 GLTFMatrixUpperLeft3x3(simd_float4x4 m);
 
-extern matrix_float3x3 GLTFNormalMatrixFromModelMatrix(matrix_float4x4 m);
+extern simd_float3x3 GLTFNormalMatrixFromModelMatrix(simd_float4x4 m);
 
-extern matrix_float4x4 GLTFPerspectiveProjectionMatrixAspectFovRH(const float fovY, const float aspect, const float nearZ, const float farZ);
+extern simd_float4x4 GLTFPerspectiveProjectionMatrixAspectFovRH(const float fovY, const float aspect, const float nearZ, const float farZ);

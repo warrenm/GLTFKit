@@ -31,7 +31,7 @@
 @property (nonatomic, assign) float znear;
 @property (nonatomic, assign) float zfar;
 
-@property (nonatomic, assign) matrix_float4x4 projectionMatrix;
+@property (nonatomic, assign) simd_float4x4 projectionMatrix;
 
 @property (nonatomic, copy) NSArray<GLTFNode *> *referencingNodes;
 

@@ -20,12 +20,12 @@
 @import simd;
 
 typedef struct {
-    vector_float3 minPoint;
-    vector_float3 maxPoint;
+    simd_float3 minPoint;
+    simd_float3 maxPoint;
 } GLTFBoundingBox;
 
 typedef struct {
-    vector_float3 center;
+    simd_float3 center;
     float radius;
 } GLTFBoundingSphere;
 
@@ -33,27 +33,27 @@ extern bool GLTFBoundingBoxIsEmpty(GLTFBoundingBox b);
 
 extern GLTFBoundingBox *GLTFBoundingBoxUnion(GLTFBoundingBox *a, GLTFBoundingBox b);
 
-extern void GLTFBoundingBoxTransform(GLTFBoundingBox *b, matrix_float4x4 transform);
+extern void GLTFBoundingBoxTransform(GLTFBoundingBox *b, simd_float4x4 transform);
 
 extern GLTFBoundingSphere GLTFBoundingSphereFromBox(const GLTFBoundingBox b);
 
-extern void GLTFAxisAngleFromQuaternion(vector_float4 q, vector_float3 *outAxis, float *outAngle);
+extern void GLTFAxisAngleFromQuaternion(simd_float4 q, simd_float3 *outAxis, float *outAngle);
 
-extern simd_float4 GLTFQuaternionMultiply(vector_float4 q, vector_float4 r);
+extern simd_float4 GLTFQuaternionMultiply(simd_float4 q, simd_float4 r);
 
-extern vector_float4 GLTFQuaternionFromEulerAngles(float pitch, float yaw, float roll);
+extern simd_float4 GLTFQuaternionFromEulerAngles(float pitch, float yaw, float roll);
 
-extern matrix_float4x4 GLTFRotationMatrixFromQuaternion(vector_float4 q);
+extern simd_float4x4 GLTFRotationMatrixFromQuaternion(simd_float4 q);
 
-extern matrix_float4x4 GLTFMatrixFromUniformScale(float s);
+extern simd_float4x4 GLTFMatrixFromUniformScale(float s);
 
-extern matrix_float4x4 GLTFMatrixFromTranslation(float x, float y, float z);
+extern simd_float4x4 GLTFMatrixFromTranslation(float x, float y, float z);
 
-extern matrix_float4x4 GLTFRotationMatrixFromAxisAngle(vector_float3 axis, float angle);
+extern simd_float4x4 GLTFRotationMatrixFromAxisAngle(simd_float3 axis, float angle);
 
-extern vector_float3 GLTFAxisX;
-extern vector_float3 GLTFAxisY;
-extern vector_float3 GLTFAxisZ;
+extern simd_float3 GLTFAxisX;
+extern simd_float3 GLTFAxisY;
+extern simd_float3 GLTFAxisZ;
 
 extern GLTFDataDimension GLTFDataDimensionForName(NSString *name);
 
@@ -61,10 +61,10 @@ extern size_t GLTFSizeOfDataType(GLTFDataType type);
 
 extern size_t GLTFSizeOfComponentTypeWithDimension(GLTFDataType baseType, GLTFDataDimension dimension);
 
-extern vector_float2 GLTFVectorFloat2FromArray(NSArray *array);
+extern simd_float2 GLTFVectorFloat2FromArray(NSArray *array);
 
-extern vector_float3 GLTFVectorFloat3FromArray(NSArray *array);
+extern simd_float3 GLTFVectorFloat3FromArray(NSArray *array);
 
-extern vector_float4 GLTFVectorFloat4FromArray(NSArray *array);
+extern simd_float4 GLTFVectorFloat4FromArray(NSArray *array);
 
-extern matrix_float4x4 GLTFMatrixFloat4x4FromArray(NSArray *array);
+extern simd_float4x4 GLTFMatrixFloat4x4FromArray(NSArray *array);

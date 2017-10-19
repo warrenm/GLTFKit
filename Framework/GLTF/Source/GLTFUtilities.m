@@ -40,15 +40,15 @@ GLTFBoundingBox *GLTFBoundingBoxUnion(GLTFBoundingBox *a, GLTFBoundingBox b) {
     return a;
 }
 
-void GLTFBoundingBoxTransform(GLTFBoundingBox *b, matrix_float4x4 transform) {
-    vector_float4 ltf = (vector_float4) { b->minPoint.x, b->maxPoint.y, b->maxPoint.z, 1 };
-    vector_float4 rtf = (vector_float4) { b->maxPoint.x, b->maxPoint.y, b->maxPoint.z, 1 };
-    vector_float4 lbf = (vector_float4) { b->minPoint.x, b->minPoint.y, b->maxPoint.z, 1 };
-    vector_float4 rbf = (vector_float4) { b->maxPoint.x, b->minPoint.y, b->maxPoint.z, 1 };
-    vector_float4 ltb = (vector_float4) { b->minPoint.x, b->maxPoint.y, b->minPoint.z, 1 };
-    vector_float4 rtb = (vector_float4) { b->maxPoint.x, b->maxPoint.y, b->minPoint.z, 1 };
-    vector_float4 lbb = (vector_float4) { b->minPoint.x, b->minPoint.y, b->minPoint.z, 1 };
-    vector_float4 rbb = (vector_float4) { b->maxPoint.x, b->minPoint.y, b->minPoint.z, 1 };
+void GLTFBoundingBoxTransform(GLTFBoundingBox *b, simd_float4x4 transform) {
+    simd_float4 ltf = (simd_float4) { b->minPoint.x, b->maxPoint.y, b->maxPoint.z, 1 };
+    simd_float4 rtf = (simd_float4) { b->maxPoint.x, b->maxPoint.y, b->maxPoint.z, 1 };
+    simd_float4 lbf = (simd_float4) { b->minPoint.x, b->minPoint.y, b->maxPoint.z, 1 };
+    simd_float4 rbf = (simd_float4) { b->maxPoint.x, b->minPoint.y, b->maxPoint.z, 1 };
+    simd_float4 ltb = (simd_float4) { b->minPoint.x, b->maxPoint.y, b->minPoint.z, 1 };
+    simd_float4 rtb = (simd_float4) { b->maxPoint.x, b->maxPoint.y, b->minPoint.z, 1 };
+    simd_float4 lbb = (simd_float4) { b->minPoint.x, b->minPoint.y, b->minPoint.z, 1 };
+    simd_float4 rbb = (simd_float4) { b->maxPoint.x, b->minPoint.y, b->minPoint.z, 1 };
     
     ltf = matrix_multiply(transform, ltf);
     rtf = matrix_multiply(transform, rtf);
@@ -75,12 +75,12 @@ GLTFBoundingSphere GLTFBoundingSphereFromBox(const GLTFBoundingBox b) {
     
     float r = sqrt(pow(b.maxPoint.x - midX, 2) + pow(b.maxPoint.y - midY, 2) + pow(b.maxPoint.z - midZ, 2));
     
-    s.center = (vector_float3){ midX, midY, midZ };
+    s.center = (simd_float3){ midX, midY, midZ };
     s.radius = r;
     return s;
 }
 
-void GLTFAxisAngleFromQuaternion(vector_float4 q, vector_float3 *outAxis, float *outAngle) {
+void GLTFAxisAngleFromQuaternion(simd_float4 q, simd_float3 *outAxis, float *outAngle) {
     // Ironically, normalizing a vector such as [0 0 0 1] with simd can cause it to become not unit-length,
     // so unless you notice problems with quaternions not being unit-length upon load, let's just skip this.
     // q = vector_normalize(q);
@@ -89,18 +89,18 @@ void GLTFAxisAngleFromQuaternion(vector_float4 q, vector_float3 *outAxis, float 
     
     if (fabs(det) < 1e-6) {
         *outAngle = 0.0;
-        *outAxis = (vector_float3){ 1, 0, 0 };
+        *outAxis = (simd_float3){ 1, 0, 0 };
     } else {
         float angle = 2 * acos(q.w);
         float x = q.x / det;
         float y = q.y / det;
         float z = q.z / det;
         *outAngle = angle;
-        *outAxis = (vector_float3){ x, y, z };
+        *outAxis = (simd_float3){ x, y, z };
     }
 }
 
-simd_float4 GLTFQuaternionMultiply(vector_float4 q, vector_float4 r) {
+simd_float4 GLTFQuaternionMultiply(simd_float4 q, simd_float4 r) {
     float w = r.w*q.w - r.x*q.x - r.y*q.y - r.z*q.z;
     float x = r.w*q.x + r.x*q.w - r.y*q.z + r.z*q.y;
     float y = r.w*q.y + r.x*q.z + r.y*q.w - r.z*q.x;
@@ -108,8 +108,8 @@ simd_float4 GLTFQuaternionMultiply(vector_float4 q, vector_float4 r) {
     return (simd_float4){ x, y, z, w };
 }
 
-matrix_float4x4 GLTFRotationMatrixFromQuaternion(vector_float4 q) {
-    return (matrix_float4x4){{
+simd_float4x4 GLTFRotationMatrixFromQuaternion(simd_float4 q) {
+    return (simd_float4x4){{
         { 1 - 2*q.y*q.y - 2*q.z*q.z,     2*q.x*q.y - 2*q.z*q.w,     2*q.x*q.z + 2*q.y*q.w, 0 },
         {     2*q.x*q.y + 2*q.z*q.w, 1 - 2*q.x*q.x - 2*q.z*q.z,     2*q.y*q.z - 2*q.x*q.w, 0 },
         {     2*q.x*q.z - 2*q.y*q.w,     2*q.y*q.z + 2*q.x*q.w, 1 - 2*q.x*q.x - 2*q.y*q.y, 0 },
@@ -117,7 +117,7 @@ matrix_float4x4 GLTFRotationMatrixFromQuaternion(vector_float4 q) {
     }};
 }
 
-vector_float4 GLTFQuaternionFromEulerAngles(float pitch, float yaw, float roll) {
+simd_float4 GLTFQuaternionFromEulerAngles(float pitch, float yaw, float roll) {
     float cx = cos(pitch / 2);
     float sx = sin(pitch / 2);
     float cy = cos(yaw / 2);
@@ -125,7 +125,7 @@ vector_float4 GLTFQuaternionFromEulerAngles(float pitch, float yaw, float roll) 
     float cz = cos(roll / 2);
     float sz = sin(roll / 2);
     
-    vector_float4 q = (vector_float4){
+    simd_float4 q = (simd_float4){
         sx*cy*cz + cx*sy*sz,
         cx*sy*cz + sx*cy*sz,
         cx*cy*sz - sx*sy*cz,
@@ -134,42 +134,42 @@ vector_float4 GLTFQuaternionFromEulerAngles(float pitch, float yaw, float roll) 
     return q;
 }
 
-matrix_float4x4 GLTFMatrixFromUniformScale(float s)
+simd_float4x4 GLTFMatrixFromUniformScale(float s)
 {
-    matrix_float4x4 m = matrix_identity_float4x4;
+    simd_float4x4 m = matrix_identity_float4x4;
     m.columns[0].x = s;
     m.columns[1].y = s;
     m.columns[2].z = s;
     return m;
 }
 
-matrix_float4x4 GLTFMatrixFromTranslation(float x, float y, float z)
+simd_float4x4 GLTFMatrixFromTranslation(float x, float y, float z)
 {
-    matrix_float4x4 m = matrix_identity_float4x4;
-    m.columns[3] = (vector_float4) { x, y, z, 1.0 };
+    simd_float4x4 m = matrix_identity_float4x4;
+    m.columns[3] = (simd_float4) { x, y, z, 1.0 };
     return m;
 }
 
-matrix_float4x4 GLTFRotationMatrixFromAxisAngle(vector_float3 axis, float angle) {
+simd_float4x4 GLTFRotationMatrixFromAxisAngle(simd_float3 axis, float angle) {
     float x = axis.x, y = axis.y, z = axis.z;
     float c = cosf(angle);
     float s = sinf(angle);
     float t = 1 - c;
     
-    vector_float4 c0 = { t * x * x + c,     t * x * y + z * s, t * x * z - y * s, 0 };
-    vector_float4 c1 = { t * x * y - z * s, t * y * y + c,     t * y * z + x * s, 0 };
-    vector_float4 c2 = { t * x * z + y * s, t * y * z - x * s, t * z * z + c,     0 };
-    vector_float4 c3 = {                 0,                 0,             0,     1 };
+    simd_float4 c0 = { t * x * x + c,     t * x * y + z * s, t * x * z - y * s, 0 };
+    simd_float4 c1 = { t * x * y - z * s, t * y * y + c,     t * y * z + x * s, 0 };
+    simd_float4 c2 = { t * x * z + y * s, t * y * z - x * s, t * z * z + c,     0 };
+    simd_float4 c3 = {                 0,                 0,             0,     1 };
     
-    return (matrix_float4x4){ c0, c1, c2, c3 };
+    return (simd_float4x4){ c0, c1, c2, c3 };
 }
 
-vector_float3 GLTFAxisX = (vector_float3){ 1, 0, 0 };
-vector_float3 GLTFAxisY = (vector_float3){ 0, 1, 0 };
-vector_float3 GLTFAxisZ = (vector_float3){ 0, 0, 1 };
+simd_float3 GLTFAxisX = (simd_float3){ 1, 0, 0 };
+simd_float3 GLTFAxisY = (simd_float3){ 0, 1, 0 };
+simd_float3 GLTFAxisZ = (simd_float3){ 0, 0, 1 };
 
-matrix_float3x3 GLTFMatrixUpperLeft3x3(matrix_float4x4 m) {
-    matrix_float3x3 mout = { {
+simd_float3x3 GLTFMatrixUpperLeft3x3(simd_float4x4 m) {
+    simd_float3x3 mout = { {
         { m.columns[0][0], m.columns[0][1], m.columns[0][2] },
         { m.columns[1][0], m.columns[1][1], m.columns[1][2] },
         { m.columns[2][0], m.columns[2][1], m.columns[2][2] }
@@ -177,18 +177,18 @@ matrix_float3x3 GLTFMatrixUpperLeft3x3(matrix_float4x4 m) {
     return mout;
 }
 
-matrix_float3x3 GLTFNormalMatrixFromModelMatrix(matrix_float4x4 m) {
-    matrix_float3x3 mout = GLTFMatrixUpperLeft3x3(m);
+simd_float3x3 GLTFNormalMatrixFromModelMatrix(simd_float4x4 m) {
+    simd_float3x3 mout = GLTFMatrixUpperLeft3x3(m);
     return matrix_invert(matrix_transpose(mout));
 }
 
-matrix_float4x4 GLTFPerspectiveProjectionMatrixAspectFovRH(const float fovY, const float aspect, const float nearZ, const float farZ)
+simd_float4x4 GLTFPerspectiveProjectionMatrixAspectFovRH(const float fovY, const float aspect, const float nearZ, const float farZ)
 {
     float yscale = 1 / tanf(fovY * 0.5f); // 1 / tan == cot
     float xscale = yscale / aspect;
     float q = -farZ / (farZ - nearZ);
     
-    matrix_float4x4 m = {
+    simd_float4x4 m = {
         .columns[0] = { xscale, 0, 0, 0 },
         .columns[1] = { 0, yscale, 0, 0 },
         .columns[2] = { 0, 0, q, -1 },
@@ -296,20 +296,20 @@ size_t GLTFSizeOfComponentTypeWithDimension(GLTFDataType baseType, GLTFDataDimen
     return 0;
 }
 
-vector_float2 GLTFVectorFloat2FromArray(NSArray *array) {
-    return (vector_float2){ [array[0] floatValue], [array[1] floatValue] };
+simd_float2 GLTFVectorFloat2FromArray(NSArray *array) {
+    return (simd_float2){ [array[0] floatValue], [array[1] floatValue] };
 }
 
-vector_float3 GLTFVectorFloat3FromArray(NSArray *array) {
-    return (vector_float3){ [array[0] floatValue], [array[1] floatValue], [array[2] floatValue] };
+simd_float3 GLTFVectorFloat3FromArray(NSArray *array) {
+    return (simd_float3){ [array[0] floatValue], [array[1] floatValue], [array[2] floatValue] };
 }
 
-vector_float4 GLTFVectorFloat4FromArray(NSArray *array) {
-    return (vector_float4){ [array[0] floatValue], [array[1] floatValue], [array[2] floatValue], [array[3] floatValue] };
+simd_float4 GLTFVectorFloat4FromArray(NSArray *array) {
+    return (simd_float4){ [array[0] floatValue], [array[1] floatValue], [array[2] floatValue], [array[3] floatValue] };
 }
 
-matrix_float4x4 GLTFMatrixFloat4x4FromArray(NSArray *array) {
-    return (matrix_float4x4){ {
+simd_float4x4 GLTFMatrixFloat4x4FromArray(NSArray *array) {
+    return (simd_float4x4){ {
         {  [array[0] floatValue],  [array[1] floatValue],  [array[2] floatValue],  [array[3] floatValue] },
         {  [array[4] floatValue],  [array[5] floatValue],  [array[6] floatValue],  [array[7] floatValue] },
         {  [array[8] floatValue],  [array[9] floatValue], [array[10] floatValue], [array[11] floatValue] },

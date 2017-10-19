@@ -28,24 +28,24 @@
 - (void)buildProjectionMatrix {
     switch (_cameraType) {
         case GLTFCameraTypeOrthographic: {
-            vector_float4 X = (vector_float4){ 1 / _xmag, 0, 0, 0 };
-            vector_float4 Y = (vector_float4){ 0, 1 / _ymag, 0, 0 };
-            vector_float4 Z = (vector_float4){ 0, 0, 2 / (_znear - _zfar), 0 };
-            vector_float4 W = (vector_float4){ 0, 0, (_zfar + _znear) / (_znear - _zfar), 1 };
-            _projectionMatrix = (matrix_float4x4){ { X, Y, Z, W } };
+            simd_float4 X = (simd_float4){ 1 / _xmag, 0, 0, 0 };
+            simd_float4 Y = (simd_float4){ 0, 1 / _ymag, 0, 0 };
+            simd_float4 Z = (simd_float4){ 0, 0, 2 / (_znear - _zfar), 0 };
+            simd_float4 W = (simd_float4){ 0, 0, (_zfar + _znear) / (_znear - _zfar), 1 };
+            _projectionMatrix = (simd_float4x4){ { X, Y, Z, W } };
             break;
         }
         case GLTFCameraTypePerspective:
         default: {
-            vector_float4 X = (vector_float4){ 1 / (_aspectRatio * tanf(0.5 * _yfov)), 0, 0, 0 };
-            vector_float4 Y = (vector_float4){ 0, 1 / tanf(0.5 * _yfov), 0, 0 };
-            vector_float4 Z = (vector_float4){ 0, 0, -1, -1 };
-            vector_float4 W = (vector_float4){ 0, 0, -2 * _znear, 0 };
+            simd_float4 X = (simd_float4){ 1 / (_aspectRatio * tanf(0.5 * _yfov)), 0, 0, 0 };
+            simd_float4 Y = (simd_float4){ 0, 1 / tanf(0.5 * _yfov), 0, 0 };
+            simd_float4 Z = (simd_float4){ 0, 0, -1, -1 };
+            simd_float4 W = (simd_float4){ 0, 0, -2 * _znear, 0 };
             if (_zfar != FLT_MAX) {
-                Z = (vector_float4){ 0, 0, (_zfar + _znear) / (_znear - _zfar), -1 };
-                W = (vector_float4){ 0, 0, (2 * _zfar * _znear) / (_znear - _zfar), 0 };
+                Z = (simd_float4){ 0, 0, (_zfar + _znear) / (_znear - _zfar), -1 };
+                W = (simd_float4){ 0, 0, (2 * _zfar * _znear) / (_znear - _zfar), 0 };
             }
-            _projectionMatrix = (matrix_float4x4){ { X, Y, Z, W } };
+            _projectionMatrix = (simd_float4x4){ { X, Y, Z, W } };
             break;
         }
     }

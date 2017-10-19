@@ -24,19 +24,19 @@
 @import MetalKit;
 
 struct VertexUniforms {
-    matrix_float4x4 modelMatrix;
-    matrix_float4x4 modelViewProjectionMatrix;
+    simd_float4x4 modelMatrix;
+    simd_float4x4 modelViewProjectionMatrix;
 };
 
 struct FragmentUniforms {
-    vector_float3 lightDirection;
-    vector_float3 lightColor;
+    simd_float3 lightDirection;
+    simd_float3 lightColor;
     float normalScale;
-    vector_float3 emissiveFactor;
+    simd_float3 emissiveFactor;
     float occlusionStrength;
-    vector_float2 metallicRoughnessValues;
-    vector_float4 baseColorFactor;
-    vector_float3 camera;
+    simd_float2 metallicRoughnessValues;
+    simd_float4 baseColorFactor;
+    simd_float3 camera;
     float alphaCutoff;
 };
 
@@ -283,18 +283,18 @@ struct FragmentUniforms {
     
     if (jointsAccessor != nil && inverseBindingAccessor != nil) {
         NSInteger jointCount = skin.jointNodes.count;
-        matrix_float4x4 *jointMatrices = (matrix_float4x4 *)jointBuffer.contents;
+        simd_float4x4 *jointMatrices = (simd_float4x4 *)jointBuffer.contents;
         for (NSInteger i = 0; i < jointCount; ++i) {
             GLTFNode *joint = skin.jointNodes[i];
-            matrix_float4x4 *inverseBindMatrices = (matrix_float4x4 *)(inverseBindingAccessor.bufferView.buffer.contents + inverseBindingAccessor.bufferView.offset + inverseBindingAccessor.offset);
-            matrix_float4x4 inverseBindMatrix = inverseBindMatrices[i];
+            simd_float4x4 *inverseBindMatrices = (simd_float4x4 *)(inverseBindingAccessor.bufferView.buffer.contents + inverseBindingAccessor.bufferView.offset + inverseBindingAccessor.offset);
+            simd_float4x4 inverseBindMatrix = inverseBindMatrices[i];
             jointMatrices[i] = matrix_multiply(matrix_invert(node.globalTransform), matrix_multiply(joint.globalTransform, inverseBindMatrix));
         }
     }
 }
 
 - (void)renderNodeRecursive:(GLTFNode *)node
-                modelMatrix:(matrix_float4x4)modelMatrix
+                modelMatrix:(simd_float4x4)modelMatrix
        renderCommandEncoder:(id<MTLRenderCommandEncoder>)renderEncoder
 {
     modelMatrix = matrix_multiply(modelMatrix, node.localTransform);
@@ -323,20 +323,20 @@ struct FragmentUniforms {
 
             struct VertexUniforms vertexUniforms;
             
-            matrix_float3x3 viewAffine = matrix_invert(GLTFMatrixUpperLeft3x3(self.viewMatrix));
-            vector_float3 cameraPos = self.viewMatrix.columns[3].xyz;
-            vector_float3 cameraWorldPos = matrix_multiply(viewAffine, -cameraPos);
+            simd_float3x3 viewAffine = matrix_invert(GLTFMatrixUpperLeft3x3(self.viewMatrix));
+            simd_float3 cameraPos = self.viewMatrix.columns[3].xyz;
+            simd_float3 cameraWorldPos = matrix_multiply(viewAffine, -cameraPos);
             
             vertexUniforms.modelMatrix = modelMatrix;
             vertexUniforms.modelViewProjectionMatrix = matrix_multiply(matrix_multiply(self.projectionMatrix, self.viewMatrix), modelMatrix);
             
             struct FragmentUniforms fragmentUniforms;
-            fragmentUniforms.lightDirection = (vector_float3){ 0, 0, -1 };
-            fragmentUniforms.lightColor = (vector_float3) { 1, 1, 1 };
+            fragmentUniforms.lightDirection = (simd_float3){ 0, 0, -1 };
+            fragmentUniforms.lightColor = (simd_float3) { 1, 1, 1 };
             fragmentUniforms.normalScale = material.normalTextureScale;
             fragmentUniforms.emissiveFactor = material.emissiveFactor;
             fragmentUniforms.occlusionStrength = 1;
-            fragmentUniforms.metallicRoughnessValues = (vector_float2){ material.metalnessFactor, material.roughnessFactor };
+            fragmentUniforms.metallicRoughnessValues = (simd_float2){ material.metalnessFactor, material.roughnessFactor };
             fragmentUniforms.baseColorFactor = material.baseColorFactor;
             fragmentUniforms.camera = cameraWorldPos;
             fragmentUniforms.alphaCutoff = material.alphaCutoff;

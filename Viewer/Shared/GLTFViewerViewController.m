@@ -34,7 +34,7 @@
 @property (nonatomic, strong) id<GLTFBufferAllocator> bufferAllocator;
 
 @property (nonatomic, strong) GLTFViewerCamera *camera;
-@property (nonatomic, assign) matrix_float4x4 regularizationMatrix;
+@property (nonatomic, assign) simd_float4x4 regularizationMatrix;
 
 @property (nonatomic, assign) NSTimeInterval globalTime;
 
@@ -122,19 +122,19 @@
     }
 }
 
-- (matrix_float4x4)viewMatrix {
+- (simd_float4x4)viewMatrix {
     return self.renderer.viewMatrix;
 }
 
-- (void)setViewMatrix:(matrix_float4x4)viewMatrix {
+- (void)setViewMatrix:(simd_float4x4)viewMatrix {
     self.renderer.viewMatrix = viewMatrix;
 }
 
-- (matrix_float4x4)projectionMatrix {
+- (simd_float4x4)projectionMatrix {
     return self.renderer.projectionMatrix;
 }
 
-- (void)setProjectionMatrix:(matrix_float4x4)projectionMatrix {
+- (void)setProjectionMatrix:(simd_float4x4)projectionMatrix {
     self.renderer.projectionMatrix = projectionMatrix;
 }
 
@@ -147,8 +147,8 @@
 - (void)computeRegularizationMatrix {
     GLTFBoundingSphere bounds = GLTFBoundingSphereFromBox(self.asset.defaultScene.approximateBounds);
     float scale = (bounds.radius > 0) ? (1 / (bounds.radius)) : 1;
-    matrix_float4x4 centerScale = GLTFMatrixFromUniformScale(scale);
-    matrix_float4x4 centerTranslation = GLTFMatrixFromTranslation(-bounds.center.x, -bounds.center.y, -bounds.center.z);
+    simd_float4x4 centerScale = GLTFMatrixFromUniformScale(scale);
+    simd_float4x4 centerTranslation = GLTFMatrixFromTranslation(-bounds.center.x, -bounds.center.y, -bounds.center.z);
     self.regularizationMatrix = matrix_multiply(centerScale, centerTranslation);
 }
 

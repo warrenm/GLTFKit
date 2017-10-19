@@ -37,33 +37,33 @@
     return self;
 }
 
-- (void)setScale:(vector_float3)scale {
+- (void)setScale:(simd_float3)scale {
     _scale = scale;
     _localTransformDirty = YES;
 }
 
-- (void)setRotationQuaternion:(vector_float4)rotationQuaternion {
+- (void)setRotationQuaternion:(simd_float4)rotationQuaternion {
     _rotationQuaternion = rotationQuaternion;
     _localTransformDirty = YES;
 }
 
-- (void)setTranslation:(vector_float3)translation {
+- (void)setTranslation:(simd_float3)translation {
     _translation = translation;
     _localTransformDirty = YES;
 }
 
-- (matrix_float4x4)globalTransform {
-    matrix_float4x4 localTransform = self.localTransform;
-    matrix_float4x4 ancestorTransform = self.parent ? self.parent.globalTransform : matrix_identity_float4x4;
+- (simd_float4x4)globalTransform {
+    simd_float4x4 localTransform = self.localTransform;
+    simd_float4x4 ancestorTransform = self.parent ? self.parent.globalTransform : matrix_identity_float4x4;
     return matrix_multiply(ancestorTransform, localTransform);
 }
 
-- (void)setLocalTransform:(matrix_float4x4)localTransform {
+- (void)setLocalTransform:(simd_float4x4)localTransform {
     // TODO: Need to decompose into constituent parts in order to support animating T, R, S separately
     _localTransform = localTransform;
 }
 
-- (matrix_float4x4)localTransform {
+- (simd_float4x4)localTransform {
     if (self.localTransformIsDirty) {
         [self computeLocalTransform];
     }
@@ -72,17 +72,17 @@
 }
 
 - (void)computeLocalTransform {
-    matrix_float4x4 translationMatrix = matrix_identity_float4x4;
+    simd_float4x4 translationMatrix = matrix_identity_float4x4;
     translationMatrix.columns[3][0] = _translation[0];
     translationMatrix.columns[3][1] = _translation[1];
     translationMatrix.columns[3][2] = _translation[2];
     
-    vector_float3 axis;
+    simd_float3 axis;
     float angle;
     GLTFAxisAngleFromQuaternion(_rotationQuaternion, &axis, &angle);
-    matrix_float4x4 rotationMatrix = GLTFRotationMatrixFromAxisAngle(axis, angle);
+    simd_float4x4 rotationMatrix = GLTFRotationMatrixFromAxisAngle(axis, angle);
     
-    matrix_float4x4 scaleMatrix = matrix_identity_float4x4;
+    simd_float4x4 scaleMatrix = matrix_identity_float4x4;
     scaleMatrix.columns[0][0] = _scale[0];
     scaleMatrix.columns[1][1] = _scale[1];
     scaleMatrix.columns[2][2] = _scale[2];
@@ -95,7 +95,7 @@
     return [self _approximateBoundsRecursive:matrix_identity_float4x4];
 }
 
-- (GLTFBoundingBox)_approximateBoundsRecursive:(matrix_float4x4)transform {
+- (GLTFBoundingBox)_approximateBoundsRecursive:(simd_float4x4)transform {
     GLTFBoundingBox bounds = { 0 };
     
     if (self.mesh != nil) {
@@ -113,7 +113,7 @@
         }
     }
     
-    matrix_float4x4 globalTransform = matrix_multiply(transform, self.localTransform);
+    simd_float4x4 globalTransform = matrix_multiply(transform, self.localTransform);
     
     GLTFBoundingBoxTransform(&bounds, globalTransform);
     

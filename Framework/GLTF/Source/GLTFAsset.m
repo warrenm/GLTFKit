@@ -119,14 +119,14 @@ typedef struct {
         float frameProgress = timeWithinFrame / frameTimeDelta;
         
         if ([path isEqualToString:@"rotation"]) {
-            const vector_float4 *rotationValues = [outputAccessor.bufferView.buffer contents] + outputAccessor.bufferView.offset + outputAccessor.offset;
+            const simd_float4 *rotationValues = [outputAccessor.bufferView.buffer contents] + outputAccessor.bufferView.offset + outputAccessor.offset;
             
             //NSLog(@"Accessing buffer of length %d at offset %d", (int)outputAccessor.bufferView.buffer.length, (int)outputAccessor.bufferView.offset + outputAccessor.offset);
             
-            vector_float4 previousRotation = rotationValues[previousKeyFrame];
-            vector_float4 nextRotation = rotationValues[nextKeyFrame];
+            simd_float4 previousRotation = rotationValues[previousKeyFrame];
+            simd_float4 nextRotation = rotationValues[nextKeyFrame];
             
-            vector_float4 interpRotation = (vector_float4) {
+            simd_float4 interpRotation = (simd_float4) {
                 ((1 - frameProgress) * previousRotation[0]) + (frameProgress * nextRotation[0]),
                 ((1 - frameProgress) * previousRotation[1]) + (frameProgress * nextRotation[1]),
                 ((1 - frameProgress) * previousRotation[2]) + (frameProgress * nextRotation[2]),
@@ -148,7 +148,7 @@ typedef struct {
                 ((1 - frameProgress) * previousTranslation.z) + (frameProgress * nextTranslation.z)
             };
 
-            target.translation = (vector_float3){ interpTranslation.x, interpTranslation.y, interpTranslation.z };
+            target.translation = (simd_float3){ interpTranslation.x, interpTranslation.y, interpTranslation.z };
         } else if ([path isEqualToString:@"scale"]) {
             const float *scaleValues = [outputAccessor.bufferView.buffer contents] + outputAccessor.bufferView.offset + outputAccessor.offset;
             

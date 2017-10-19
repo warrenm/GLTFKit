@@ -29,10 +29,10 @@
 @property (nonatomic, weak) GLTFSkin *skin;
 @property (nonatomic, copy) NSString *jointName;
 @property (nonatomic, weak) GLTFMesh *mesh;
-@property (nonatomic, assign) vector_float4 rotationQuaternion;
-@property (nonatomic, assign) vector_float3 scale;
-@property (nonatomic, assign) vector_float3 translation;
-@property (nonatomic, assign) matrix_float4x4 localTransform;
-@property (nonatomic, readonly, assign) matrix_float4x4 globalTransform;
+@property (nonatomic, assign) simd_float4 rotationQuaternion;
+@property (nonatomic, assign) simd_float3 scale;
+@property (nonatomic, assign) simd_float3 translation;
+@property (nonatomic, assign) simd_float4x4 localTransform;
+@property (nonatomic, readonly, assign) simd_float4x4 globalTransform;
 @property (nonatomic, readonly, assign) GLTFBoundingBox approximateBounds; // axis-aligned; in local coordinates
 @end

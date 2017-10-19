@@ -28,14 +28,14 @@ typedef NS_ENUM(NSInteger, GLTFAlphaMode) {
 
 @interface GLTFMaterial : GLTFObject
 
-@property (nonatomic, assign) vector_float4 baseColorFactor;
+@property (nonatomic, assign) simd_float4 baseColorFactor;
 @property (nonatomic, assign) float metalnessFactor;
 @property (nonatomic, assign) float roughnessFactor;
 @property (nonatomic, assign) float normalTextureScale;
-@property (nonatomic, assign) vector_float3 emissiveFactor;
+@property (nonatomic, assign) simd_float3 emissiveFactor;
 
 @property (nonatomic, assign) float glossinessFactor; // Only used by KHR_materials_pbrSpecularGlossiness extension
-@property (nonatomic, assign) vector_float3 specularFactor; // Only used by KHR_materials_pbrSpecularGlossiness extension
+@property (nonatomic, assign) simd_float3 specularFactor; // Only used by KHR_materials_pbrSpecularGlossiness extension
 
 @property (nonatomic, strong) GLTFTexture *baseColorTexture;
 @property (nonatomic, strong) GLTFTexture *metallicRoughnessTexture;
