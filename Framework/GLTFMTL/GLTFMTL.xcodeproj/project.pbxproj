@@ -88,8 +88,8 @@
 				83D6FFC71F48BDE700F71E0C /* GLTFMTLBufferAllocator.h */,
 				839945C91F641E9000642E68 /* GLTFMTLLightingEnvironment.h */,
 				83D6FFC81F48BDE700F71E0C /* GLTFMTLShaderBuilder.h */,
-				83D6FFC91F48BDE700F71E0C /* GLTFMTLUtilities.h */,
 				83D6FFCA1F48BDE700F71E0C /* GLTFMTLRenderer.h */,
+				83D6FFC91F48BDE700F71E0C /* GLTFMTLUtilities.h */,
 			);
 			path = Headers;
 			sourceTree = "<group>";

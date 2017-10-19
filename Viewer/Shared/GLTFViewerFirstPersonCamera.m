@@ -44,14 +44,14 @@ const float GLTFViewerFirstPersonCameraRotationScale = 0.0033;
     return self;
 }
 
+- (void)dealloc {
+    [self releaseCursor];
+}
+
 - (void)mouseDown:(NSEvent *)event {
     [super mouseDown:event];
 
-    if (!self.capturedCursor) {
-        CGAssociateMouseAndMouseCursorPosition(false);
-        [NSCursor hide];
-        self.capturedCursor = YES;
-    }
+    [self captureCursor];
 }
 
 - (void)mouseMoved:(NSEvent *)event {
@@ -64,6 +64,20 @@ const float GLTFViewerFirstPersonCameraRotationScale = 0.0033;
     [super keyUp:event];
     
     if (event.keyCode == kVK_Escape) {
+        [self releaseCursor];
+    }
+}
+
+- (void)captureCursor {
+    if (!self.capturedCursor) {
+        CGAssociateMouseAndMouseCursorPosition(false);
+        [NSCursor hide];
+        self.capturedCursor = YES;
+    }
+}
+
+- (void)releaseCursor {
+    if (self.capturedCursor) {
         CGAssociateMouseAndMouseCursorPosition(true);
         [NSCursor unhide];
         self.capturedCursor = NO;

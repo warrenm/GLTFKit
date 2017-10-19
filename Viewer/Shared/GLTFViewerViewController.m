@@ -18,8 +18,6 @@
 #import "GLTFViewerOrbitCamera.h"
 #import "GLTFViewerFirstPersonCamera.h"
 
-@import simd;
-
 @interface GLTFViewerViewController ()
 @property (nonatomic, weak) MTKView *metalView;
 
@@ -76,7 +74,7 @@
     self.metalView.clearColor = MTLClearColorMake(0.5, 0.5, 0.5, 1.0);
     self.metalView.depthStencilPixelFormat = MTLPixelFormatDepth32Float_Stencil8;
     
-    self.camera = [GLTFViewerOrbitCamera new];
+    self.camera = [GLTFViewerFirstPersonCamera new];
 }
 
 - (void)setupRenderer {
@@ -166,22 +164,6 @@
     float aspectRatio = self.renderer.drawableSize.width / self.renderer.drawableSize.height;
     self.projectionMatrix = GLTFPerspectiveProjectionMatrixAspectFovRH(M_PI / 3, aspectRatio, 0.01, 150);
 }
-
-//- (void)keyDown:(NSEvent *)event {
-//    switch (event.keyCode) {
-//        case 29: _lastCameraIndex = 0; break;
-//        case 18: _lastCameraIndex = 1; break;
-//        case 19: _lastCameraIndex = 2; break;
-//        case 20: _lastCameraIndex = 3; break;
-//        case 21: _lastCameraIndex = 4; break;
-//        case 23: _lastCameraIndex = 5; break;
-//        case 22: _lastCameraIndex = 6; break;
-//        case 26: _lastCameraIndex = 7; break;
-//        case 28: _lastCameraIndex = 8; break;
-//        case 25: _lastCameraIndex = 9; break;
-//        default: _lastCameraIndex = -1; break;
-//    }
-//}
 
 - (void)updateWithTimestep:(NSTimeInterval)timestep {
     self.globalTime += timestep;
@@ -280,6 +262,17 @@
 
 - (void)keyDown:(NSEvent *)event {
     [self.camera keyDown:event];
+    
+    switch (event.keyCode) {
+        case 29:
+            self.camera = [GLTFViewerFirstPersonCamera new];
+            break;
+        case 18:
+            self.camera = [GLTFViewerOrbitCamera new];
+            break;
+        default:
+            break;
+    }
 }
 
 - (void)keyUp:(NSEvent *)event {
