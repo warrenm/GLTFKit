@@ -324,7 +324,7 @@ struct FragmentUniforms {
             struct VertexUniforms vertexUniforms;
             
             matrix_float3x3 viewAffine = matrix_invert(GLTFMatrixUpperLeft3x3(self.viewMatrix));
-            vector_float3 cameraPos = (vector_float3){ self.viewMatrix.columns[3].x, self.viewMatrix.columns[3].y, self.viewMatrix.columns[3].z };
+            vector_float3 cameraPos = self.viewMatrix.columns[3].xyz;
             vector_float3 cameraWorldPos = matrix_multiply(viewAffine, -cameraPos);
             
             vertexUniforms.modelMatrix = modelMatrix;
@@ -360,11 +360,18 @@ struct FragmentUniforms {
                                        atIndex:i];
             }
 
-            // TODO: Disable depth-write when drawing translucent meshes
-            id<MTLDepthStencilState> depthStencilState = [self depthStencilStateForDepthWriteEnabled:YES
-                                                                                    depthTestEnabled:YES
-                                                                                     compareFunction:MTLCompareFunctionLess];
-            [renderEncoder setDepthStencilState:depthStencilState];
+            // TODO: This is pretty clumsy. Need to actually defer translucent meshes till after all opaques are rendered.
+            if (material.alphaMode == GLTFAlphaModeBlend){
+                id<MTLDepthStencilState> depthStencilState = [self depthStencilStateForDepthWriteEnabled:NO
+                                                                                        depthTestEnabled:YES
+                                                                                         compareFunction:MTLCompareFunctionLess];
+                [renderEncoder setDepthStencilState:depthStencilState];
+            } else {
+                id<MTLDepthStencilState> depthStencilState = [self depthStencilStateForDepthWriteEnabled:YES
+                                                                                        depthTestEnabled:YES
+                                                                                         compareFunction:MTLCompareFunctionLess];
+                [renderEncoder setDepthStencilState:depthStencilState];
+            }
             
             [renderEncoder setCullMode:MTLCullModeBack];
             

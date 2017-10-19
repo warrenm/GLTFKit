@@ -146,7 +146,7 @@ Below is a checklist of glTF features and their current level of support.
 - [ ] Normal texture scale
 - [ ] Alpha mode
 	- [x] Opaque alpha mode
-	- [ ] Mask alpha mode
+	- [x] Mask alpha mode
 	- [ ] Blend alpha mode
 - [ ] Double-sided material
 

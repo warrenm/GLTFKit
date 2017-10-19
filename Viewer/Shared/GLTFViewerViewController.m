@@ -163,7 +163,7 @@
 //    }
     
     float aspectRatio = self.renderer.drawableSize.width / self.renderer.drawableSize.height;
-    self.projectionMatrix = GLTFPerspectiveProjectionMatrixAspectFovRH(M_PI / 3, aspectRatio, 0.1, 1000);
+    self.projectionMatrix = GLTFPerspectiveProjectionMatrixAspectFovRH(M_PI / 3, aspectRatio, 0.01, 150);
 }
 
 //- (void)keyDown:(NSEvent *)event {

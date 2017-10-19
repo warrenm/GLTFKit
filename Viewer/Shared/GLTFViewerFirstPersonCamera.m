@@ -26,7 +26,6 @@ const CGFloat GLTFViewerFirstPersonCameraRotationScaleFactor = 0.0033;
 
 @interface GLTFViewerFirstPersonCamera ()
 
-//@property (nonatomic, assign) CGPoint cursorPosition;
 @property (nonatomic, assign) CGVector cursorVelocity;
 @property (nonatomic, assign) simd_float4 motionDirection;
 @property (nonatomic, assign) simd_float4 position;
