@@ -18,18 +18,18 @@
 #import "HIToolboxEvents.h"
 #import <GLTF/GLTF.h>
 
-const CGFloat GLTFViewerFirstPersonCameraDefaultDistance = 2;
-const CGFloat GLTFViewerFirstPersonCameraDefaultSpeed = 0.015;
-const CGFloat GLTFViewerFirstPersonCameraMotionDecayFactor = 0.6667;
-const CGFloat GLTFViewerFirstPersonCameraRotationDecayFactor = 0.8333;
-const CGFloat GLTFViewerFirstPersonCameraRotationScaleFactor = 0.0033;
+const float GLTFViewerFirstPersonCameraDefaultDistance = 2;
+const float GLTFViewerFirstPersonCameraDefaultSpeed = 0.015;
+const float GLTFViewerFirstPersonCameraVelocityDecay = 0.6667;
+const float GLTFViewerFirstPersonCameraRotationDecay = 0.8333;
+const float GLTFViewerFirstPersonCameraRotationScale = 0.0033;
 
 @interface GLTFViewerFirstPersonCamera ()
 
-@property (nonatomic, assign) CGVector cursorVelocity;
-@property (nonatomic, assign) simd_float4 motionDirection;
-@property (nonatomic, assign) simd_float4 position;
-@property (nonatomic, assign) float pitch, yaw;
+@property (nonatomic, assign) simd_float3 rotationVelocity;
+@property (nonatomic, assign) simd_float3 rotationAngles;
+@property (nonatomic, assign) simd_float3 velocity;
+@property (nonatomic, assign) simd_float3 position;
 @property (nonatomic, assign) BOOL capturedCursor;
 @end
 
@@ -39,9 +39,7 @@ const CGFloat GLTFViewerFirstPersonCameraRotationScaleFactor = 0.0033;
 
 - (instancetype)init {
     if ((self = [super init])) {
-        _position = (simd_float4){ 0, 0, GLTFViewerFirstPersonCameraDefaultDistance, 1 };
-        _pitch = 0;
-        _yaw = 0;
+        _position = (simd_float3){ 0, 0, GLTFViewerFirstPersonCameraDefaultDistance };
     }
     return self;
 }
@@ -59,7 +57,7 @@ const CGFloat GLTFViewerFirstPersonCameraRotationScaleFactor = 0.0033;
 - (void)mouseMoved:(NSEvent *)event {
     [super mouseMoved:event];
 
-    self.cursorVelocity = CGVectorMake(event.deltaX, event.deltaY);
+    self.rotationVelocity = (simd_float3){ event.deltaX, event.deltaY, 0 };
 }
 
 - (void)keyUp:(NSEvent *)event {
@@ -73,40 +71,38 @@ const CGFloat GLTFViewerFirstPersonCameraRotationScaleFactor = 0.0033;
 }
 
 - (void)updateWithTimestep:(NSTimeInterval)timestep {
-    simd_float4 motionDirection = self.motionDirection;
+    simd_float3 velocity = self.velocity;
     
-    motionDirection = motionDirection * GLTFViewerFirstPersonCameraMotionDecayFactor;
+    velocity *= GLTFViewerFirstPersonCameraVelocityDecay;
     
     if (self.keysDown[kVK_UpArrow] || self.keysDown[kVK_ANSI_W]) {
-        motionDirection.z -= 1;
+        velocity.z -= 1;
     }
     if (self.keysDown[kVK_DownArrow] || self.keysDown[kVK_ANSI_S]) {
-        motionDirection.z += 1;
+        velocity.z += 1;
     }
     if (self.keysDown[kVK_LeftArrow] || self.keysDown[kVK_ANSI_A]) {
-        motionDirection.x -= 1;
+        velocity.x -= 1;
     }
     if (self.keysDown[kVK_RightArrow] || self.keysDown[kVK_ANSI_D]) {
-        motionDirection.x += 1;
+        velocity.x += 1;
     }
 
-    self.motionDirection = motionDirection;
+    self.velocity = velocity;
     
-    self.yaw += GLTFViewerFirstPersonCameraRotationScaleFactor * self.cursorVelocity.dx;
-    self.pitch += GLTFViewerFirstPersonCameraRotationScaleFactor * self.cursorVelocity.dy;
-    
-    self.cursorVelocity = CGVectorMake(self.cursorVelocity.dx * GLTFViewerFirstPersonCameraRotationDecayFactor,
-                                       self.cursorVelocity.dy * GLTFViewerFirstPersonCameraRotationDecayFactor);
+    self.rotationAngles += (simd_float3){ self.rotationVelocity.y, self.rotationVelocity.x, 0 } * GLTFViewerFirstPersonCameraRotationScale;
 
-    vector_float4 yawQuat = GLTFQuaternionFromEulerAngles(0, self.yaw, 0);
-    vector_float4 pitchQuat = GLTFQuaternionFromEulerAngles(self.pitch, 0, 0);
-    vector_float4 rotationQuat = GLTFQuaternionMultiply(pitchQuat, yawQuat);
+    self.rotationVelocity *= GLTFViewerFirstPersonCameraRotationDecay;
+
+    simd_float4 pitchQuat = GLTFQuaternionFromEulerAngles(self.rotationAngles.x, 0, 0);
+    simd_float4 yawQuat = GLTFQuaternionFromEulerAngles(0, self.rotationAngles.y, 0);
+    simd_float4 rotationQuat = GLTFQuaternionMultiply(pitchQuat, yawQuat);
     simd_float4x4 rotation = GLTFRotationMatrixFromQuaternion(rotationQuat);
 
-    simd_float4 forward = rotation.columns[2];
-    simd_float4 right = rotation.columns[0];
+    simd_float3 forward = rotation.columns[2].xyz;
+    simd_float3 right = rotation.columns[0].xyz;
     
-    self.position = self.position + (motionDirection.x * right + motionDirection.z * forward) * GLTFViewerFirstPersonCameraDefaultSpeed;
+    self.position = self.position + (velocity.x * right + velocity.z * forward) * GLTFViewerFirstPersonCameraDefaultSpeed;
 
     simd_float4x4 translation = GLTFMatrixFromTranslation(self.position.x, self.position.y, self.position.z);
     _viewMatrix = matrix_invert(matrix_multiply(translation, rotation));

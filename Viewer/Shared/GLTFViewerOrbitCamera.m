@@ -18,19 +18,16 @@
 #import "HIToolboxEvents.h"
 #import <GLTF/GLTF.h>
 
-const CGFloat GLTFViewerOrbitCameraDefaultDistance = 2;
-const CGFloat GLTFViewerOrbitCameraZoomDrag = 0.95;
-const CGFloat GLTFViewerOrbitCameraRotationDrag = 0.6667;
-const CGFloat GLTFViewerOrbitCameraRotationScaleFactor = 0.0033;
-const CGFloat GLTFViewerOrbitCameraRotationMomentumScaleFactor = 0.2;
+const float GLTFViewerOrbitCameraDefaultDistance = 2;
+const float GLTFViewerOrbitCameraZoomDrag = 0.95;
+const float GLTFViewerOrbitCameraRotationDrag = 0.6667;
+const float GLTFViewerOrbitCameraZoomSensitivity = 2;
 
 @interface GLTFViewerOrbitCamera ()
 @property (nonatomic, assign) simd_float3 rotationAngles;
-@property (nonatomic, assign) CGVector cursorVelocity;
-@property (nonatomic, assign) CGFloat cameraDistance;
-@property (nonatomic, assign) CGFloat cameraVelocity;
-@property (nonatomic, assign) CGFloat zoomVelocity;
-
+@property (nonatomic, assign) simd_float3 rotationVelocity;
+@property (nonatomic, assign) float distance;
+@property (nonatomic, assign) float velocity;
 @end
 
 @implementation GLTFViewerOrbitCamera
@@ -39,7 +36,7 @@ const CGFloat GLTFViewerOrbitCameraRotationMomentumScaleFactor = 0.2;
 
 - (instancetype)init {
     if ((self = [super init])) {
-        _cameraDistance = GLTFViewerOrbitCameraDefaultDistance;
+        _distance = GLTFViewerOrbitCameraDefaultDistance;
     }
     return self;
 }
@@ -47,31 +44,30 @@ const CGFloat GLTFViewerOrbitCameraRotationMomentumScaleFactor = 0.2;
 - (void)mouseDragged:(NSEvent *)event {
     [super mouseMoved:event];
     
-    self.cursorVelocity = CGVectorMake(event.deltaX, event.deltaY);
+    self.rotationVelocity = (simd_float3){ event.deltaX, event.deltaY, 0 };
 }
 
 - (void)scrollWheel:(NSEvent *)event {
-    self.cameraVelocity = 2 * event.deltaY;
+    [super scrollWheel:event];
+    
+    self.velocity = event.deltaY * GLTFViewerOrbitCameraZoomSensitivity;
 }
 
 - (void)updateWithTimestep:(NSTimeInterval)timestep {
-    self.rotationAngles += (simd_float3){ self.cursorVelocity.dx * timestep, self.cursorVelocity.dy * timestep, 0 };
+    self.rotationAngles += self.rotationVelocity * timestep;
 
     // Clamp pitch
-    self.rotationAngles = (simd_float3){ self.rotationAngles.x, MAX(-M_PI * 0.5, MIN(self.rotationAngles.y, M_PI * 0.5)), 0 };
+    self.rotationAngles = (simd_float3){ self.rotationAngles.x, fmax(-M_PI_2, fmin(self.rotationAngles.y, M_PI_2)), 0 };
 
-    self.cursorVelocity = CGVectorMake(self.cursorVelocity.dx * GLTFViewerOrbitCameraRotationDrag,
-                                       self.cursorVelocity.dy * GLTFViewerOrbitCameraRotationDrag);
+    self.rotationVelocity *= GLTFViewerOrbitCameraRotationDrag;
 
-    self.cameraDistance += self.cameraVelocity * timestep;
-    self.cameraVelocity = self.cameraVelocity * GLTFViewerOrbitCameraZoomDrag;
+    self.distance += self.velocity * timestep;
+    self.velocity *= GLTFViewerOrbitCameraZoomDrag;
     
-    simd_float4x4 yawRotation = GLTFRotationMatrixFromAxisAngle(GLTFAxisY, -self.rotationAngles.x);
     simd_float4x4 pitchRotation = GLTFRotationMatrixFromAxisAngle(GLTFAxisX, -self.rotationAngles.y);
-    simd_float4x4 cameraTranslation = GLTFMatrixFromTranslation(0, 0, self.cameraDistance);
-    _viewMatrix = matrix_invert(matrix_multiply(matrix_multiply(yawRotation, pitchRotation), cameraTranslation));
-
+    simd_float4x4 yawRotation = GLTFRotationMatrixFromAxisAngle(GLTFAxisY, -self.rotationAngles.x);
+    simd_float4x4 translation = GLTFMatrixFromTranslation(0, 0, self.distance);
+    _viewMatrix = matrix_invert(matrix_multiply(matrix_multiply(yawRotation, pitchRotation), translation));
 }
 
 @end
-
