@@ -15,6 +15,7 @@
 //
 
 #import "GLTFViewerViewController.h"
+#import "GLTFViewerOrbitCamera.h"
 #import "GLTFViewerFirstPersonCamera.h"
 
 @import simd;
@@ -75,7 +76,7 @@
     self.metalView.clearColor = MTLClearColorMake(0.5, 0.5, 0.5, 1.0);
     self.metalView.depthStencilPixelFormat = MTLPixelFormatDepth32Float_Stencil8;
     
-    self.camera = [GLTFViewerFirstPersonCamera new];
+    self.camera = [GLTFViewerOrbitCamera new];
 }
 
 - (void)setupRenderer {
