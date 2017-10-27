@@ -296,6 +296,42 @@ size_t GLTFSizeOfComponentTypeWithDimension(GLTFDataType baseType, GLTFDataDimen
     return 0;
 }
 
+NSInteger GLTFComponentCountForDimension(GLTFDataDimension dimension) {
+    switch (dimension) {
+        case GLTFDataDimensionScalar:
+            return 1;
+        case GLTFDataDimensionVector2:
+            return 2;
+        case GLTFDataDimensionVector3:
+            return 3;
+        case GLTFDataDimensionVector4:
+            return 4;
+        case GLTFDataDimensionMatrix2x2:
+            return 4;
+        case GLTFDataDimensionMatrix3x3:
+            return 9;
+        case GLTFDataDimensionMatrix4x4:
+            return 16;
+        default:
+            return 0;
+    }
+}
+
+BOOL GLTFDataTypeComponentsAreFloats(GLTFDataType type) {
+    switch (type) {
+        case GLTFDataTypeFloat:
+        case GLTFDataTypeFloat2:
+        case GLTFDataTypeFloat3:
+        case GLTFDataTypeFloat4:
+        case GLTFDataTypeFloat2x2:
+        case GLTFDataTypeFloat3x3:
+        case GLTFDataTypeFloat4x4:
+            return YES;
+        default:
+            return NO;
+    }
+}
+
 simd_float2 GLTFVectorFloat2FromArray(NSArray *array) {
     return (simd_float2){ [array[0] floatValue], [array[1] floatValue] };
 }

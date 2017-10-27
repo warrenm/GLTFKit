@@ -35,6 +35,7 @@ FOUNDATION_EXPORT const unsigned char GLTFVersionString[];
 #import <GLTF/GLTFBufferAllocator.h>
 #import <GLTF/GLTFBufferView.h>
 #import <GLTF/GLTFCamera.h>
+#import <GLTF/GLTFDefaultBufferAllocator.h>
 #import <GLTF/GLTFEnums.h>
 #import <GLTF/GLTFImage.h>
 #import <GLTF/GLTFMaterial.h>

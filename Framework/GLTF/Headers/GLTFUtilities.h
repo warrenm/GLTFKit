@@ -61,6 +61,10 @@ extern size_t GLTFSizeOfDataType(GLTFDataType type);
 
 extern size_t GLTFSizeOfComponentTypeWithDimension(GLTFDataType baseType, GLTFDataDimension dimension);
 
+extern NSInteger GLTFComponentCountForDimension(GLTFDataDimension dimension);
+
+extern BOOL GLTFDataTypeComponentsAreFloats(GLTFDataType type);
+
 extern simd_float2 GLTFVectorFloat2FromArray(NSArray *array);
 
 extern simd_float3 GLTFVectorFloat3FromArray(NSArray *array);

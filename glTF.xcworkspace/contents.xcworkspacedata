@@ -11,6 +11,9 @@
       location = "group:Framework/GLTF/../GLTFMTL/GLTFMTL.xcodeproj">
    </FileRef>
    <FileRef
+      location = "group:Framework/GLTFSCN/GLTFSCN.xcodeproj">
+   </FileRef>
+   <FileRef
       location = "group:Viewer/Viewer.xcodeproj">
    </FileRef>
 </Workspace>
