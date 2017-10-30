@@ -9,19 +9,19 @@
 /* Begin PBXBuildFile section */
 		831C63AF1F9962A90087EF6A /* SceneKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 831C63AE1F9962A90087EF6A /* SceneKit.framework */; };
 		831C63B41F99635B0087EF6A /* GLTF.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 831C63B51F99635B0087EF6A /* GLTF.framework */; };
-		837EEE411FA2B05E004BA504 /* SCNAsset+GLTF.m in Sources */ = {isa = PBXBuildFile; fileRef = 837EEE401FA2B05E004BA504 /* SCNAsset+GLTF.m */; };
-		837EEE431FA2B069004BA504 /* SCNAsset+GLTF.h in Headers */ = {isa = PBXBuildFile; fileRef = 837EEE421FA2B069004BA504 /* SCNAsset+GLTF.h */; };
-		837EEE4D1FA2B100004BA504 /* GLTFSCN.h in Headers */ = {isa = PBXBuildFile; fileRef = 837EEE4B1FA2B100004BA504 /* GLTFSCN.h */; };
+		837EEE4D1FA2B100004BA504 /* GLTFSCN.h in Headers */ = {isa = PBXBuildFile; fileRef = 837EEE4B1FA2B100004BA504 /* GLTFSCN.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		83DBFD821FA3DDF000722FA8 /* SCNAsset+GLTF.h in Headers */ = {isa = PBXBuildFile; fileRef = 83DBFD7F1FA3DDF000722FA8 /* SCNAsset+GLTF.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		83DBFD831FA3DDF000722FA8 /* SCNAsset+GLTF.m in Sources */ = {isa = PBXBuildFile; fileRef = 83DBFD811FA3DDF000722FA8 /* SCNAsset+GLTF.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		831C63AE1F9962A90087EF6A /* SceneKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SceneKit.framework; path = System/Library/Frameworks/SceneKit.framework; sourceTree = SDKROOT; };
 		831C63B51F99635B0087EF6A /* GLTF.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = GLTF.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		837EEE401FA2B05E004BA504 /* SCNAsset+GLTF.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "SCNAsset+GLTF.m"; path = "Source/SCNAsset+GLTF.m"; sourceTree = SOURCE_ROOT; };
-		837EEE421FA2B069004BA504 /* SCNAsset+GLTF.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "SCNAsset+GLTF.h"; path = "Headers/SCNAsset+GLTF.h"; sourceTree = SOURCE_ROOT; };
 		837EEE4A1FA2B100004BA504 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		837EEE4B1FA2B100004BA504 /* GLTFSCN.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GLTFSCN.h; sourceTree = "<group>"; };
 		83A2D6E91F9961AC00FB8874 /* GLTFSCN.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = GLTFSCN.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		83DBFD7F1FA3DDF000722FA8 /* SCNAsset+GLTF.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "SCNAsset+GLTF.h"; sourceTree = "<group>"; };
+		83DBFD811FA3DDF000722FA8 /* SCNAsset+GLTF.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "SCNAsset+GLTF.m"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -46,29 +46,11 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
-		837EEE3E1FA2B046004BA504 /* Headers */ = {
-			isa = PBXGroup;
-			children = (
-				837EEE421FA2B069004BA504 /* SCNAsset+GLTF.h */,
-			);
-			name = Headers;
-			path = GLTFSCN/GLTFSCN/Headers;
-			sourceTree = "<group>";
-		};
-		837EEE3F1FA2B04D004BA504 /* Source */ = {
-			isa = PBXGroup;
-			children = (
-				837EEE401FA2B05E004BA504 /* SCNAsset+GLTF.m */,
-			);
-			name = Source;
-			path = GLTFSCN/Source;
-			sourceTree = "<group>";
-		};
 		83A2D6DF1F9961AC00FB8874 = {
 			isa = PBXGroup;
 			children = (
-				837EEE3E1FA2B046004BA504 /* Headers */,
-				837EEE3F1FA2B04D004BA504 /* Source */,
+				83DBFD7E1FA3DDF000722FA8 /* Headers */,
+				83DBFD801FA3DDF000722FA8 /* Source */,
 				837EEE4B1FA2B100004BA504 /* GLTFSCN.h */,
 				837EEE4A1FA2B100004BA504 /* Info.plist */,
 				83A2D6EA1F9961AC00FB8874 /* Products */,
@@ -84,6 +66,22 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		83DBFD7E1FA3DDF000722FA8 /* Headers */ = {
+			isa = PBXGroup;
+			children = (
+				83DBFD7F1FA3DDF000722FA8 /* SCNAsset+GLTF.h */,
+			);
+			path = Headers;
+			sourceTree = "<group>";
+		};
+		83DBFD801FA3DDF000722FA8 /* Source */ = {
+			isa = PBXGroup;
+			children = (
+				83DBFD811FA3DDF000722FA8 /* SCNAsset+GLTF.m */,
+			);
+			path = Source;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
@@ -92,7 +90,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				837EEE4D1FA2B100004BA504 /* GLTFSCN.h in Headers */,
-				837EEE431FA2B069004BA504 /* SCNAsset+GLTF.h in Headers */,
+				83DBFD821FA3DDF000722FA8 /* SCNAsset+GLTF.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -164,7 +162,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				837EEE411FA2B05E004BA504 /* SCNAsset+GLTF.m in Sources */,
+				83DBFD831FA3DDF000722FA8 /* SCNAsset+GLTF.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
