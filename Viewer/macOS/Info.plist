@@ -44,7 +44,7 @@
 	<key>LSMinimumSystemVersion</key>
 	<string>$(MACOSX_DEPLOYMENT_TARGET)</string>
 	<key>NSHumanReadableCopyright</key>
-	<string>Copyright © 2017 Warren Moore. All rights reserved.</string>
+	<string>Copyright © 2017 Warren Moore. All rights reserved. glTF and the glTF logo are trademarks of the Khronos Group Inc.</string>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
 	<key>UTImportedTypeDeclarations</key>
