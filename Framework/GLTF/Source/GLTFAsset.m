@@ -731,7 +731,7 @@ typedef struct {
         material.extensions = properties[@"extensions"];
         material.extras = properties[@"extras"];
 
-        if (self.usesPBRSpecularGlossiness) {
+        if (_usesPBRSpecularGlossiness) {
             NSDictionary *pbrSpecularGlossinessProperties = material.extensions[GLTFExtensionKHRMaterialsPBRSpecularGlossiness];
             if (pbrSpecularGlossinessProperties != nil) {
                 NSDictionary *diffuseTextureMap = pbrSpecularGlossinessProperties[@"diffuseTexture"];
@@ -748,15 +748,21 @@ typedef struct {
                         material.baseColorTexCoord = diffuseTexCoordValue.integerValue;
                     }
                 }
+                
+                // TODO: Support specularGlossinessTexture
 
                 NSArray *diffuseFactorComponents = pbrSpecularGlossinessProperties[@"diffuseFactor"];
-                material.baseColorFactor = GLTFVectorFloat4FromArray(diffuseFactorComponents);
+                if (diffuseFactorComponents.count == 4) {
+                    material.baseColorFactor = GLTFVectorFloat4FromArray(diffuseFactorComponents);
+                }
                 
                 NSNumber *glossinessFactorValue = pbrSpecularGlossinessProperties[@"glossinessFactor"];
                 material.glossinessFactor = (glossinessFactorValue != nil) ? glossinessFactorValue.floatValue : 0.0;
 
                 NSArray *specularFactorComponents = pbrSpecularGlossinessProperties[@"specularFactor"];
-                material.specularFactor = GLTFVectorFloat3FromArray(specularFactorComponents);
+                if (specularFactorComponents.count == 3) {
+                    material.specularFactor = GLTFVectorFloat3FromArray(specularFactorComponents);
+                }
             }
         }
 
