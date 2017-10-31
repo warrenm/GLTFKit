@@ -8,8 +8,10 @@ This project consists of several related parts:
 
  - **GLTF.framework**: A glTF 2.0 loader framework written in Objective-C (and suitable for use in Swift)
  - **GLTFMTL.framework**: A framework for rendering glTF assets with Metal
+ - **GLTFSCN.framework**: A framework for converting glTF scenes into SceneKit scenes
  - A viewer app for macOS
- 
+ - A SceneKit sample app for macOS
+
 ## Usage
 
 ### Using the Framework Projects

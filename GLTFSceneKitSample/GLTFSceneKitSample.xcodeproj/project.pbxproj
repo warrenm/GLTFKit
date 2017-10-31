@@ -1,0 +1,389 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 48;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		836715F91FA9014E007ECCC9 /* GLTFSCNViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 836715F81FA9014E007ECCC9 /* GLTFSCNViewController.m */; };
+		83BD8A0D1FA82BCF002CF9B9 /* GLTFSCNDocument.m in Sources */ = {isa = PBXBuildFile; fileRef = 83BD8A0C1FA82BCF002CF9B9 /* GLTFSCNDocument.m */; };
+		83BD8A0F1FA82BCF002CF9B9 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 83BD8A0E1FA82BCF002CF9B9 /* Assets.xcassets */; };
+		83BD8A121FA82BCF002CF9B9 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 83BD8A101FA82BCF002CF9B9 /* Main.storyboard */; };
+		83BD8A151FA82BCF002CF9B9 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 83BD8A141FA82BCF002CF9B9 /* main.m */; };
+		83E99B5F1FA91063006E8004 /* GLTF.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 83E99B611FA91063006E8004 /* GLTF.framework */; };
+		83E99B601FA91063006E8004 /* GLTFSCN.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 83E99B621FA91063006E8004 /* GLTFSCN.framework */; };
+		83E99B651FA9106C006E8004 /* GLTF.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 83E99B611FA91063006E8004 /* GLTF.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		83E99B671FA9106C006E8004 /* GLTFSCN.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 83E99B621FA91063006E8004 /* GLTFSCN.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		83E99B6D1FA910DC006E8004 /* Ridgecrest_Road_Env.hdr in Resources */ = {isa = PBXBuildFile; fileRef = 83E99B6B1FA910DC006E8004 /* Ridgecrest_Road_Env.hdr */; };
+		83E99B6E1FA910DC006E8004 /* Ridgecrest_Road_Ref.hdr in Resources */ = {isa = PBXBuildFile; fileRef = 83E99B6C1FA910DC006E8004 /* Ridgecrest_Road_Ref.hdr */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		83E99B681FA9106C006E8004 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				83E99B671FA9106C006E8004 /* GLTFSCN.framework in Embed Frameworks */,
+				83E99B651FA9106C006E8004 /* GLTF.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		836715F81FA9014E007ECCC9 /* GLTFSCNViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GLTFSCNViewController.m; sourceTree = "<group>"; };
+		83BD8A021FA82BCF002CF9B9 /* GLTFSceneKitSample.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GLTFSceneKitSample.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		83BD8A081FA82BCF002CF9B9 /* GLTFSCNViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GLTFSCNViewController.h; sourceTree = "<group>"; };
+		83BD8A0B1FA82BCF002CF9B9 /* GLTFSCNDocument.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GLTFSCNDocument.h; sourceTree = "<group>"; };
+		83BD8A0C1FA82BCF002CF9B9 /* GLTFSCNDocument.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = GLTFSCNDocument.m; sourceTree = "<group>"; };
+		83BD8A0E1FA82BCF002CF9B9 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		83BD8A111FA82BCF002CF9B9 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		83BD8A131FA82BCF002CF9B9 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		83BD8A141FA82BCF002CF9B9 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		83E99B611FA91063006E8004 /* GLTF.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = GLTF.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		83E99B621FA91063006E8004 /* GLTFSCN.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = GLTFSCN.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		83E99B631FA91064006E8004 /* SceneKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SceneKit.framework; path = System/Library/Frameworks/SceneKit.framework; sourceTree = SDKROOT; };
+		83E99B6B1FA910DC006E8004 /* Ridgecrest_Road_Env.hdr */ = {isa = PBXFileReference; lastKnownFileType = file; path = Ridgecrest_Road_Env.hdr; sourceTree = "<group>"; };
+		83E99B6C1FA910DC006E8004 /* Ridgecrest_Road_Ref.hdr */ = {isa = PBXFileReference; lastKnownFileType = file; path = Ridgecrest_Road_Ref.hdr; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		83BD89FF1FA82BCF002CF9B9 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				83E99B5F1FA91063006E8004 /* GLTF.framework in Frameworks */,
+				83E99B601FA91063006E8004 /* GLTFSCN.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		83BD89F91FA82BCF002CF9B9 = {
+			isa = PBXGroup;
+			children = (
+				83D32B1B1FA9150100703763 /* Shared */,
+				83E99B691FA910B4006E8004 /* Resources */,
+				83BD8A041FA82BCF002CF9B9 /* macOS */,
+				83BD8A031FA82BCF002CF9B9 /* Products */,
+				83E99B5E1FA91063006E8004 /* Frameworks */,
+			);
+			sourceTree = "<group>";
+		};
+		83BD8A031FA82BCF002CF9B9 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				83BD8A021FA82BCF002CF9B9 /* GLTFSceneKitSample.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		83BD8A041FA82BCF002CF9B9 /* macOS */ = {
+			isa = PBXGroup;
+			children = (
+				83BD8A0B1FA82BCF002CF9B9 /* GLTFSCNDocument.h */,
+				83BD8A0C1FA82BCF002CF9B9 /* GLTFSCNDocument.m */,
+				83BD8A0E1FA82BCF002CF9B9 /* Assets.xcassets */,
+				83BD8A101FA82BCF002CF9B9 /* Main.storyboard */,
+				83BD8A131FA82BCF002CF9B9 /* Info.plist */,
+				83BD8A141FA82BCF002CF9B9 /* main.m */,
+			);
+			path = macOS;
+			sourceTree = "<group>";
+		};
+		83D32B1B1FA9150100703763 /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+				83BD8A081FA82BCF002CF9B9 /* GLTFSCNViewController.h */,
+				836715F81FA9014E007ECCC9 /* GLTFSCNViewController.m */,
+			);
+			path = Shared;
+			sourceTree = "<group>";
+		};
+		83E99B5E1FA91063006E8004 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				83E99B631FA91064006E8004 /* SceneKit.framework */,
+				83E99B611FA91063006E8004 /* GLTF.framework */,
+				83E99B621FA91063006E8004 /* GLTFSCN.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		83E99B691FA910B4006E8004 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				83E99B6A1FA910B9006E8004 /* Environment */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		83E99B6A1FA910B9006E8004 /* Environment */ = {
+			isa = PBXGroup;
+			children = (
+				83E99B6B1FA910DC006E8004 /* Ridgecrest_Road_Env.hdr */,
+				83E99B6C1FA910DC006E8004 /* Ridgecrest_Road_Ref.hdr */,
+			);
+			path = Environment;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		83BD8A011FA82BCF002CF9B9 /* GLTFSceneKitSample */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 83BD8A191FA82BCF002CF9B9 /* Build configuration list for PBXNativeTarget "GLTFSceneKitSample" */;
+			buildPhases = (
+				83BD89FE1FA82BCF002CF9B9 /* Sources */,
+				83BD89FF1FA82BCF002CF9B9 /* Frameworks */,
+				83BD8A001FA82BCF002CF9B9 /* Resources */,
+				83E99B681FA9106C006E8004 /* Embed Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = GLTFSceneKitSample;
+			productName = GLTFSceneKitSample;
+			productReference = 83BD8A021FA82BCF002CF9B9 /* GLTFSceneKitSample.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		83BD89FA1FA82BCF002CF9B9 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0900;
+				ORGANIZATIONNAME = "Warren Moore";
+				TargetAttributes = {
+					83BD8A011FA82BCF002CF9B9 = {
+						CreatedOnToolsVersion = 9.0.1;
+						ProvisioningStyle = Automatic;
+						SystemCapabilities = {
+							com.apple.Sandbox = {
+								enabled = 0;
+							};
+						};
+					};
+				};
+			};
+			buildConfigurationList = 83BD89FD1FA82BCF002CF9B9 /* Build configuration list for PBXProject "GLTFSceneKitSample" */;
+			compatibilityVersion = "Xcode 8.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 83BD89F91FA82BCF002CF9B9;
+			productRefGroup = 83BD8A031FA82BCF002CF9B9 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				83BD8A011FA82BCF002CF9B9 /* GLTFSceneKitSample */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		83BD8A001FA82BCF002CF9B9 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				83E99B6E1FA910DC006E8004 /* Ridgecrest_Road_Ref.hdr in Resources */,
+				83E99B6D1FA910DC006E8004 /* Ridgecrest_Road_Env.hdr in Resources */,
+				83BD8A0F1FA82BCF002CF9B9 /* Assets.xcassets in Resources */,
+				83BD8A121FA82BCF002CF9B9 /* Main.storyboard in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		83BD89FE1FA82BCF002CF9B9 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				83BD8A0D1FA82BCF002CF9B9 /* GLTFSCNDocument.m in Sources */,
+				83BD8A151FA82BCF002CF9B9 /* main.m in Sources */,
+				836715F91FA9014E007ECCC9 /* GLTFSCNViewController.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXVariantGroup section */
+		83BD8A101FA82BCF002CF9B9 /* Main.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				83BD8A111FA82BCF002CF9B9 /* Base */,
+			);
+			name = Main.storyboard;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		83BD8A171FA82BCF002CF9B9 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "Mac Developer";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.13;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		83BD8A181FA82BCF002CF9B9 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "Mac Developer";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.13;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		83BD8A1A1FA82BCF002CF9B9 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = 5XU8G72NQS;
+				INFOPLIST_FILE = "$(SRCROOT)/macOS/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = net.warrenmoore.GLTFSceneKitSample;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		83BD8A1B1FA82BCF002CF9B9 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = 5XU8G72NQS;
+				INFOPLIST_FILE = "$(SRCROOT)/macOS/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = net.warrenmoore.GLTFSceneKitSample;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		83BD89FD1FA82BCF002CF9B9 /* Build configuration list for PBXProject "GLTFSceneKitSample" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				83BD8A171FA82BCF002CF9B9 /* Debug */,
+				83BD8A181FA82BCF002CF9B9 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		83BD8A191FA82BCF002CF9B9 /* Build configuration list for PBXNativeTarget "GLTFSceneKitSample" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				83BD8A1A1FA82BCF002CF9B9 /* Debug */,
+				83BD8A1B1FA82BCF002CF9B9 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 83BD89FA1FA82BCF002CF9B9 /* Project object */;
+}
