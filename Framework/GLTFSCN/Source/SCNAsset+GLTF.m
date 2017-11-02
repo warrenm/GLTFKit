@@ -361,7 +361,7 @@ static SCNWrapMode GLTFSCNWrapModeForAddressMode(GLTFAddressMode mode) {
 }
 
 - (CGColorRef)createCGColorForFloat4:(simd_float4)v {
-    CGFloat components[] = { v.x, v.y, v.z, v.w, 0 };
+    CGFloat components[] = { v.x, v.y, v.z, v.w };
     CGColorSpaceRef colorSpace = CGColorSpaceCreateWithName(kCGColorSpaceSRGB);
     CGColorRef color = CGColorCreate(colorSpace, &components[0]);
     CGColorSpaceRelease(colorSpace);
@@ -369,7 +369,7 @@ static SCNWrapMode GLTFSCNWrapModeForAddressMode(GLTFAddressMode mode) {
 }
 
 - (CGColorRef)createCGColorForFloat3:(simd_float3)v {
-    CGFloat components[] = { v.x, v.y, v.z, 1, 0 };
+    CGFloat components[] = { v.x, v.y, v.z, 1 };
     CGColorSpaceRef colorSpace = CGColorSpaceCreateWithName(kCGColorSpaceSRGB);
     CGColorRef color = CGColorCreate(colorSpace, &components[0]);
     CGColorSpaceRelease(colorSpace);
