@@ -52,7 +52,7 @@
     cameraNode.camera = [SCNCamera camera];
     cameraNode.camera.wantsHDR = YES;
     cameraNode.camera.wantsExposureAdaptation = YES;
-    cameraNode.camera.bloomIntensity = 0.3;
+    cameraNode.camera.bloomIntensity = 1.0;
     cameraNode.camera.zNear = 0.01;
     cameraNode.camera.zFar = 100.0;
     cameraNode.camera.automaticallyAdjustsZRange = YES;

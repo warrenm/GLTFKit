@@ -43,6 +43,18 @@ static SCNGeometryPrimitiveType GLTFSCNGeometryPrimitiveTypeForPrimitiveType(GLT
     }
 }
 
+static SCNWrapMode GLTFSCNWrapModeForAddressMode(GLTFAddressMode mode) {
+    switch (mode) {
+        case GLTFAddressModeClampToEdge:
+            return SCNWrapModeClamp;
+        case GLTFAddressModeMirroredRepeat:
+            return SCNWrapModeMirror;
+        case GLTFAddressModeRepeat:
+        default:
+            return SCNWrapModeRepeat;
+    }
+}
+
 @interface GLTFSCNSceneBuilder : NSObject
 
 @property (nonatomic, strong) GLTFScene *scene;
@@ -217,16 +229,14 @@ static SCNGeometryPrimitiveType GLTFSCNGeometryPrimitiveTypeForPrimitiveType(GLT
     scnMaterial.name = material.name;
     
     scnMaterial.lightingModelName = SCNLightingModelPhysicallyBased;
-    
-    // TODO: Translate from addressing modes to proper wrapping modes
-    
+
     scnMaterial.diffuse.contents = (__bridge id)[self cgImageForGLTFImage:material.baseColorTexture.image
                                                               channelMask:GLTFImageChannelAll];
     if (scnMaterial.diffuse.contents == nil) {
         scnMaterial.diffuse.contents = (__bridge id)[self createCGColorForFloat4:material.baseColorFactor];
     }
-    scnMaterial.diffuse.wrapS = SCNWrapModeRepeat;
-    scnMaterial.diffuse.wrapT = SCNWrapModeRepeat;
+    scnMaterial.diffuse.wrapS = GLTFSCNWrapModeForAddressMode(material.baseColorTexture.sampler.sAddressMode);
+    scnMaterial.diffuse.wrapT = GLTFSCNWrapModeForAddressMode(material.baseColorTexture.sampler.tAddressMode);
     scnMaterial.diffuse.mappingChannel = material.baseColorTexCoord;
     
     scnMaterial.metalness.contents = (__bridge id)[self cgImageForGLTFImage:material.metallicRoughnessTexture.image
@@ -234,8 +244,8 @@ static SCNGeometryPrimitiveType GLTFSCNGeometryPrimitiveTypeForPrimitiveType(GLT
     if (scnMaterial.metalness.contents == nil) {
         scnMaterial.metalness.contents = @(material.metalnessFactor);
     }
-    scnMaterial.metalness.wrapS = SCNWrapModeRepeat;
-    scnMaterial.metalness.wrapT = SCNWrapModeRepeat;
+    scnMaterial.metalness.wrapS = GLTFSCNWrapModeForAddressMode(material.metallicRoughnessTexture.sampler.sAddressMode);
+    scnMaterial.metalness.wrapT = GLTFSCNWrapModeForAddressMode(material.metallicRoughnessTexture.sampler.tAddressMode);
     scnMaterial.metalness.mappingChannel = material.metallicRoughnessTexCoord;
     
     scnMaterial.roughness.contents = (__bridge id)[self cgImageForGLTFImage:material.metallicRoughnessTexture.image
@@ -243,20 +253,20 @@ static SCNGeometryPrimitiveType GLTFSCNGeometryPrimitiveTypeForPrimitiveType(GLT
     if (scnMaterial.roughness.contents == nil) {
         scnMaterial.roughness.contents = @(material.roughnessFactor);
     }
-    scnMaterial.roughness.wrapS = SCNWrapModeRepeat;
-    scnMaterial.roughness.wrapT = SCNWrapModeRepeat;
+    scnMaterial.roughness.wrapS = GLTFSCNWrapModeForAddressMode(material.metallicRoughnessTexture.sampler.sAddressMode);
+    scnMaterial.roughness.wrapT = GLTFSCNWrapModeForAddressMode(material.metallicRoughnessTexture.sampler.tAddressMode);
     scnMaterial.roughness.mappingChannel = material.metallicRoughnessTexCoord;
     
     scnMaterial.normal.contents = (__bridge id)[self cgImageForGLTFImage:material.normalTexture.image
                                                              channelMask:GLTFImageChannelAll];
-    scnMaterial.normal.wrapS = SCNWrapModeRepeat;
-    scnMaterial.normal.wrapT = SCNWrapModeRepeat;
+    scnMaterial.normal.wrapS = GLTFSCNWrapModeForAddressMode(material.normalTexture.sampler.sAddressMode);
+    scnMaterial.normal.wrapT = GLTFSCNWrapModeForAddressMode(material.normalTexture.sampler.tAddressMode);
     scnMaterial.normal.mappingChannel = material.normalTexCoord;
     
     scnMaterial.ambientOcclusion.contents = (__bridge id)[self cgImageForGLTFImage:material.occlusionTexture.image
                                                                        channelMask:GLTFImageChannelRed];
-    scnMaterial.ambientOcclusion.wrapS = SCNWrapModeRepeat;
-    scnMaterial.ambientOcclusion.wrapT = SCNWrapModeRepeat;
+    scnMaterial.ambientOcclusion.wrapS = GLTFSCNWrapModeForAddressMode(material.occlusionTexture.sampler.sAddressMode);
+    scnMaterial.ambientOcclusion.wrapT = GLTFSCNWrapModeForAddressMode(material.occlusionTexture.sampler.tAddressMode);
     scnMaterial.ambientOcclusion.mappingChannel = material.occlusionTexCoord;
     
     scnMaterial.emission.contents = (__bridge id)[self cgImageForGLTFImage:material.emissiveTexture.image
@@ -264,8 +274,8 @@ static SCNGeometryPrimitiveType GLTFSCNGeometryPrimitiveTypeForPrimitiveType(GLT
     if (scnMaterial.emission.contents == nil) {
         scnMaterial.emission.contents = (__bridge id)[self createCGColorForFloat3:material.emissiveFactor];
     }
-    scnMaterial.emission.wrapS = SCNWrapModeRepeat;
-    scnMaterial.emission.wrapT = SCNWrapModeRepeat;
+    scnMaterial.emission.wrapS = GLTFSCNWrapModeForAddressMode(material.emissiveTexture.sampler.sAddressMode);
+    scnMaterial.emission.wrapT = GLTFSCNWrapModeForAddressMode(material.emissiveTexture.sampler.tAddressMode);
     scnMaterial.emission.mappingChannel = material.emissiveTexCoord;
 
     return scnMaterial;
