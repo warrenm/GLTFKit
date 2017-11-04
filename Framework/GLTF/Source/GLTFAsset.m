@@ -120,9 +120,7 @@ typedef struct {
         
         if ([path isEqualToString:@"rotation"]) {
             const simd_float4 *rotationValues = [outputAccessor.bufferView.buffer contents] + outputAccessor.bufferView.offset + outputAccessor.offset;
-            
-            //NSLog(@"Accessing buffer of length %d at offset %d", (int)outputAccessor.bufferView.buffer.length, (int)outputAccessor.bufferView.offset + outputAccessor.offset);
-            
+
             simd_float4 previousRotation = rotationValues[previousKeyFrame];
             simd_float4 nextRotation = rotationValues[nextKeyFrame];
             
@@ -593,7 +591,36 @@ typedef struct {
             
             NSUInteger indexAccessorIndex = [submeshProperties[@"indices"] intValue];
             if (indexAccessorIndex < _accessors.count) {
-                submesh.indexAccessor = _accessors[indexAccessorIndex];
+                GLTFAccessor *indexAccessor = _accessors[indexAccessorIndex];
+                if (indexAccessor.componentType == GLTFTextureTypeUChar) {
+                    // Fix up 8-bit indices, since they're unsupported in modern APIs
+                    uint8_t *sourceIndices = indexAccessor.bufferView.buffer.contents + indexAccessor.offset + indexAccessor.bufferView.offset;
+                    
+                    id<GLTFBuffer> shortBuffer = [_bufferAllocator newBufferWithLength:indexAccessor.count * sizeof(uint16_t)];
+                    uint16_t *destIndices = shortBuffer.contents;
+                    for (int i = 0; i < indexAccessor.count; ++i) {
+                        destIndices[i] = (uint16_t)sourceIndices[i];
+                    }
+                    _buffers = [_buffers arrayByAddingObject:shortBuffer];
+                    
+                    GLTFBufferView *shortBufferView = [GLTFBufferView new];
+                    shortBufferView.buffer = shortBuffer;
+                    shortBufferView.offset = 0;
+                    shortBufferView.stride = 0;
+                    _bufferViews = [_bufferViews arrayByAddingObject:shortBufferView];
+                    
+                    GLTFAccessor *shortAccessor = [GLTFAccessor new];
+                    shortAccessor.bufferView = shortBufferView;
+                    shortAccessor.componentType = GLTFDataTypeUShort;
+                    shortAccessor.dimension = GLTFDataDimensionScalar;
+                    shortAccessor.count = indexAccessor.count;
+                    shortAccessor.offset = 0;
+                    shortAccessor.valueRange = indexAccessor.valueRange;
+                    _accessors = [_accessors arrayByAddingObject:shortAccessor];
+                    
+                    indexAccessor = shortAccessor;
+                }
+                submesh.indexAccessor = indexAccessor;
             }
             
             if (submeshProperties[@"mode"]) {
