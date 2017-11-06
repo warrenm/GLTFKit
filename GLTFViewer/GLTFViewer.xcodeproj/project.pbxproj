@@ -9,14 +9,11 @@
 /* Begin PBXBuildFile section */
 		834168101F8D70210052E7FE /* GLTFViewerOrbitCamera.m in Sources */ = {isa = PBXBuildFile; fileRef = 8341680F1F8D70210052E7FE /* GLTFViewerOrbitCamera.m */; };
 		834168131F8D70730052E7FE /* GLTFViewerFirstPersonCamera.m in Sources */ = {isa = PBXBuildFile; fileRef = 834168121F8D70730052E7FE /* GLTFViewerFirstPersonCamera.m */; };
-		837EEE501FA2B48F004BA504 /* GLTFSCN.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 837EEE511FA2B48F004BA504 /* GLTFSCN.framework */; };
-		837EEE521FA2B493004BA504 /* GLTFSCN.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 837EEE511FA2B48F004BA504 /* GLTFSCN.framework */; };
 		837EEE531FA2B493004BA504 /* GLTFSCN.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 837EEE511FA2B48F004BA504 /* GLTFSCN.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		83850FC21F4A5E8F00F9A444 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 83850FBE1F4A5C5C00F9A444 /* main.m */; };
 		83850FC71F4A5F4D00F9A444 /* GLTFViewerViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 83850FC51F4A5F2600F9A444 /* GLTFViewerViewController.m */; };
 		83850FCA1F4A616E00F9A444 /* GLTFDocument.m in Sources */ = {isa = PBXBuildFile; fileRef = 83850FC91F4A616E00F9A444 /* GLTFDocument.m */; };
 		83850FF71F4A715D00F9A444 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 83850FF51F4A714600F9A444 /* Main.storyboard */; };
-		8394D4391F533CE4007FC600 /* GLTF.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 83850FB01F4A403800F9A444 /* GLTF.framework */; };
 		8394D43A1F533CE4007FC600 /* GLTF.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 83850FB01F4A403800F9A444 /* GLTF.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		8394D43B1F533CE4007FC600 /* GLTFMTL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 83850FB31F4A403800F9A444 /* GLTFMTL.framework */; };
 		8394D43C1F533CE4007FC600 /* GLTFMTL.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 83850FB31F4A403800F9A444 /* GLTFMTL.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
@@ -31,7 +28,6 @@
 		83D32B301FA915D000703763 /* output_pmrem_5.png in Resources */ = {isa = PBXBuildFile; fileRef = 83D32B261FA915D000703763 /* output_pmrem_5.png */; };
 		83D32B311FA915D000703763 /* output_iem.png in Resources */ = {isa = PBXBuildFile; fileRef = 83D32B271FA915D000703763 /* output_iem.png */; };
 		83D32B321FA915D000703763 /* brdfLUT.png in Resources */ = {isa = PBXBuildFile; fileRef = 83D32B281FA915D000703763 /* brdfLUT.png */; };
-		83D32B331FA917E200703763 /* skybox.metal in CopyFiles */ = {isa = PBXBuildFile; fileRef = 83D32B1E1FA915D000703763 /* skybox.metal */; };
 		83D32B341FA917E200703763 /* pbr.metal in CopyFiles */ = {isa = PBXBuildFile; fileRef = 83D32B1F1FA915D000703763 /* pbr.metal */; };
 		83DBFDA71FA51F3400722FA8 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 83850FBA1F4A5C5C00F9A444 /* Assets.xcassets */; };
 /* End PBXBuildFile section */
@@ -56,7 +52,6 @@
 			dstPath = "";
 			dstSubfolderSpec = 7;
 			files = (
-				83D32B331FA917E200703763 /* skybox.metal in CopyFiles */,
 				83D32B341FA917E200703763 /* pbr.metal in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -107,9 +102,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				837EEE501FA2B48F004BA504 /* GLTFSCN.framework in Frameworks */,
-				8394D4391F533CE4007FC600 /* GLTF.framework in Frameworks */,
-				837EEE521FA2B493004BA504 /* GLTFSCN.framework in Frameworks */,
 				8394D43B1F533CE4007FC600 /* GLTFMTL.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -267,7 +259,7 @@
 		83D6FFDB1F48BE6200F71E0C /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0900;
+				LastUpgradeCheck = 0910;
 				ORGANIZATIONNAME = "Warren Moore";
 				TargetAttributes = {
 					83D6FFE21F48BE6200F71E0C = {

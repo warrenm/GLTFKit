@@ -22,7 +22,7 @@ typedef NS_ENUM(NSInteger, GLTFVisitationStrategy) {
     GLTFVisitationStrategyDepthFirst
 };
 
-typedef void (^GLTFNodeVisitor)(GLTFNode *node, BOOL *stop);
+typedef void (^GLTFNodeVisitor)(GLTFNode *node, int depth, BOOL *stop);
 
 @protocol GLTFNodeVisitable <NSObject>
 - (void)acceptVisitor:(GLTFNodeVisitor)visitor strategy:(GLTFVisitationStrategy)strategy;

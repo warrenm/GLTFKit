@@ -22,6 +22,9 @@
 @interface GLTFAnimation : GLTFObject
 @property (nonatomic, copy) NSArray *channels;
 @property (nonatomic, copy) NSDictionary *samplers;
+@property (nonatomic, readonly, assign) NSTimeInterval duration;
+
+- (void)runAtTime:(NSTimeInterval)time;
 @end
 
 @interface GLTFAnimationSampler : GLTFObject

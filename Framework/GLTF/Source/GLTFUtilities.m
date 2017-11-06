@@ -87,7 +87,7 @@ void GLTFAxisAngleFromQuaternion(simd_float4 q, simd_float3 *outAxis, float *out
     
     float det = sqrtf(1 - q.w * q.w);
     
-    if (fabs(det) < 1e-6) {
+    if (fabs(det) < 1e-3) {
         *outAngle = 0.0;
         *outAxis = (simd_float3){ 1, 0, 0 };
     } else {
@@ -109,12 +109,12 @@ simd_float4 GLTFQuaternionMultiply(simd_float4 q, simd_float4 r) {
 }
 
 simd_float4x4 GLTFRotationMatrixFromQuaternion(simd_float4 q) {
-    return (simd_float4x4){{
-        { 1 - 2*q.y*q.y - 2*q.z*q.z,     2*q.x*q.y - 2*q.z*q.w,     2*q.x*q.z + 2*q.y*q.w, 0 },
-        {     2*q.x*q.y + 2*q.z*q.w, 1 - 2*q.x*q.x - 2*q.z*q.z,     2*q.y*q.z - 2*q.x*q.w, 0 },
-        {     2*q.x*q.z - 2*q.y*q.w,     2*q.y*q.z + 2*q.x*q.w, 1 - 2*q.x*q.x - 2*q.y*q.y, 0 },
+    return (simd_float4x4){ {
+        { 1 - 2*q.y*q.y - 2*q.z*q.z,     2*q.x*q.y + 2*q.z*q.w,     2*q.x*q.z - 2*q.y*q.w, 0 },
+        {     2*q.x*q.y - 2*q.z*q.w, 1 - 2*q.x*q.x - 2*q.z*q.z,     2*q.y*q.z + 2*q.x*q.w, 0 },
+        {     2*q.x*q.z + 2*q.y*q.w,     2*q.y*q.z - 2*q.x*q.w, 1 - 2*q.x*q.x - 2*q.y*q.y, 0 },
         {                         0,                         0,                         0, 1 }
-    }};
+    } };
 }
 
 simd_float4 GLTFQuaternionFromEulerAngles(float pitch, float yaw, float roll) {
@@ -132,6 +132,26 @@ simd_float4 GLTFQuaternionFromEulerAngles(float pitch, float yaw, float roll) {
         cx*cy*cz - sx*sy*sz
     };
     return q;
+}
+
+simd_float4 GLTFQuaternionSlerp(simd_float4 from, simd_float4 to, float t) {
+    const double alignmentThreshold = 0.9995;
+    double dot = simd_dot(from, to);
+    if (dot > alignmentThreshold) {
+        simd_float4 result = from + t * (to - from);
+        result = simd_normalize(result);
+        return result;
+    }
+
+    if (dot < 0) {
+        dot = -dot;
+        to = -to;
+    }
+    
+    double theta = acos(dot);
+    double fromFactor = sin((1 - t) * theta) / sin(theta);
+    double toFactor = sin(t * theta) / sin(theta);
+    return fromFactor * from + toFactor * to;
 }
 
 simd_float4x4 GLTFMatrixFromUniformScale(float s)
@@ -286,7 +306,12 @@ size_t GLTFSizeOfComponentTypeWithDimension(GLTFDataType baseType, GLTFDataDimen
                 case GLTFDataDimensionVector3:
                     return 12;
                 case GLTFDataDimensionVector4:
+                case GLTFDataDimensionMatrix2x2:
                     return 16;
+                case GLTFDataDimensionMatrix3x3:
+                    return 36;
+                case GLTFDataDimensionMatrix4x4:
+                    return 64;
                 default:
                     break;
             }

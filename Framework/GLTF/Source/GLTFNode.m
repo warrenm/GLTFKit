@@ -59,7 +59,6 @@
 }
 
 - (void)setLocalTransform:(simd_float4x4)localTransform {
-    // TODO: Need to decompose into constituent parts in order to support animating T, R, S separately
     _localTransform = localTransform;
 }
 
@@ -76,11 +75,8 @@
     translationMatrix.columns[3][0] = _translation[0];
     translationMatrix.columns[3][1] = _translation[1];
     translationMatrix.columns[3][2] = _translation[2];
-    
-    simd_float3 axis;
-    float angle;
-    GLTFAxisAngleFromQuaternion(_rotationQuaternion, &axis, &angle);
-    simd_float4x4 rotationMatrix = GLTFRotationMatrixFromAxisAngle(axis, angle);
+
+    simd_float4x4 rotationMatrix = GLTFRotationMatrixFromQuaternion(_rotationQuaternion);
     
     simd_float4x4 scaleMatrix = matrix_identity_float4x4;
     scaleMatrix.columns[0][0] = _scale[0];
@@ -126,15 +122,19 @@
 }
 
 - (void)acceptVisitor:(GLTFNodeVisitor)visitor strategy:(GLTFVisitationStrategy)strategy {
+    [self _acceptVisitor:visitor depth:0 strategy:strategy];
+}
+
+- (void)_acceptVisitor:(GLTFNodeVisitor)visitor depth:(int)depth strategy:(GLTFVisitationStrategy)strategy {
     switch (strategy) {
         case GLTFVisitationStrategyDepthFirst:
         default:
         {
             BOOL recurse = YES;
-            visitor(self, &recurse);
+            visitor(self, depth, &recurse);
             if (recurse) {
                 for (GLTFNode *child in self.children) {
-                    visitor(child, &recurse);
+                    [child _acceptVisitor:visitor depth:(depth + 1) strategy:strategy];
                 }
             }
         }

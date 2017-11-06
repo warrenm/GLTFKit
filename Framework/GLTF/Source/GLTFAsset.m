@@ -35,10 +35,6 @@
 
 static NSString *const GLTFExtensionKHRMaterialsPBRSpecularGlossiness = @"KHR_materials_pbrSpecularGlossiness";
 
-typedef struct {
-    float x, y, z;
-} packed_float3;
-
 @interface GLTFAsset ()
 @property (nonatomic, strong) NSURL *url;
 @property (nonatomic, strong) id<GLTFBufferAllocator> bufferAllocator;
@@ -75,89 +71,6 @@ typedef struct {
         }
     }
     return self;
-}
-
-- (void)runAnimationsAtTime:(NSTimeInterval)time {
-    [self.animations enumerateObjectsUsingBlock:^(GLTFAnimation *animation, NSUInteger index, BOOL *stop) {
-        [self runAnimation:animation atTime:time];
-    }];
-}
-
-- (void)runAnimation:(GLTFAnimation *)animation atTime:(NSTimeInterval)time {
-    for (GLTFAnimationChannel *channel in animation.channels) {
-        GLTFNode *target = channel.targetNode;
-        NSString *path = channel.targetPath;
-        GLTFAnimationSampler *sampler = channel.sampler;
-        
-        GLTFAccessor *inputAccessor = sampler.inputAccessor;
-        GLTFAccessor *outputAccessor = sampler.outputAccessor;
-        
-        int keyFrameCount = (int)inputAccessor.count;
-        
-        const float *timeValues = [inputAccessor.bufferView.buffer contents] + inputAccessor.bufferView.offset + inputAccessor.offset;
-        
-        float maxTime = timeValues[keyFrameCount - 1];
-        
-        float modTime = fmodf(time, maxTime); // Wrap time, assuming animation repeats indefinitely
-        
-        int previousKeyFrame = 0, nextKeyFrame = 1;
-        while (timeValues[nextKeyFrame] < modTime) {
-            ++previousKeyFrame;
-            ++nextKeyFrame;
-        }
-        
-        if (previousKeyFrame >= keyFrameCount) {
-            previousKeyFrame = 0;
-        }
-        
-        if (nextKeyFrame >= keyFrameCount) {
-            nextKeyFrame = 0;
-        }
-        
-        float frameTimeDelta = timeValues[nextKeyFrame] - timeValues[previousKeyFrame];
-        float timeWithinFrame = modTime - timeValues[previousKeyFrame];
-        float frameProgress = timeWithinFrame / frameTimeDelta;
-        
-        if ([path isEqualToString:@"rotation"]) {
-            const simd_float4 *rotationValues = [outputAccessor.bufferView.buffer contents] + outputAccessor.bufferView.offset + outputAccessor.offset;
-
-            simd_float4 previousRotation = rotationValues[previousKeyFrame];
-            simd_float4 nextRotation = rotationValues[nextKeyFrame];
-            
-            simd_float4 interpRotation = (simd_float4) {
-                ((1 - frameProgress) * previousRotation[0]) + (frameProgress * nextRotation[0]),
-                ((1 - frameProgress) * previousRotation[1]) + (frameProgress * nextRotation[1]),
-                ((1 - frameProgress) * previousRotation[2]) + (frameProgress * nextRotation[2]),
-                ((1 - frameProgress) * previousRotation[3]) + (frameProgress * nextRotation[3])
-            };
-            
-            interpRotation = vector_normalize(interpRotation);
-            
-            target.rotationQuaternion = interpRotation;
-        } else if ([path isEqualToString:@"translation"]) {
-            const packed_float3 *translationValues = [outputAccessor.bufferView.buffer contents] + outputAccessor.bufferView.offset + outputAccessor.offset;
-            
-            packed_float3 previousTranslation = translationValues[previousKeyFrame];
-            packed_float3 nextTranslation = translationValues[nextKeyFrame];
-            
-            packed_float3 interpTranslation = (packed_float3) {
-                ((1 - frameProgress) * previousTranslation.x) + (frameProgress * nextTranslation.x),
-                ((1 - frameProgress) * previousTranslation.y) + (frameProgress * nextTranslation.y),
-                ((1 - frameProgress) * previousTranslation.z) + (frameProgress * nextTranslation.z)
-            };
-
-            target.translation = (simd_float3){ interpTranslation.x, interpTranslation.y, interpTranslation.z };
-        } else if ([path isEqualToString:@"scale"]) {
-            const float *scaleValues = [outputAccessor.bufferView.buffer contents] + outputAccessor.bufferView.offset + outputAccessor.offset;
-            
-            float previousScale = scaleValues[previousKeyFrame];
-            float nextScale = scaleValues[nextKeyFrame];
-            
-            float interpScale = ((1 - frameProgress) * previousScale) + (frameProgress * nextScale);
-            
-            target.scale = interpScale;
-        }
-    }
 }
 
 - (BOOL)loadWithError:(NSError **)errorOrNil {
@@ -232,15 +145,34 @@ typedef struct {
     NSMutableArray *accessors = [NSMutableArray arrayWithCapacity:accessorsMap.count];
     for (NSDictionary *properties in accessorsMap) {
         GLTFAccessor *accessor = [[GLTFAccessor alloc] init];
-        NSUInteger bufferViewIndex = [properties[@"bufferView"] intValue];
-        if (bufferViewIndex < _bufferViews.count) {
-            accessor.bufferView = _bufferViews[bufferViewIndex];
-        }
         accessor.componentType = [properties[@"componentType"] integerValue];
         accessor.dimension = GLTFDataDimensionForName(properties[@"type"]);
         accessor.offset = [properties[@"byteOffset"] integerValue];
         accessor.count = [properties[@"count"] integerValue];
-        
+        NSUInteger bufferViewIndex = [properties[@"bufferView"] intValue];
+        if (bufferViewIndex < _bufferViews.count) {
+            accessor.bufferView = _bufferViews[bufferViewIndex];
+            size_t bytesPerComponent = (int)GLTFSizeOfDataType(accessor.componentType);
+            NSInteger dataOffset = accessor.offset + accessor.bufferView.offset;
+            if (dataOffset % bytesPerComponent != 0) {
+                //NSLog(@"WARNING: Accessor had misaligned offset %d, which is not a multiple of %d. Building auxiliary buffer and continuing...",
+                //      (int)dataOffset, (int)bytesPerComponent);
+                size_t elementSize = GLTFSizeOfComponentTypeWithDimension(accessor.componentType, accessor.dimension);
+                id<GLTFBuffer> buffer = [_bufferAllocator newBufferWithLength:accessor.count * elementSize];
+                memcpy(buffer.contents, accessor.bufferView.buffer.contents + accessor.bufferView.offset + accessor.offset, buffer.length);
+                _buffers = [_buffers arrayByAddingObject:buffer];
+
+                GLTFBufferView *bufferView = [GLTFBufferView new];
+                bufferView.buffer = buffer;
+                bufferView.offset = 0;
+                bufferView.stride = 0;
+                _bufferViews = [_bufferViews arrayByAddingObject:bufferView];
+
+                accessor.bufferView = bufferView;
+                accessor.offset = 0;
+            }
+        }
+
         __block GLTFValueRange valueRange = { 0 };
         NSArray *minValues = properties[@"min"];
         [minValues enumerateObjectsUsingBlock:^(NSNumber *num, NSUInteger index, BOOL *stop) {
@@ -311,16 +243,16 @@ typedef struct {
         bufferView.stride = [properties[@"byteStride"] integerValue];
         bufferView.offset = [properties[@"byteOffset"] integerValue];
         bufferView.target = [properties[@"target"] integerValue];
-        
-        if ((bufferView.buffer != nil) && (bufferView.offset % 16 != 0)) {
-            NSLog(@"WARNING: Buffer view %d had misaligned offset of %d. Creating auxilliary buffer of length %d and continuing...",
-                  (int)index, (int)bufferView.offset, (int)bufferView.length);
-            id<GLTFBuffer> alignedBuffer = [_bufferAllocator newBufferWithLength:bufferView.length];
-            _buffers = [_buffers arrayByAddingObject:alignedBuffer];
-            memcpy([alignedBuffer contents], bufferView.buffer.contents + bufferView.offset, bufferView.length);
-            bufferView.buffer = alignedBuffer;
-            bufferView.offset = 0;
-        }
+
+//        if ((bufferView.buffer != nil) && (bufferView.offset % 16 != 0)) {
+//            NSLog(@"WARNING: Buffer view %d had misaligned offset of %d. Creating auxilliary buffer of length %d and continuing...",
+//                  (int)index, (int)bufferView.offset, (int)bufferView.length);
+//            id<GLTFBuffer> alignedBuffer = [_bufferAllocator newBufferWithLength:bufferView.length];
+//            _buffers = [_buffers arrayByAddingObject:alignedBuffer];
+//            memcpy([alignedBuffer contents], bufferView.buffer.contents + bufferView.offset, bufferView.length);
+//            bufferView.buffer = alignedBuffer;
+//            bufferView.offset = 0;
+//        }
         
         [bufferViews addObject: bufferView];
     }];
@@ -893,16 +825,18 @@ typedef struct {
         NSMutableArray *nodes = [NSMutableArray arrayWithCapacity:skin.jointNodes.count];
         for (NSInteger i = 0; i < skin.jointNodes.count; ++i) {
             NSNumber *jointIndexValue = (NSNumber *)skin.jointNodes[i];
-            // TODO: Bounds-check
-            [nodes addObject:_nodes[jointIndexValue.integerValue]];
+            if (jointIndexValue != nil && jointIndexValue.intValue < _nodes.count) {
+                [nodes addObject:_nodes[jointIndexValue.intValue]];
+            }
         }
         skin.jointNodes = [nodes copy];
 
         NSNumber *skeletonIndexValue = (NSNumber *)skin.skeletonRootNode;
-        // TODO: Bounds-check
-        skin.skeletonRootNode = _nodes[skeletonIndexValue.integerValue];
+        if (skeletonIndexValue != nil && skeletonIndexValue.intValue < _nodes.count) {
+            skin.skeletonRootNode = _nodes[skeletonIndexValue.intValue];
+        }
     }
-
+    
     return YES;
 }
 

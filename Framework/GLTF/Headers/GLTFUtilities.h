@@ -45,6 +45,8 @@ extern simd_float4 GLTFQuaternionFromEulerAngles(float pitch, float yaw, float r
 
 extern simd_float4x4 GLTFRotationMatrixFromQuaternion(simd_float4 q);
 
+extern simd_float4 GLTFQuaternionSlerp(simd_float4 from, simd_float4 to, float t);
+
 extern simd_float4x4 GLTFMatrixFromUniformScale(float s);
 
 extern simd_float4x4 GLTFMatrixFromTranslation(float x, float y, float z);

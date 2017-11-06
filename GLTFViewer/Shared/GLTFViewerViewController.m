@@ -75,7 +75,7 @@
     self.metalView.clearColor = MTLClearColorMake(0.5, 0.5, 0.5, 1.0);
     self.metalView.depthStencilPixelFormat = MTLPixelFormatDepth32Float_Stencil8;
     
-    self.camera = [GLTFViewerFirstPersonCamera new];
+    self.camera = [GLTFViewerOrbitCamera new];
 }
 
 - (void)setupRenderer {
@@ -163,13 +163,24 @@
 //    }
     
     float aspectRatio = self.renderer.drawableSize.width / self.renderer.drawableSize.height;
-    self.projectionMatrix = GLTFPerspectiveProjectionMatrixAspectFovRH(M_PI / 3, aspectRatio, 0.01, 150);
+    self.projectionMatrix = GLTFPerspectiveProjectionMatrixAspectFovRH(M_PI / 3, aspectRatio, 0.01, 250);
 }
 
 - (void)updateWithTimestep:(NSTimeInterval)timestep {
     self.globalTime += timestep;
+    
+    NSTimeInterval maxAnimDuration = 0;
+    for (GLTFAnimation *animation in self.asset.animations) {
+        if (animation.duration > maxAnimDuration) {
+            maxAnimDuration = animation.duration;
+        }
+    }
+    
+    NSTimeInterval animTime = fmod(self.globalTime, maxAnimDuration);
 
-    [self.asset runAnimationsAtTime:self.globalTime];
+    for (GLTFAnimation *animation in self.asset.animations) {
+        [animation runAtTime:animTime];
+    }
 
     [self.camera updateWithTimestep:timestep];
     [self computeTransforms];

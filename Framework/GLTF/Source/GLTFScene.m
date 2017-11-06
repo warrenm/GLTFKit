@@ -30,8 +30,7 @@
 
 - (void)acceptVisitor:(GLTFNodeVisitor)visitor strategy:(GLTFVisitationStrategy)strategy {
     for (GLTFNode *node in self.nodes) {
-        BOOL ignored = NO;
-        visitor(node, &ignored);
+        [node acceptVisitor:visitor strategy:strategy];
     }
 }
 

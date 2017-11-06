@@ -57,7 +57,7 @@ const float GLTFViewerFirstPersonCameraRotationScale = 0.0033;
 - (void)mouseMoved:(NSEvent *)event {
     [super mouseMoved:event];
 
-    self.rotationVelocity = (simd_float3){ event.deltaX, event.deltaY, 0 };
+    self.rotationVelocity = (simd_float3){ -event.deltaX, -event.deltaY, 0 };
 }
 
 - (void)keyUp:(NSEvent *)event {
@@ -110,7 +110,7 @@ const float GLTFViewerFirstPersonCameraRotationScale = 0.0033;
 
     simd_float4 pitchQuat = GLTFQuaternionFromEulerAngles(self.rotationAngles.x, 0, 0);
     simd_float4 yawQuat = GLTFQuaternionFromEulerAngles(0, self.rotationAngles.y, 0);
-    simd_float4 rotationQuat = GLTFQuaternionMultiply(pitchQuat, yawQuat);
+    simd_float4 rotationQuat = GLTFQuaternionMultiply(yawQuat, pitchQuat);
     simd_float4x4 rotation = GLTFRotationMatrixFromQuaternion(rotationQuat);
 
     simd_float3 forward = rotation.columns[2].xyz;

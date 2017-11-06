@@ -19,13 +19,15 @@
 #import "GLTFObject.h"
 #import "GLTFEnums.h"
 
-@class GLTFScene, GLTFCamera;
+@class GLTFScene, GLTFCamera, GLTFAnimation;
 @protocol GLTFBufferAllocator;
 
 @interface GLTFAsset : NSObject
 
 @property (nonatomic, readonly, copy) NSArray<GLTFScene *> *scenes;
 @property (nonatomic, readonly) GLTFScene *defaultScene;
+
+@property (nonatomic, readonly, copy) NSArray<GLTFAnimation *> *animations;
 
 @property (nonatomic, readonly, copy) NSArray<GLTFCamera *> *cameras;
 
@@ -36,8 +38,6 @@
 @property (nonatomic, copy) NSArray<NSString *> *extensionsUsed;
 
 - (instancetype)initWithURL:(NSURL *)url bufferAllocator:(id<GLTFBufferAllocator>)bufferAllocator;
-
-- (void)runAnimationsAtTime:(NSTimeInterval)time;
 
 @end
 

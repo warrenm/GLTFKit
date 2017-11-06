@@ -49,9 +49,7 @@ struct FragmentUniforms {
 
 @property (nonatomic, strong) dispatch_semaphore_t frameBoundarySemaphore;
 
-@property (nonatomic, copy) NSArray *dynamicConstantsBuffers;
-@property (nonatomic, assign) NSInteger constantsBufferIndex;
-@property (nonatomic, assign) NSInteger dynamicConstantsOffset;
+@property (nonatomic, strong) NSMutableArray *constantsBuffers;
 
 @property (nonatomic, strong) NSMutableDictionary<NSUUID *, id<MTLRenderPipelineState>> *pipelineStatesForSubmeshes;
 @property (nonatomic, strong) NSMutableDictionary<NSNumber *, id<MTLDepthStencilState>> *depthStencilStateMap;
@@ -77,15 +75,8 @@ struct FragmentUniforms {
 
         _textureLoader = [[MTKTextureLoader alloc] initWithDevice:_device];
         
-        NSMutableArray *buffers = [NSMutableArray arrayWithCapacity:GLTFMTLRendererMaxInflightFrames];
-        for (int i = 0; i < GLTFMTLRendererMaxInflightFrames; ++i) {
-            id buffer = [_device newBufferWithLength:GLTFMTLRendererDynamicConstantsBufferSize
-                                             options:MTLResourceStorageModeShared];
-            [buffers addObject:buffer];
-        }
-        
-        _dynamicConstantsBuffers = [buffers copy];
-        _constantsBufferIndex = 0;
+        _constantsBuffers = [NSMutableArray array];
+
         _frameBoundarySemaphore = dispatch_semaphore_create(GLTFMTLRendererMaxInflightFrames);
         
         _depthStencilStateMap = [NSMutableDictionary dictionary];
@@ -95,6 +86,11 @@ struct FragmentUniforms {
     }
     
     return self;
+}
+
+- (id<MTLBuffer>)dequeueReusableBufferOfLength:(size_t)length {
+    id <MTLBuffer> buffer = [self.device newBufferWithLength:length options:MTLResourceStorageModeShared];
+    return buffer;
 }
 
 - (id<MTLTexture>)textureForImage:(GLTFImage *)image {
@@ -284,9 +280,9 @@ struct FragmentUniforms {
     if (jointsAccessor != nil && inverseBindingAccessor != nil) {
         NSInteger jointCount = skin.jointNodes.count;
         simd_float4x4 *jointMatrices = (simd_float4x4 *)jointBuffer.contents;
+        simd_float4x4 *inverseBindMatrices = inverseBindingAccessor.bufferView.buffer.contents + inverseBindingAccessor.bufferView.offset + inverseBindingAccessor.offset;
         for (NSInteger i = 0; i < jointCount; ++i) {
             GLTFNode *joint = skin.jointNodes[i];
-            simd_float4x4 *inverseBindMatrices = (simd_float4x4 *)(inverseBindingAccessor.bufferView.buffer.contents + inverseBindingAccessor.bufferView.offset + inverseBindingAccessor.offset);
             simd_float4x4 inverseBindMatrix = inverseBindMatrices[i];
             jointMatrices[i] = matrix_multiply(matrix_invert(node.globalTransform), matrix_multiply(joint.globalTransform, inverseBindMatrix));
         }
@@ -343,9 +339,11 @@ struct FragmentUniforms {
             
             [renderEncoder setVertexBytes:&vertexUniforms length:sizeof(vertexUniforms) atIndex:GLTFVertexDescriptorMaxAttributeCount + 0];
             
-            id<MTLBuffer> jointBuffer = self.dynamicConstantsBuffers[self.constantsBufferIndex];
-            [self computeJointsForSubmesh:submesh inNode:node buffer:jointBuffer];
-            [renderEncoder setVertexBuffer:jointBuffer offset:0 atIndex:GLTFVertexDescriptorMaxAttributeCount + 1];
+            if (node.skin != nil && node.skin.jointNodes != nil && node.skin.jointNodes.count > 0) {
+                id<MTLBuffer> jointBuffer = [self dequeueReusableBufferOfLength: node.skin.jointNodes.count * sizeof(simd_float4x4)];
+                [self computeJointsForSubmesh:submesh inNode:node buffer:jointBuffer];
+                [renderEncoder setVertexBuffer:jointBuffer offset:0 atIndex:GLTFVertexDescriptorMaxAttributeCount + 1];
+            }
             
             [renderEncoder setFragmentBytes:&fragmentUniforms length: sizeof(fragmentUniforms) atIndex: 0];
             
@@ -373,7 +371,11 @@ struct FragmentUniforms {
                 [renderEncoder setDepthStencilState:depthStencilState];
             }
             
-            [renderEncoder setCullMode:MTLCullModeBack];
+            if (material.isDoubleSided) {
+                [renderEncoder setCullMode:MTLCullModeNone];
+            } else {
+                [renderEncoder setCullMode:MTLCullModeBack];
+            }
             
             if (useIndexBuffer) {
                 GLTFMTLBuffer *indexBuffer = (GLTFMTLBuffer *)indexAccessor.bufferView.buffer;
@@ -402,8 +404,6 @@ struct FragmentUniforms {
 }
 
 - (void)signalFrameCompletion {
-    self.constantsBufferIndex = (self.constantsBufferIndex + 1) % GLTFMTLRendererMaxInflightFrames;
-    self.dynamicConstantsOffset = 0;
     dispatch_semaphore_signal(self.frameBoundarySemaphore);
 }
 
