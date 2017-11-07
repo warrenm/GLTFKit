@@ -33,6 +33,8 @@
 
 @import simd;
 
+#define USE_AGGRESSIVE_ALIGNMENT 0
+
 static NSString *const GLTFExtensionKHRMaterialsPBRSpecularGlossiness = @"KHR_materials_pbrSpecularGlossiness";
 
 @interface GLTFAsset ()
@@ -152,13 +154,18 @@ static NSString *const GLTFExtensionKHRMaterialsPBRSpecularGlossiness = @"KHR_ma
         NSUInteger bufferViewIndex = [properties[@"bufferView"] intValue];
         if (bufferViewIndex < _bufferViews.count) {
             accessor.bufferView = _bufferViews[bufferViewIndex];
-            size_t bytesPerComponent = (int)GLTFSizeOfDataType(accessor.componentType);
+#if USE_AGGRESSIVE_ALIGNMENT
+            size_t alignment = GLTFSizeOfComponentTypeWithDimension(accessor.componentType, accessor.dimension);
+#else
+            size_t alignment = GLTFSizeOfDataType(accessor.componentType);
+#endif
             NSInteger dataOffset = accessor.offset + accessor.bufferView.offset;
-            if (dataOffset % bytesPerComponent != 0) {
-                //NSLog(@"WARNING: Accessor had misaligned offset %d, which is not a multiple of %d. Building auxiliary buffer and continuing...",
-                //      (int)dataOffset, (int)bytesPerComponent);
+            if (dataOffset % alignment != 0) {
                 size_t elementSize = GLTFSizeOfComponentTypeWithDimension(accessor.componentType, accessor.dimension);
-                id<GLTFBuffer> buffer = [_bufferAllocator newBufferWithLength:accessor.count * elementSize];
+                size_t length = accessor.count * elementSize;
+                NSLog(@"WARNING: Accessor had misaligned offset %d, which is not a multiple of %d. Building auxiliary buffer of length %d and continuing...",
+                      (int)dataOffset, (int)alignment, (int)length);
+                id<GLTFBuffer> buffer = [_bufferAllocator newBufferWithLength:length];
                 memcpy(buffer.contents, accessor.bufferView.buffer.contents + accessor.bufferView.offset + accessor.offset, buffer.length);
                 _buffers = [_buffers arrayByAddingObject:buffer];
 
