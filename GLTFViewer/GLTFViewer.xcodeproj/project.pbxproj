@@ -92,8 +92,6 @@
 		83D6000C1F48BECB00F71E0C /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		83D6000F1F48BECB00F71E0C /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		83D600111F48BECB00F71E0C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		83D6003E1F48C59D00F71E0C /* GLTF.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GLTF.framework; path = "../../../../Library/Developer/Xcode/DerivedData/glTF-hfjwsbtojkmckmakuumesfrunwqe/Build/Products/Debug/GLTF.framework"; sourceTree = "<group>"; };
-		83D6003F1F48C59D00F71E0C /* GLTFMTL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GLTFMTL.framework; path = "../../../../Library/Developer/Xcode/DerivedData/glTF-hfjwsbtojkmckmakuumesfrunwqe/Build/Products/Debug/GLTFMTL.framework"; sourceTree = "<group>"; };
 		83D6FFE31F48BE6200F71E0C /* glTFViewer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = glTFViewer.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -193,8 +191,6 @@
 				837EEE511FA2B48F004BA504 /* GLTFSCN.framework */,
 				83850FB31F4A403800F9A444 /* GLTFMTL.framework */,
 				83850FB01F4A403800F9A444 /* GLTF.framework */,
-				83D6003E1F48C59D00F71E0C /* GLTF.framework */,
-				83D6003F1F48C59D00F71E0C /* GLTFMTL.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";

@@ -21,7 +21,9 @@
 @interface GLTFViewerViewController ()
 @property (nonatomic, weak) MTKView *metalView;
 
+#if TARGET_OS_OSX
 @property (nonatomic, strong) NSTrackingArea *trackingArea;
+#endif
 
 @property (nonatomic, strong) id <MTLDevice> device;
 @property (nonatomic, strong) id <MTLCommandQueue> commandQueue;
@@ -44,6 +46,7 @@
     return YES;
 }
 
+#if TARGET_OS_OSX
 - (void)setView:(NSView *)view {
     [super setView:view];
     
@@ -60,6 +63,7 @@
                                                     userInfo:nil];
     [self.view addTrackingArea:self.trackingArea];
 }
+#endif
 
 - (void)setupMetal {
     self.device = MTLCreateSystemDefaultDevice();
@@ -252,6 +256,8 @@
 
 // MARK: - NSResponder
 
+#if TARGET_OS_OSX
+
 - (void)mouseDown:(NSEvent *)event {
     [self.camera mouseDown:event];
 }
@@ -290,6 +296,8 @@
 - (void)keyUp:(NSEvent *)event {
     [self.camera keyUp:event];
 }
+
+#endif
 
 // MARK: - MTKViewDelegate
 
