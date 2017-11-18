@@ -16,6 +16,13 @@
 
 #import "GLTFDefaultBufferAllocator.h"
 
+static uint64_t _liveAllocationSize;
+
+@interface GLTFDefaultBufferAllocator ()
++ (void)incrementLiveAllocationSizeByLength:(uint64_t)length;
++ (void)decrementLiveAllocationSizeByLength:(uint64_t)length;
+@end
+
 @interface GLTFMemoryBuffer: NSObject <GLTFBuffer>
 @property (nonatomic, assign) void *bytes;
 @property (nonatomic, assign) NSInteger length;
@@ -33,6 +40,7 @@
     if ((self = [super init])) {
         _bytes = malloc(length);
         _length = length;
+        [GLTFDefaultBufferAllocator incrementLiveAllocationSizeByLength:_length];
     }
     return self;
 }
@@ -42,8 +50,14 @@
         _length = data.length;
         _bytes = malloc(_length);
         memcpy(_bytes, data.bytes, _length);
+        [GLTFDefaultBufferAllocator incrementLiveAllocationSizeByLength:_length];
     }
     return self;
+}
+
+- (void)dealloc {
+    free(_bytes);
+    [GLTFDefaultBufferAllocator decrementLiveAllocationSizeByLength:_length];
 }
 
 - (void *)contents NS_RETURNS_INNER_POINTER {
@@ -53,6 +67,18 @@
 @end
 
 @implementation GLTFDefaultBufferAllocator
+
++ (void)incrementLiveAllocationSizeByLength:(uint64_t)length {
+    _liveAllocationSize += length;
+}
+
++ (void)decrementLiveAllocationSizeByLength:(uint64_t)length {
+    _liveAllocationSize -= length;
+}
+
++ (uint64_t)liveAllocationSize {
+    return _liveAllocationSize;
+}
 
 - (id<GLTFBuffer>)newBufferWithLength:(NSInteger)length {
     GLTFMemoryBuffer *buffer = [[GLTFMemoryBuffer alloc] initWithLength:length];
