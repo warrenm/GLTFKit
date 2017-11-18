@@ -34,14 +34,10 @@
     
     id<MTLCommandQueue> commandQueue = self.scnView.commandQueue;
     commandQueue.label = @"gltf.scenekit";
-
-    self.scnView.allowsCameraControl = YES;
 }
 
 - (void)setAsset:(GLTFAsset *)asset {
-    _asset = asset;
-
-    _scene = [[SCNScene scenesFromGLTFAsset:self.asset options:nil] firstObject];
+    _scene = [[SCNScene scenesFromGLTFAsset:asset options:nil] firstObject];
     
     _scene.lightingEnvironment.contents = @"Ridgecrest_Road_Ref.hdr";
     _scene.lightingEnvironment.intensity = 3.0;

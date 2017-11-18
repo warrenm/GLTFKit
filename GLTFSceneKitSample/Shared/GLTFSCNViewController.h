@@ -28,7 +28,8 @@ typedef UIViewController NSUIViewController;
 
 @interface GLTFSCNViewController : NSUIViewController
 
-@property (nonatomic, strong) GLTFAsset *asset;
 @property (nonatomic, strong, readonly) SCNScene *scene;
+
+- (void)setAsset:(GLTFAsset *)asset;
 
 @end
