@@ -24,7 +24,7 @@ typedef NSViewController NSUIViewController;
 typedef UIViewController NSUIViewController;
 #endif
 
-#import <GLTFMTL/GLTFMTL.h>
+#import <GLTF/GLTF.h>
 
 @interface GLTFSCNViewController : NSUIViewController
 
