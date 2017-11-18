@@ -16,7 +16,7 @@
 
 #import <Foundation/Foundation.h>
 
-#import "SCNAsset+GLTF.h"
+#import "SCNScene+GLTF.h"
 
 
 typedef NS_ENUM(NSInteger, GLTFImageChannel) {
@@ -55,37 +55,95 @@ static SCNWrapMode GLTFSCNWrapModeForAddressMode(GLTFAddressMode mode) {
     }
 }
 
+static NSInteger GLTFPrimitiveCountForIndexCount(NSInteger indexCount, SCNGeometryPrimitiveType primitiveType) {
+    switch (primitiveType) {
+        case SCNGeometryPrimitiveTypePoint:
+            return indexCount;
+        case SCNGeometryPrimitiveTypeLine:
+            return indexCount / 2;
+        case SCNGeometryPrimitiveTypeTriangles:
+            return indexCount / 3;
+        case SCNGeometryPrimitiveTypeTriangleStrip:
+            return indexCount - 2;
+        case SCNGeometryPrimitiveTypePolygon:
+            return 1;
+        default:
+            return 0;
+    }
+}
+
+static SCNMatrix4 GLTFSCNMatrix4FromFloat4x4(simd_float4x4 m) {
+    SCNMatrix4 mOut = (SCNMatrix4) {
+        m.columns[0].x, m.columns[0].y, m.columns[0].z, m.columns[0].w,
+        m.columns[1].x, m.columns[1].y, m.columns[1].z, m.columns[1].w,
+        m.columns[2].x, m.columns[2].y, m.columns[2].z, m.columns[2].w,
+        m.columns[3].x, m.columns[3].y, m.columns[3].z, m.columns[3].w
+    };
+    return mOut;
+}
+
 @interface GLTFSCNSceneBuilder : NSObject
 
-@property (nonatomic, strong) GLTFScene *scene;
+@property (nonatomic, strong) GLTFAsset *asset;
 @property (nonatomic, copy) NSDictionary<id<NSCopying>, id> *options;
 @property (nonatomic, strong) NSMutableDictionary<NSString *, id> *cgImagesForImagesAndChannels;
+@property (nonatomic, strong) NSMutableDictionary<NSUUID *, SCNNode *> *scnNodesForGLTFNodeIdentifiers;
 
-- (instancetype)initWithGLTFScene:(GLTFScene *)scene options:(NSDictionary<id<NSCopying>, id> *)options;
+- (instancetype)initWithGLTFAsset:(GLTFAsset *)asset options:(NSDictionary<id<NSCopying>, id> *)options;
 
-- (SCNScene *)buildScene;
+- (NSArray<SCNScene *> *)buildScenes;
 
 @end
 
 @implementation GLTFSCNSceneBuilder
 
-- (instancetype)initWithGLTFScene:(GLTFScene *)scene options:(NSDictionary<id<NSCopying>, id> *)options {
+- (instancetype)initWithGLTFAsset:(GLTFAsset *)asset options:(NSDictionary<id<NSCopying>, id> *)options {
     if ((self = [super init])) {
-        _scene = scene;
+        _asset = asset;
         _options = options;
         _cgImagesForImagesAndChannels = [NSMutableDictionary dictionary];
+        _scnNodesForGLTFNodeIdentifiers = [NSMutableDictionary dictionary];
     }
     return self;
 }
 
-- (SCNScene *)buildScene {
-    SCNScene *scnScene = [SCNScene scene];
+- (NSArray<SCNScene *> *)buildScenes {
+    NSMutableArray *scenes = [NSMutableArray array];
     
-    for (GLTFNode *node in self.scene.nodes) {
-        [self recursiveAddNode:node toSCNNode:scnScene.rootNode];
+    for (GLTFScene *scene in self.asset.scenes) {
+        SCNScene *scnScene = [SCNScene scene];
+        
+        for (GLTFNode *node in scene.nodes) {
+            [self recursiveAddNode:node toSCNNode:scnScene.rootNode];
+        }
+        
+        [scenes addObject:scnScene];
     }
     
-    return scnScene;
+    for (GLTFAnimation *animation in self.asset.animations) {
+        for (GLTFAnimationChannel *channel in animation.channels) {
+            CAKeyframeAnimation *keyframeAnimation = [CAKeyframeAnimation animationWithKeyPath:channel.targetPath];
+            if ([channel.targetPath isEqualToString:@"rotation"]) {
+                keyframeAnimation.values = [self rotationArrayFromQuaternionAccessor:channel.sampler.outputAccessor];
+            } else if ([channel.targetPath isEqualToString:@"translation"]) {
+                keyframeAnimation.values = [self vectorArrayFromAccessor:channel.sampler.outputAccessor];
+            } else if ([channel.targetPath isEqualToString:@"scale"]) {
+                keyframeAnimation.values = [self vectorArrayFromScalarAccessor:channel.sampler.outputAccessor];
+            } else {
+                continue;
+            }
+            keyframeAnimation.keyTimes = [self floatArrayFromFloatAccessor:channel.sampler.inputAccessor];
+            keyframeAnimation.duration = animation.duration;
+            keyframeAnimation.repeatDuration = FLT_MAX;
+            
+            SCNNode *scnNode = self.scnNodesForGLTFNodeIdentifiers[channel.targetNode.identifier];
+            if (scnNode != nil) {
+                [scnNode addAnimation:keyframeAnimation forKey:nil];
+            }
+        }
+    }
+
+    return scenes;
 }
 
 - (void)recursiveAddNode:(GLTFNode *)node toSCNNode:(SCNNode *)parentNode {
@@ -95,16 +153,14 @@ static SCNWrapMode GLTFSCNWrapModeForAddressMode(GLTFAddressMode mode) {
         // generate camera and add to node
     }
     
-    // TODO: How to handle skins and joints?
-    //    @property (nonatomic, weak) GLTFSkin *skin;
-    //    @property (nonatomic, copy) NSString *jointName;
-    
     scnNode.simdTransform = node.localTransform;
     scnNode.name = node.name;
 
     [parentNode addChildNode:scnNode];
     
-    NSArray<SCNNode *> *meshNodes = [self nodesForGLTFMesh:node.mesh];
+    self.scnNodesForGLTFNodeIdentifiers[node.identifier] = scnNode;
+    
+    NSArray<SCNNode *> *meshNodes = [self nodesForGLTFMesh:node.mesh skin:node.skin];
     for (SCNNode *meshNode in meshNodes) {
         [scnNode addChildNode:meshNode];
     }
@@ -114,12 +170,15 @@ static SCNWrapMode GLTFSCNWrapModeForAddressMode(GLTFAddressMode mode) {
     }
 }
 
-- (NSArray<SCNNode *> *)nodesForGLTFMesh:(GLTFMesh *)mesh {
+- (NSArray<SCNNode *> *)nodesForGLTFMesh:(GLTFMesh *)mesh skin:(GLTFSkin *)skin {
     if (mesh == nil) {
         return nil;
     }
     
     NSMutableArray *nodes = [NSMutableArray array];
+    
+    NSArray<SCNNode *> *bones = [self bonesForGLTFSkin:skin];
+    NSArray<NSValue *> *inverseBindMatrices = [self inverseBindMatricesForGLTFSkin:skin];
 
     NSInteger submeshIndex = 0;
     for (GLTFSubmesh *submesh in mesh.submeshes) {
@@ -150,11 +209,12 @@ static SCNWrapMode GLTFSCNWrapModeForAddressMode(GLTFAddressMode mode) {
             [sources addObject:texCoord0Source];
         }
         
-        // TODO:
-        //   SCNGeometrySourceSemanticColor;
-        //   SCNGeometrySourceSemanticBoneWeights
-        //   SCNGeometrySourceSemanticBoneIndices
-        
+        SCNGeometrySource *color0Source = [self geometrySourceWithSemantic:SCNGeometrySourceSemanticColor
+                                                                  accessor:submesh.accessorsForAttributes[GLTFAttributeSemanticColor0]];
+        if (color0Source != nil) {
+            [sources addObject:color0Source];
+        }
+
         GLTFAccessor *indexAccessor = submesh.indexAccessor;
         GLTFBufferView *indexBufferView = indexAccessor.bufferView;
         id<GLTFBuffer> indexBuffer = indexBufferView.buffer;
@@ -164,7 +224,7 @@ static SCNWrapMode GLTFSCNWrapModeForAddressMode(GLTFAddressMode mode) {
                                                  length:indexAccessor.count * bytesPerIndex
                                            freeWhenDone:NO];
         NSInteger indexCount = indexAccessor.count;
-        NSInteger primitiveCount = indexCount / 3; // TODO: Wrong for anything other than indexed triangles
+        NSInteger primitiveCount = GLTFPrimitiveCountForIndexCount(indexCount, primitiveType);
         SCNGeometryElement *geometryElement = [SCNGeometryElement geometryElementWithData:indexData
                                                                             primitiveType:primitiveType
                                                                            primitiveCount:primitiveCount
@@ -178,7 +238,20 @@ static SCNWrapMode GLTFSCNWrapModeForAddressMode(GLTFAddressMode mode) {
         
         SCNNode *node = [SCNNode node];
         node.geometry = geometry;
-        
+
+        SCNGeometrySource *boneWeights = [self geometrySourceWithSemantic:SCNGeometrySourceSemanticBoneWeights
+                                                                 accessor:submesh.accessorsForAttributes[GLTFAttributeSemanticWeights0]];
+        SCNGeometrySource *boneIndices = [self geometrySourceWithSemantic:SCNGeometrySourceSemanticBoneIndices
+                                                                 accessor:submesh.accessorsForAttributes[GLTFAttributeSemanticJoints0]];
+        if (boneWeights != nil && boneIndices != nil) {
+            SCNSkinner *skinner = [SCNSkinner skinnerWithBaseGeometry:geometry
+                                                                bones:bones
+                                            boneInverseBindTransforms:inverseBindMatrices
+                                                          boneWeights:boneWeights
+                                                          boneIndices:boneIndices];
+            node.skinner = skinner;
+        }
+
         [nodes addObject:node];
         ++submeshIndex;
     }
@@ -217,6 +290,44 @@ static SCNWrapMode GLTFSCNWrapModeForAddressMode(GLTFAddressMode mode) {
                                                                dataOffset:dataOffset
                                                                dataStride:dataStride];
     return source;
+}
+
+- (NSArray<SCNNode *> *)bonesForGLTFSkin:(GLTFSkin *)skin {
+    if (skin == nil) {
+        return @[];
+    }
+    
+    NSMutableArray<SCNNode *> *bones = [NSMutableArray array];
+    for (GLTFNode *jointNode in skin.jointNodes) {
+        SCNNode *boneNode = self.scnNodesForGLTFNodeIdentifiers[jointNode.identifier];
+        if (boneNode != nil) {
+            [bones addObject:boneNode];
+        } else {
+            NSLog(@"WARNING: Did not find node for joint with identifier %@", jointNode.identifier);
+        }
+    }
+    
+    if (bones.count == skin.jointNodes.count) {
+        return [bones copy];
+    }
+    
+    return @[];
+}
+
+- (NSArray<NSValue *> *) inverseBindMatricesForGLTFSkin:(GLTFSkin *)skin {
+    if (skin == nil) {
+        return @[];
+    }
+
+    NSMutableArray<NSValue *> *inverseBindMatrices = [NSMutableArray array];
+    GLTFAccessor *ibmAccessor = skin.inverseBindMatricesAccessor;
+    simd_float4x4 *ibms = ibmAccessor.bufferView.buffer.contents + ibmAccessor.bufferView.offset + ibmAccessor.offset;
+    for (int i = 0; i < ibmAccessor.count; ++i) {
+        SCNMatrix4 ibm = GLTFSCNMatrix4FromFloat4x4(ibms[i]);
+        NSValue *ibmValue = [NSValue valueWithSCNMatrix4:ibm];
+        [inverseBindMatrices addObject:ibmValue];
+    }
+    return [inverseBindMatrices copy];
 }
 
 - (SCNMaterial *)materialForGLTFMaterial:(GLTFMaterial *)material {
@@ -376,13 +487,66 @@ static SCNWrapMode GLTFSCNWrapModeForAddressMode(GLTFAddressMode mode) {
     return color;
 }
 
+- (NSArray<NSValue *> *)rotationArrayFromQuaternionAccessor:(GLTFAccessor *)accessor {
+    NSMutableArray *values = [NSMutableArray array];
+    const simd_packed_float4 *quaternions = accessor.bufferView.buffer.contents + accessor.bufferView.offset + accessor.offset;
+    NSInteger count = accessor.count;
+    for (NSInteger i = 0; i < count; ++i) {
+        simd_float3 axis; float angle;
+        GLTFAxisAngleFromQuaternion(quaternions[i], &axis, &angle);
+        SCNVector4 axisAngle = (SCNVector4){ axis.x, axis.y, axis.z, angle };
+        NSValue *value = [NSValue valueWithSCNVector4:axisAngle];
+        [values addObject:value];
+    }
+    return [values copy];
+}
+
+- (NSArray<NSValue *> *)vectorArrayFromAccessor:(GLTFAccessor *)accessor {
+    typedef struct __attribute__((packed)) {
+        float x, y, z;
+    } packed_float3;
+    NSMutableArray *values = [NSMutableArray array];
+    const packed_float3 *vectors = accessor.bufferView.buffer.contents + accessor.bufferView.offset + accessor.offset;
+    NSInteger count = accessor.count;
+    for (NSInteger i = 0; i < count; ++i) {
+        packed_float3 vec = vectors[i];
+        SCNVector3 scnVec = (SCNVector3){ vec.x, vec.y, vec.z };
+        NSValue *value = [NSValue valueWithSCNVector3:scnVec];
+        [values addObject:value];
+    }
+    return [values copy];
+}
+
+- (NSArray<NSValue *> *)vectorArrayFromScalarAccessor:(GLTFAccessor *)accessor {
+    NSMutableArray *values = [NSMutableArray array];
+    const float *floats = accessor.bufferView.buffer.contents + accessor.bufferView.offset + accessor.offset;
+    NSInteger count = accessor.count;
+    for (NSInteger i = 0; i < count; ++i) {
+        SCNVector3 scnVec = (SCNVector3){ floats[i], floats[i], floats[i] };
+        NSValue *value = [NSValue valueWithSCNVector3:scnVec];
+        [values addObject:value];
+    }
+    return [values copy];
+}
+
+- (NSArray<NSNumber *> *)floatArrayFromFloatAccessor:(GLTFAccessor *)accessor {
+    NSMutableArray *values = [NSMutableArray array];
+    const float *floats = accessor.bufferView.buffer.contents + accessor.bufferView.offset + accessor.offset;
+    NSInteger count = accessor.count;
+    for (NSInteger i = 0; i < count; ++i) {
+        NSValue *value = [NSNumber numberWithFloat:floats[i]];
+        [values addObject:value];
+    }
+    return [values copy];
+}
+
 @end
 
 @implementation SCNScene (GLTF)
 
-+ (instancetype)sceneWithGLTFScene:(GLTFScene *)scene options:(NSDictionary<id<NSCopying>, id> *)options {
-    GLTFSCNSceneBuilder *builder = [[GLTFSCNSceneBuilder alloc] initWithGLTFScene:scene options:options];
-    return [builder buildScene];
++ (NSArray<SCNScene *> *)scenesFromGLTFAsset:(GLTFAsset *)asset options:(NSDictionary<id<NSCopying>, id> *)options {
+    GLTFSCNSceneBuilder *builder = [[GLTFSCNSceneBuilder alloc] initWithGLTFAsset:asset options:options];
+    return [builder buildScenes];
 }
 
 @end

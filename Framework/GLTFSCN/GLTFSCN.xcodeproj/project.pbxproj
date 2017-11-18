@@ -10,8 +10,8 @@
 		831C63AF1F9962A90087EF6A /* SceneKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 831C63AE1F9962A90087EF6A /* SceneKit.framework */; };
 		831C63B41F99635B0087EF6A /* GLTF.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 831C63B51F99635B0087EF6A /* GLTF.framework */; };
 		837EEE4D1FA2B100004BA504 /* GLTFSCN.h in Headers */ = {isa = PBXBuildFile; fileRef = 837EEE4B1FA2B100004BA504 /* GLTFSCN.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		83DBFD821FA3DDF000722FA8 /* SCNAsset+GLTF.h in Headers */ = {isa = PBXBuildFile; fileRef = 83DBFD7F1FA3DDF000722FA8 /* SCNAsset+GLTF.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		83DBFD831FA3DDF000722FA8 /* SCNAsset+GLTF.m in Sources */ = {isa = PBXBuildFile; fileRef = 83DBFD811FA3DDF000722FA8 /* SCNAsset+GLTF.m */; };
+		83DBFD821FA3DDF000722FA8 /* SCNScene+GLTF.h in Headers */ = {isa = PBXBuildFile; fileRef = 83DBFD7F1FA3DDF000722FA8 /* SCNScene+GLTF.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		83DBFD831FA3DDF000722FA8 /* SCNScene+GLTF.m in Sources */ = {isa = PBXBuildFile; fileRef = 83DBFD811FA3DDF000722FA8 /* SCNScene+GLTF.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -20,8 +20,8 @@
 		837EEE4A1FA2B100004BA504 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		837EEE4B1FA2B100004BA504 /* GLTFSCN.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GLTFSCN.h; sourceTree = "<group>"; };
 		83A2D6E91F9961AC00FB8874 /* GLTFSCN.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = GLTFSCN.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		83DBFD7F1FA3DDF000722FA8 /* SCNAsset+GLTF.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "SCNAsset+GLTF.h"; sourceTree = "<group>"; };
-		83DBFD811FA3DDF000722FA8 /* SCNAsset+GLTF.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "SCNAsset+GLTF.m"; sourceTree = "<group>"; };
+		83DBFD7F1FA3DDF000722FA8 /* SCNScene+GLTF.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "SCNScene+GLTF.h"; sourceTree = "<group>"; };
+		83DBFD811FA3DDF000722FA8 /* SCNScene+GLTF.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "SCNScene+GLTF.m"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -69,7 +69,7 @@
 		83DBFD7E1FA3DDF000722FA8 /* Headers */ = {
 			isa = PBXGroup;
 			children = (
-				83DBFD7F1FA3DDF000722FA8 /* SCNAsset+GLTF.h */,
+				83DBFD7F1FA3DDF000722FA8 /* SCNScene+GLTF.h */,
 			);
 			path = Headers;
 			sourceTree = "<group>";
@@ -77,7 +77,7 @@
 		83DBFD801FA3DDF000722FA8 /* Source */ = {
 			isa = PBXGroup;
 			children = (
-				83DBFD811FA3DDF000722FA8 /* SCNAsset+GLTF.m */,
+				83DBFD811FA3DDF000722FA8 /* SCNScene+GLTF.m */,
 			);
 			path = Source;
 			sourceTree = "<group>";
@@ -90,7 +90,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				837EEE4D1FA2B100004BA504 /* GLTFSCN.h in Headers */,
-				83DBFD821FA3DDF000722FA8 /* SCNAsset+GLTF.h in Headers */,
+				83DBFD821FA3DDF000722FA8 /* SCNScene+GLTF.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -162,7 +162,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				83DBFD831FA3DDF000722FA8 /* SCNAsset+GLTF.m in Sources */,
+				83DBFD831FA3DDF000722FA8 /* SCNScene+GLTF.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

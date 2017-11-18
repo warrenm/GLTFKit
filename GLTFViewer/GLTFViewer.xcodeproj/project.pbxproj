@@ -9,7 +9,6 @@
 /* Begin PBXBuildFile section */
 		834168101F8D70210052E7FE /* GLTFViewerOrbitCamera.m in Sources */ = {isa = PBXBuildFile; fileRef = 8341680F1F8D70210052E7FE /* GLTFViewerOrbitCamera.m */; };
 		834168131F8D70730052E7FE /* GLTFViewerFirstPersonCamera.m in Sources */ = {isa = PBXBuildFile; fileRef = 834168121F8D70730052E7FE /* GLTFViewerFirstPersonCamera.m */; };
-		837EEE531FA2B493004BA504 /* GLTFSCN.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 837EEE511FA2B48F004BA504 /* GLTFSCN.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		83850FC21F4A5E8F00F9A444 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 83850FBE1F4A5C5C00F9A444 /* main.m */; };
 		83850FC71F4A5F4D00F9A444 /* GLTFViewerViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 83850FC51F4A5F2600F9A444 /* GLTFViewerViewController.m */; };
 		83850FCA1F4A616E00F9A444 /* GLTFDocument.m in Sources */ = {isa = PBXBuildFile; fileRef = 83850FC91F4A616E00F9A444 /* GLTFDocument.m */; };
@@ -40,7 +39,6 @@
 			dstSubfolderSpec = 10;
 			files = (
 				8394D43A1F533CE4007FC600 /* GLTF.framework in Embed Frameworks */,
-				837EEE531FA2B493004BA504 /* GLTFSCN.framework in Embed Frameworks */,
 				8394D43C1F533CE4007FC600 /* GLTFMTL.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";

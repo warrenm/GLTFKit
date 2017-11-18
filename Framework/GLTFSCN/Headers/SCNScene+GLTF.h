@@ -19,6 +19,6 @@
 
 @interface SCNScene (GLTF)
 
-+ (instancetype)sceneWithGLTFScene:(GLTFScene *)scene options:(NSDictionary<id<NSCopying>, id> *)options;
++ (NSArray<SCNScene *> *)scenesFromGLTFAsset:(GLTFAsset *)asset options:(NSDictionary<id<NSCopying>, id> *)options;
 
 @end
