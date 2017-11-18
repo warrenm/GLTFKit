@@ -87,7 +87,8 @@ static SCNMatrix4 GLTFSCNMatrix4FromFloat4x4(simd_float4x4 m) {
 @property (nonatomic, strong) GLTFAsset *asset;
 @property (nonatomic, copy) NSDictionary<id<NSCopying>, id> *options;
 @property (nonatomic, strong) NSMutableDictionary<NSString *, id> *cgImagesForImagesAndChannels;
-@property (nonatomic, strong) NSMutableDictionary<NSUUID *, SCNNode *> *scnNodesForGLTFNodeIdentifiers;
+@property (nonatomic, strong) NSMutableDictionary<NSUUID *, SCNNode *> *scnNodesForGLTFNodes;
+@property (nonatomic, strong) NSMutableDictionary<NSUUID *, NSArray<NSValue *> *> *inverseBindMatricesForSkins;
 
 - (instancetype)initWithGLTFAsset:(GLTFAsset *)asset options:(NSDictionary<id<NSCopying>, id> *)options;
 
@@ -102,7 +103,8 @@ static SCNMatrix4 GLTFSCNMatrix4FromFloat4x4(simd_float4x4 m) {
         _asset = asset;
         _options = options;
         _cgImagesForImagesAndChannels = [NSMutableDictionary dictionary];
-        _scnNodesForGLTFNodeIdentifiers = [NSMutableDictionary dictionary];
+        _scnNodesForGLTFNodes = [NSMutableDictionary dictionary];
+        _inverseBindMatricesForSkins = [NSMutableDictionary dictionary];
     }
     return self;
 }
@@ -136,7 +138,7 @@ static SCNMatrix4 GLTFSCNMatrix4FromFloat4x4(simd_float4x4 m) {
             keyframeAnimation.duration = animation.duration;
             keyframeAnimation.repeatDuration = FLT_MAX;
             
-            SCNNode *scnNode = self.scnNodesForGLTFNodeIdentifiers[channel.targetNode.identifier];
+            SCNNode *scnNode = self.scnNodesForGLTFNodes[channel.targetNode.identifier];
             if (scnNode != nil) {
                 [scnNode addAnimation:keyframeAnimation forKey:nil];
             }
@@ -158,7 +160,7 @@ static SCNMatrix4 GLTFSCNMatrix4FromFloat4x4(simd_float4x4 m) {
 
     [parentNode addChildNode:scnNode];
     
-    self.scnNodesForGLTFNodeIdentifiers[node.identifier] = scnNode;
+    self.scnNodesForGLTFNodes[node.identifier] = scnNode;
     
     NSArray<SCNNode *> *meshNodes = [self nodesForGLTFMesh:node.mesh skin:node.skin];
     for (SCNNode *meshNode in meshNodes) {
@@ -299,7 +301,7 @@ static SCNMatrix4 GLTFSCNMatrix4FromFloat4x4(simd_float4x4 m) {
     
     NSMutableArray<SCNNode *> *bones = [NSMutableArray array];
     for (GLTFNode *jointNode in skin.jointNodes) {
-        SCNNode *boneNode = self.scnNodesForGLTFNodeIdentifiers[jointNode.identifier];
+        SCNNode *boneNode = self.scnNodesForGLTFNodes[jointNode.identifier];
         if (boneNode != nil) {
             [bones addObject:boneNode];
         } else {
@@ -314,20 +316,28 @@ static SCNMatrix4 GLTFSCNMatrix4FromFloat4x4(simd_float4x4 m) {
     return @[];
 }
 
-- (NSArray<NSValue *> *) inverseBindMatricesForGLTFSkin:(GLTFSkin *)skin {
+- (NSArray<NSValue *> *)inverseBindMatricesForGLTFSkin:(GLTFSkin *)skin {
     if (skin == nil) {
         return @[];
     }
 
-    NSMutableArray<NSValue *> *inverseBindMatrices = [NSMutableArray array];
+    NSArray<NSValue *> *inverseBindMatrices = self.inverseBindMatricesForSkins[skin.identifier];
+    if (inverseBindMatrices != nil) {
+        return inverseBindMatrices;
+    }
+    
+    NSMutableArray *matrices = [NSMutableArray array];
     GLTFAccessor *ibmAccessor = skin.inverseBindMatricesAccessor;
     simd_float4x4 *ibms = ibmAccessor.bufferView.buffer.contents + ibmAccessor.bufferView.offset + ibmAccessor.offset;
     for (int i = 0; i < ibmAccessor.count; ++i) {
         SCNMatrix4 ibm = GLTFSCNMatrix4FromFloat4x4(ibms[i]);
         NSValue *ibmValue = [NSValue valueWithSCNMatrix4:ibm];
-        [inverseBindMatrices addObject:ibmValue];
+        [matrices addObject:ibmValue];
     }
-    return [inverseBindMatrices copy];
+    matrices = [matrices copy];
+    self.inverseBindMatricesForSkins[skin.identifier] = matrices;
+
+    return matrices;
 }
 
 - (SCNMaterial *)materialForGLTFMaterial:(GLTFMaterial *)material {
