@@ -18,7 +18,7 @@
 
 @implementation GLTFImage
 
-+ (CGImageRef)createImageForDataURI:(NSString *)uriData {
++ (CGImageRef)newImageForDataURI:(NSString *)uriData {
     NSString *pngHeader = @"data:image/png;base64,";
     if ([uriData hasPrefix:pngHeader]) {
         NSString *encodedImageData = [uriData substringFromIndex:pngHeader.length];
@@ -46,6 +46,10 @@
     // TODO: Support for GIF, BMP, etc.
     
     return nil;
+}
+
+- (void)dealloc {
+    CGImageRelease(_cgImage);
 }
 
 @end

@@ -303,7 +303,7 @@ static NSString *const GLTFExtensionKHRMaterialsPBRSpecularGlossiness = @"KHR_ma
         NSString *uri = properties[@"uri"];
         
         if ([uri hasPrefix:@"data:image/"]) {
-            image.cgImage = [GLTFImage createImageForDataURI:uri];
+            image.cgImage = [GLTFImage newImageForDataURI:uri];
         } else if (uri.length > 0) {
             NSURL *resourceURL = [self.url URLByDeletingLastPathComponent];
             image.url = [resourceURL URLByAppendingPathComponent:uri];

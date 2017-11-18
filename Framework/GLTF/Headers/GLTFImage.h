@@ -22,7 +22,7 @@
 
 @interface GLTFImage : GLTFObject
 
-+ (CGImageRef)createImageForDataURI:(NSString *)uriData;
++ (CGImageRef)newImageForDataURI:(NSString *)uriData;
 
 /// A reference to a buffer view containing image data, if url is nil
 @property (nonatomic, strong) GLTFBufferView *bufferView;

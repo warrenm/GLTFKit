@@ -344,7 +344,7 @@ static SCNMatrix4 GLTFSCNMatrix4FromFloat4x4(simd_float4x4 m) {
     scnMaterial.diffuse.contents = (__bridge id)[self cgImageForGLTFImage:material.baseColorTexture.image
                                                               channelMask:GLTFImageChannelAll];
     if (scnMaterial.diffuse.contents == nil) {
-        scnMaterial.diffuse.contents = (__bridge id)[self createCGColorForFloat4:material.baseColorFactor];
+        scnMaterial.diffuse.contents = (__bridge_transfer id)[self newCGColorForFloat4:material.baseColorFactor];
     }
     scnMaterial.diffuse.wrapS = GLTFSCNWrapModeForAddressMode(material.baseColorTexture.sampler.sAddressMode);
     scnMaterial.diffuse.wrapT = GLTFSCNWrapModeForAddressMode(material.baseColorTexture.sampler.tAddressMode);
@@ -383,7 +383,7 @@ static SCNMatrix4 GLTFSCNMatrix4FromFloat4x4(simd_float4x4 m) {
     scnMaterial.emission.contents = (__bridge id)[self cgImageForGLTFImage:material.emissiveTexture.image
                                                                channelMask:GLTFImageChannelAll];
     if (scnMaterial.emission.contents == nil) {
-        scnMaterial.emission.contents = (__bridge id)[self createCGColorForFloat3:material.emissiveFactor];
+        scnMaterial.emission.contents = (__bridge_transfer id)[self newCGColorForFloat3:material.emissiveFactor];
     }
     scnMaterial.emission.wrapS = GLTFSCNWrapModeForAddressMode(material.emissiveTexture.sampler.sAddressMode);
     scnMaterial.emission.wrapT = GLTFSCNWrapModeForAddressMode(material.emissiveTexture.sampler.tAddressMode);
@@ -428,7 +428,7 @@ static SCNMatrix4 GLTFSCNMatrix4FromFloat4x4(simd_float4x4 m) {
     
     // Now that we have the original, we may need to extract the requisite channel and cache the result
     if (channelMask != GLTFImageChannelAll) {
-        CGImageRef extractedImage = [self createCGImageByExtractingChannel:(int)channelMask fromCGImage:originalImage];
+        CGImageRef extractedImage = [self newCGImageByExtractingChannel:(int)channelMask fromCGImage:originalImage];
         self.cgImagesForImagesAndChannels[maskedIdentifier] = (__bridge id)extractedImage;
         CGImageRelease(extractedImage);
         return extractedImage;
@@ -437,7 +437,7 @@ static SCNMatrix4 GLTFSCNMatrix4FromFloat4x4(simd_float4x4 m) {
     return originalImage;
 }
 
-- (CGImageRef)createCGImageByExtractingChannel:(NSInteger)channelIndex fromCGImage:(CGImageRef)sourceImage {
+- (CGImageRef)newCGImageByExtractingChannel:(NSInteger)channelIndex fromCGImage:(CGImageRef)sourceImage {
     if (sourceImage == NULL) {
         return NULL;
     }
@@ -463,6 +463,7 @@ static SCNMatrix4 GLTFSCNMatrix4FromFloat4x4(simd_float4x4 m) {
 
     CGImageRef channelImage = CGBitmapContextCreateImage(monoContext);
 
+    CGColorSpaceRelease(monoColorSpace);
     CGContextRelease(monoContext);
     CGColorSpaceRelease(colorSpace);
     CGContextRelease(context);
@@ -471,7 +472,7 @@ static SCNMatrix4 GLTFSCNMatrix4FromFloat4x4(simd_float4x4 m) {
     return channelImage;
 }
 
-- (CGColorRef)createCGColorForFloat4:(simd_float4)v {
+- (CGColorRef)newCGColorForFloat4:(simd_float4)v {
     CGFloat components[] = { v.x, v.y, v.z, v.w };
     CGColorSpaceRef colorSpace = CGColorSpaceCreateWithName(kCGColorSpaceSRGB);
     CGColorRef color = CGColorCreate(colorSpace, &components[0]);
@@ -479,7 +480,7 @@ static SCNMatrix4 GLTFSCNMatrix4FromFloat4x4(simd_float4x4 m) {
     return color;
 }
 
-- (CGColorRef)createCGColorForFloat3:(simd_float3)v {
+- (CGColorRef)newCGColorForFloat3:(simd_float3)v {
     CGFloat components[] = { v.x, v.y, v.z, 1 };
     CGColorSpaceRef colorSpace = CGColorSpaceCreateWithName(kCGColorSpaceSRGB);
     CGColorRef color = CGColorCreate(colorSpace, &components[0]);
