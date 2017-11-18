@@ -87,16 +87,16 @@ void GLTFAxisAngleFromQuaternion(simd_float4 q, simd_float3 *outAxis, float *out
     
     float det = sqrtf(1 - q.w * q.w);
     
-    if (fabs(det) < 1e-3) {
+    if (fabs(det) < 1e-6) {
         *outAngle = 0.0;
         *outAxis = (simd_float3){ 1, 0, 0 };
     } else {
-        float angle = 2 * acos(q.w);
-        float x = q.x / det;
-        float y = q.y / det;
-        float z = q.z / det;
+        float w = fmin(fmax(-1, q.w), 1); // Clamp to the domain of acos to avoid NaNs when we're a little off
+        float angle = 2 * acos(w);
         *outAngle = angle;
-        *outAxis = (simd_float3){ x, y, z };
+        simd_float3 axis = (simd_float3){ q.x, q.y, q.z };
+        axis = simd_normalize(axis);
+        *outAxis = axis; // Theoretically shouldn't need this, but it aids stability for small angles
     }
 }
 
