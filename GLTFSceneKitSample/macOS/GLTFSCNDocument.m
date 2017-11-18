@@ -58,7 +58,8 @@
 - (BOOL)readFromURL:(NSURL *)url ofType:(NSString *)typeName error:(NSError **)outError {
     self.bufferAllocator = [[GLTFDefaultBufferAllocator alloc] init];
     self.asset = [[GLTFAsset alloc] initWithURL:url bufferAllocator:self.bufferAllocator];
-    
+    NSLog(@"INFO: Total live buffer allocation size after document load is %0.2f MB", ([GLTFDefaultBufferAllocator liveAllocationSize] / (float)1e6));
+
     self.displayName = [url lastPathComponent];
     
     return (self.asset != nil);

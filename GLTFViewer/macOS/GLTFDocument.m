@@ -69,7 +69,8 @@
     self.device = MTLCreateSystemDefaultDevice();
     self.bufferAllocator = [[GLTFMTLBufferAllocator alloc] initWithDevice:self.device];
     self.asset = [[GLTFAsset alloc] initWithURL:url bufferAllocator:self.bufferAllocator];
-    
+    NSLog(@"INFO: Total live buffer allocation size after document load is %0.2f MB", ([GLTFMTLBufferAllocator liveAllocationSize] / (float)1e6));
+
     self.displayName = [url lastPathComponent];
     
     return (self.asset != nil);

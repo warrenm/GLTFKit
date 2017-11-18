@@ -18,6 +18,13 @@
 
 @import Metal;
 
+static uint64_t _liveAllocationSize;
+
+@interface GLTFMTLBufferAllocator ()
++ (void)incrementLiveAllocationSizeByLength:(uint64_t)length;
++ (void)decrementLiveAllocationSizeByLength:(uint64_t)length;
+@end
+
 @interface GLTFMTLBuffer ()
 @property (nonatomic, strong) id<MTLBuffer> buffer;
 
@@ -34,8 +41,13 @@
 - (instancetype)initWithBuffer:(id<MTLBuffer>)buffer {
     if ((self = [super init])) {
         _buffer = buffer;
+        [GLTFMTLBufferAllocator incrementLiveAllocationSizeByLength:_buffer.length];
     }
     return self;
+}
+
+- (void)dealloc {
+    [GLTFMTLBufferAllocator decrementLiveAllocationSizeByLength:_buffer.length];
 }
 
 - (NSInteger)length {
@@ -53,6 +65,18 @@
 @end
 
 @implementation GLTFMTLBufferAllocator
+
++ (void)incrementLiveAllocationSizeByLength:(uint64_t)length {
+    _liveAllocationSize += length;
+}
+
++ (void)decrementLiveAllocationSizeByLength:(uint64_t)length {
+    _liveAllocationSize -= length;
+}
+
++ (uint64_t)liveAllocationSize {
+    return _liveAllocationSize;
+}
 
 - (instancetype)initWithDevice:(id<MTLDevice>)device {
     if ((self = [super init])) {
