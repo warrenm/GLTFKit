@@ -322,6 +322,8 @@ static SCNMatrix4 GLTFSCNMatrix4FromFloat4x4(GLTFMatrix4 m) {
     
     if (bones.count == skin.jointNodes.count) {
         return [bones copy];
+    } else {
+        NSLog(@"WARNING: Bone count for skinner does not match joint node count for skin with identifier %@", skin.identifier);
     }
     
     return @[];
@@ -336,8 +338,7 @@ static SCNMatrix4 GLTFSCNMatrix4FromFloat4x4(GLTFMatrix4 m) {
     if (inverseBindMatrices != nil) {
         return inverseBindMatrices;
     }
-    
-    
+
     NSMutableArray *matrices = [NSMutableArray array];
     GLTFAccessor *ibmAccessor = skin.inverseBindMatricesAccessor;
     GLTFMatrix4 *ibms = ibmAccessor.bufferView.buffer.contents + ibmAccessor.bufferView.offset + ibmAccessor.offset;
@@ -515,22 +516,19 @@ static SCNMatrix4 GLTFSCNMatrix4FromFloat4x4(GLTFMatrix4 m) {
     const GLTFQuaternion *quaternions = accessor.bufferView.buffer.contents + accessor.bufferView.offset + accessor.offset;
     NSInteger count = accessor.count;
     for (NSInteger i = 0; i < count; ++i) {
-        SCNVector4 axisAngle = (SCNVector4){ quaternions[i].x, quaternions[i].y, quaternions[i].z, quaternions[i].w };
-        NSValue *value = [NSValue valueWithSCNVector4:axisAngle];
+        SCNVector4 quat = (SCNVector4){ quaternions[i].x, quaternions[i].y, quaternions[i].z, quaternions[i].w };
+        NSValue *value = [NSValue valueWithSCNVector4:quat];
         [values addObject:value];
     }
     return [values copy];
 }
 
 - (NSArray<NSValue *> *)vectorArrayFromAccessor:(GLTFAccessor *)accessor {
-    typedef struct __attribute__((packed)) {
-        float x, y, z;
-    } packed_float3;
     NSMutableArray *values = [NSMutableArray array];
-    const packed_float3 *vectors = accessor.bufferView.buffer.contents + accessor.bufferView.offset + accessor.offset;
+    const GLTFVector3 *vectors = accessor.bufferView.buffer.contents + accessor.bufferView.offset + accessor.offset;
     NSInteger count = accessor.count;
     for (NSInteger i = 0; i < count; ++i) {
-        packed_float3 vec = vectors[i];
+        GLTFVector3 vec = vectors[i];
         SCNVector3 scnVec = (SCNVector3){ vec.x, vec.y, vec.z };
         NSValue *value = [NSValue valueWithSCNVector3:scnVec];
         [values addObject:value];
