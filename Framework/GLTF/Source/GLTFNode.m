@@ -30,7 +30,7 @@
 - (instancetype)init {
     if ((self = [super init])) {
         _localTransform = matrix_identity_float4x4;
-        _rotationQuaternion = vector4(0.0f, 0.0f, 0.0f, 1.0f);
+        _rotationQuaternion = (GLTFQuaternion){ 0, 0, 0, 1 };
         _scale = vector3(1.0f, 1.0f, 1.0f);
         _translation = vector3(0.0f, 0.0f, 0.0f);
     }
@@ -42,7 +42,7 @@
     _localTransformDirty = YES;
 }
 
-- (void)setRotationQuaternion:(simd_float4)rotationQuaternion {
+- (void)setRotationQuaternion:(GLTFQuaternion)rotationQuaternion {
     _rotationQuaternion = rotationQuaternion;
     _localTransformDirty = YES;
 }

@@ -16,6 +16,14 @@
 
 #import "GLTFUtilities.h"
 
+static GLTFQuaternion GLTFQuaternionFromSIMDFloat4(simd_float4 v) {
+    return (GLTFQuaternion){ v.x, v.y, v.z, v.w };
+}
+
+static simd_float4 GLTFSIMDFloat4FromQuaternion(GLTFQuaternion q) {
+    return (simd_float4){ q.x, q.y, q.z, q.w };
+}
+
 bool GLTFBoundingBoxIsEmpty(GLTFBoundingBox b) {
     return (b.minPoint.x == b.maxPoint.x) && (b.minPoint.y == b.maxPoint.y) && (b.minPoint.z == b.maxPoint.z);
 }
@@ -80,7 +88,7 @@ GLTFBoundingSphere GLTFBoundingSphereFromBox(const GLTFBoundingBox b) {
     return s;
 }
 
-void GLTFAxisAngleFromQuaternion(simd_float4 q, simd_float3 *outAxis, float *outAngle) {
+void GLTFAxisAngleFromQuaternion(GLTFQuaternion q, simd_float3 *outAxis, float *outAngle) {
     // Ironically, normalizing a vector such as [0 0 0 1] with simd can cause it to become not unit-length,
     // so unless you notice problems with quaternions not being unit-length upon load, let's just skip this.
     // q = vector_normalize(q);
@@ -100,15 +108,15 @@ void GLTFAxisAngleFromQuaternion(simd_float4 q, simd_float3 *outAxis, float *out
     }
 }
 
-simd_float4 GLTFQuaternionMultiply(simd_float4 q, simd_float4 r) {
+GLTFQuaternion GLTFQuaternionMultiply(GLTFQuaternion q, GLTFQuaternion r) {
     float w = r.w*q.w - r.x*q.x - r.y*q.y - r.z*q.z;
     float x = r.w*q.x + r.x*q.w - r.y*q.z + r.z*q.y;
     float y = r.w*q.y + r.x*q.z + r.y*q.w - r.z*q.x;
     float z = r.w*q.z - r.x*q.y + r.y*q.x + r.z*q.w;
-    return (simd_float4){ x, y, z, w };
+    return (GLTFQuaternion){ x, y, z, w };
 }
 
-simd_float4x4 GLTFRotationMatrixFromQuaternion(simd_float4 q) {
+simd_float4x4 GLTFRotationMatrixFromQuaternion(GLTFQuaternion q) {
     return (simd_float4x4){ {
         { 1 - 2*q.y*q.y - 2*q.z*q.z,     2*q.x*q.y + 2*q.z*q.w,     2*q.x*q.z - 2*q.y*q.w, 0 },
         {     2*q.x*q.y - 2*q.z*q.w, 1 - 2*q.x*q.x - 2*q.z*q.z,     2*q.y*q.z + 2*q.x*q.w, 0 },
@@ -117,7 +125,7 @@ simd_float4x4 GLTFRotationMatrixFromQuaternion(simd_float4 q) {
     } };
 }
 
-simd_float4 GLTFQuaternionFromEulerAngles(float pitch, float yaw, float roll) {
+GLTFQuaternion GLTFQuaternionFromEulerAngles(float pitch, float yaw, float roll) {
     float cx = cos(pitch / 2);
     float sx = sin(pitch / 2);
     float cy = cos(yaw / 2);
@@ -125,7 +133,7 @@ simd_float4 GLTFQuaternionFromEulerAngles(float pitch, float yaw, float roll) {
     float cz = cos(roll / 2);
     float sz = sin(roll / 2);
     
-    simd_float4 q = (simd_float4){
+    GLTFQuaternion q = (GLTFQuaternion){
         sx*cy*cz + cx*sy*sz,
         cx*sy*cz + sx*cy*sz,
         cx*cy*sz - sx*sy*cz,
@@ -134,13 +142,16 @@ simd_float4 GLTFQuaternionFromEulerAngles(float pitch, float yaw, float roll) {
     return q;
 }
 
-simd_float4 GLTFQuaternionSlerp(simd_float4 from, simd_float4 to, float t) {
+GLTFQuaternion GLTFQuaternionSlerp(GLTFQuaternion fromQ, GLTFQuaternion toQ, float t) {
+    simd_float4 from = GLTFSIMDFloat4FromQuaternion(fromQ);
+    simd_float4 to = GLTFSIMDFloat4FromQuaternion(toQ);
+    
     const double alignmentThreshold = 0.9995;
     double dot = simd_dot(from, to);
     if (dot > alignmentThreshold) {
         simd_float4 result = from + t * (to - from);
         result = simd_normalize(result);
-        return result;
+        return GLTFQuaternionFromSIMDFloat4(result);
     }
 
     if (dot < 0) {
@@ -151,7 +162,7 @@ simd_float4 GLTFQuaternionSlerp(simd_float4 from, simd_float4 to, float t) {
     double theta = acos(dot);
     double fromFactor = sin((1 - t) * theta) / sin(theta);
     double toFactor = sin(t * theta) / sin(theta);
-    return fromFactor * from + toFactor * to;
+    return GLTFQuaternionFromSIMDFloat4(fromFactor * from + toFactor * to);
 }
 
 simd_float4x4 GLTFMatrixFromUniformScale(float s)
@@ -367,6 +378,10 @@ simd_float3 GLTFVectorFloat3FromArray(NSArray *array) {
 
 simd_float4 GLTFVectorFloat4FromArray(NSArray *array) {
     return (simd_float4){ [array[0] floatValue], [array[1] floatValue], [array[2] floatValue], [array[3] floatValue] };
+}
+
+GLTFQuaternion GLTFQuaternionFromArray(NSArray *array) {
+    return (GLTFQuaternion){ [array[0] floatValue], [array[1] floatValue], [array[2] floatValue], [array[3] floatValue] };
 }
 
 simd_float4x4 GLTFMatrixFloat4x4FromArray(NSArray *array) {

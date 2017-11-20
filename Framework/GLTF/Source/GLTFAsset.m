@@ -33,7 +33,7 @@
 
 @import simd;
 
-#define USE_AGGRESSIVE_ALIGNMENT 1
+#define USE_AGGRESSIVE_ALIGNMENT 0
 
 static NSString *const GLTFExtensionKHRMaterialsPBRSpecularGlossiness = @"KHR_materials_pbrSpecularGlossiness";
 
@@ -788,7 +788,7 @@ static NSString *const GLTFExtensionKHRMaterialsPBRSpecularGlossiness = @"KHR_ma
 
         NSArray *rotationArray = properties[@"rotation"];
         if (rotationArray) {
-            node.rotationQuaternion = GLTFVectorFloat4FromArray(rotationArray);
+            node.rotationQuaternion = GLTFQuaternionFromArray(rotationArray);
         }
 
         NSArray *scaleArray = properties[@"scale"];

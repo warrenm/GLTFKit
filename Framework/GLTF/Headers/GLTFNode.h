@@ -29,7 +29,7 @@
 @property (nonatomic, weak) GLTFSkin *skin;
 @property (nonatomic, copy) NSString *jointName;
 @property (nonatomic, weak) GLTFMesh *mesh;
-@property (nonatomic, assign) simd_float4 rotationQuaternion;
+@property (nonatomic, assign) GLTFQuaternion rotationQuaternion;
 @property (nonatomic, assign) simd_float3 scale;
 @property (nonatomic, assign) simd_float3 translation;
 @property (nonatomic, assign) simd_float4x4 localTransform;

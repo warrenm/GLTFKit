@@ -20,10 +20,6 @@
 #import "GLTFBuffer.h"
 #import "GLTFNode.h"
 
-typedef struct __attribute__((packed)) {
-    float x, y, z;
-} packed_float3;
-
 @implementation GLTFAnimationSampler
 
 - (const void *)inputValues {
@@ -95,20 +91,20 @@ typedef struct __attribute__((packed)) {
         float frameProgress = timeWithinFrame / frameTimeDelta;
         
         if ([path isEqualToString:@"rotation"]) {
-            const simd_packed_float4 *rotationValues = sampler.outputValues;
+            const GLTFQuaternion *rotationValues = sampler.outputValues;
             
-            simd_packed_float4 previousRotation = rotationValues[previousKeyFrame];
-            simd_packed_float4 nextRotation = rotationValues[nextKeyFrame];
-            simd_packed_float4 interpRotation = GLTFQuaternionSlerp(previousRotation, nextRotation, frameProgress);
+            GLTFQuaternion previousRotation = rotationValues[previousKeyFrame];
+            GLTFQuaternion nextRotation = rotationValues[nextKeyFrame];
+            GLTFQuaternion interpRotation = GLTFQuaternionSlerp(previousRotation, nextRotation, frameProgress);
 
             target.rotationQuaternion = interpRotation;
         } else if ([path isEqualToString:@"translation"]) {
-            const packed_float3 *translationValues = sampler.outputValues;
+            const GLTFVector3 *translationValues = sampler.outputValues;
             
-            packed_float3 previousTranslation = translationValues[previousKeyFrame];
-            packed_float3 nextTranslation = translationValues[nextKeyFrame];
+            GLTFVector3 previousTranslation = translationValues[previousKeyFrame];
+            GLTFVector3 nextTranslation = translationValues[nextKeyFrame];
             
-            packed_float3 interpTranslation = (packed_float3) {
+            GLTFVector3 interpTranslation = (GLTFVector3) {
                 ((1 - frameProgress) * previousTranslation.x) + (frameProgress * nextTranslation.x),
                 ((1 - frameProgress) * previousTranslation.y) + (frameProgress * nextTranslation.y),
                 ((1 - frameProgress) * previousTranslation.z) + (frameProgress * nextTranslation.z)

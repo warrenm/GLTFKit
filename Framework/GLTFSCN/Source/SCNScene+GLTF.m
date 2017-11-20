@@ -18,7 +18,6 @@
 
 #import "SCNScene+GLTF.h"
 
-
 typedef NS_ENUM(NSInteger, GLTFImageChannel) {
     GLTFImageChannelRed,
     GLTFImageChannelGreen,
@@ -72,7 +71,7 @@ static NSInteger GLTFPrimitiveCountForIndexCount(NSInteger indexCount, SCNGeomet
     }
 }
 
-static SCNMatrix4 GLTFSCNMatrix4FromFloat4x4(simd_float4x4 m) {
+static SCNMatrix4 GLTFSCNMatrix4FromFloat4x4(GLTFMatrix4 m) {
     SCNMatrix4 mOut = (SCNMatrix4) {
         m.columns[0].x, m.columns[0].y, m.columns[0].z, m.columns[0].w,
         m.columns[1].x, m.columns[1].y, m.columns[1].z, m.columns[1].w,
@@ -141,6 +140,8 @@ static SCNMatrix4 GLTFSCNMatrix4FromFloat4x4(simd_float4x4 m) {
             SCNNode *scnNode = self.scnNodesForGLTFNodes[channel.targetNode.identifier];
             if (scnNode != nil) {
                 [scnNode addAnimation:keyframeAnimation forKey:nil];
+            } else {
+                NSLog(@"WARNING: Could not find node for channel target node identifier %@", channel.targetNode.identifier);
             }
         }
     }
@@ -333,9 +334,10 @@ static SCNMatrix4 GLTFSCNMatrix4FromFloat4x4(simd_float4x4 m) {
         return inverseBindMatrices;
     }
     
+    
     NSMutableArray *matrices = [NSMutableArray array];
     GLTFAccessor *ibmAccessor = skin.inverseBindMatricesAccessor;
-    simd_float4x4 *ibms = ibmAccessor.bufferView.buffer.contents + ibmAccessor.bufferView.offset + ibmAccessor.offset;
+    GLTFMatrix4 *ibms = ibmAccessor.bufferView.buffer.contents + ibmAccessor.bufferView.offset + ibmAccessor.offset;
     for (int i = 0; i < ibmAccessor.count; ++i) {
         SCNMatrix4 ibm = GLTFSCNMatrix4FromFloat4x4(ibms[i]);
         NSValue *ibmValue = [NSValue valueWithSCNMatrix4:ibm];
@@ -507,7 +509,7 @@ static SCNMatrix4 GLTFSCNMatrix4FromFloat4x4(simd_float4x4 m) {
 
 - (NSArray<NSValue *> *)rotationArrayFromQuaternionAccessor:(GLTFAccessor *)accessor {
     NSMutableArray *values = [NSMutableArray array];
-    const simd_packed_float4 *quaternions = accessor.bufferView.buffer.contents + accessor.bufferView.offset + accessor.offset;
+    const GLTFQuaternion *quaternions = accessor.bufferView.buffer.contents + accessor.bufferView.offset + accessor.offset;
     NSInteger count = accessor.count;
     for (NSInteger i = 0; i < count; ++i) {
         simd_float3 axis; float angle;

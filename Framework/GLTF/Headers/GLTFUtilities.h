@@ -19,6 +19,20 @@
 @import Foundation;
 @import simd;
 
+typedef struct __attribute__((packed)) {
+    float x, y, z;
+} GLTFVector3;
+
+typedef struct __attribute__((packed)) {
+    float x, y, z, w;
+} GLTFVector4;
+
+typedef struct __attribute__((packed)) {
+    GLTFVector4 columns[4];
+} GLTFMatrix4;
+
+typedef GLTFVector4 GLTFQuaternion;
+
 typedef struct {
     simd_float3 minPoint;
     simd_float3 maxPoint;
@@ -37,15 +51,15 @@ extern void GLTFBoundingBoxTransform(GLTFBoundingBox *b, simd_float4x4 transform
 
 extern GLTFBoundingSphere GLTFBoundingSphereFromBox(const GLTFBoundingBox b);
 
-extern void GLTFAxisAngleFromQuaternion(simd_float4 q, simd_float3 *outAxis, float *outAngle);
+extern void GLTFAxisAngleFromQuaternion(GLTFQuaternion q, simd_float3 *outAxis, float *outAngle);
 
-extern simd_float4 GLTFQuaternionMultiply(simd_float4 q, simd_float4 r);
+extern GLTFQuaternion GLTFQuaternionMultiply(GLTFQuaternion q, GLTFQuaternion r);
 
-extern simd_float4 GLTFQuaternionFromEulerAngles(float pitch, float yaw, float roll);
+extern GLTFQuaternion GLTFQuaternionFromEulerAngles(float pitch, float yaw, float roll);
 
-extern simd_float4x4 GLTFRotationMatrixFromQuaternion(simd_float4 q);
+extern simd_float4x4 GLTFRotationMatrixFromQuaternion(GLTFQuaternion q);
 
-extern simd_float4 GLTFQuaternionSlerp(simd_float4 from, simd_float4 to, float t);
+extern GLTFQuaternion GLTFQuaternionSlerp(GLTFQuaternion from, GLTFQuaternion to, float t);
 
 extern simd_float4x4 GLTFMatrixFromUniformScale(float s);
 
@@ -72,5 +86,7 @@ extern simd_float2 GLTFVectorFloat2FromArray(NSArray *array);
 extern simd_float3 GLTFVectorFloat3FromArray(NSArray *array);
 
 extern simd_float4 GLTFVectorFloat4FromArray(NSArray *array);
+
+extern GLTFQuaternion GLTFQuaternionFromArray(NSArray *array);
 
 extern simd_float4x4 GLTFMatrixFloat4x4FromArray(NSArray *array);
