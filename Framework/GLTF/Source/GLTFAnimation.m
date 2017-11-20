@@ -69,7 +69,7 @@
         float maxTime = timeValues[keyFrameCount - 1];
 
         if (time < minTime || time > maxTime) {
-            return;
+            continue;
         }
         
         int previousKeyFrame = 0, nextKeyFrame = 1;
