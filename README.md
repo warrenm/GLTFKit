@@ -1,4 +1,4 @@
-# gltf-objc
+# GLTFKit
 
 An Objective-C glTF 2.0 loader and Metal-based renderer
 
