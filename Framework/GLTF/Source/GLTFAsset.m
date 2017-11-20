@@ -33,7 +33,7 @@
 
 @import simd;
 
-#define USE_AGGRESSIVE_ALIGNMENT 0
+#define USE_AGGRESSIVE_ALIGNMENT 1
 
 static NSString *const GLTFExtensionKHRMaterialsPBRSpecularGlossiness = @"KHR_materials_pbrSpecularGlossiness";
 

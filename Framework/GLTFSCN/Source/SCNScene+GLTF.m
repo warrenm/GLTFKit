@@ -149,7 +149,7 @@ static SCNMatrix4 GLTFSCNMatrix4FromFloat4x4(simd_float4x4 m) {
 }
 
 - (void)recursiveAddNode:(GLTFNode *)node toSCNNode:(SCNNode *)parentNode {
-    SCNNode *scnNode = [SCNNode node];
+    SCNNode *scnNode = [self makeSCNNodeForGLTFNode:node];
     
     if (node.camera != nil) {
         // generate camera and add to node
@@ -159,9 +159,7 @@ static SCNMatrix4 GLTFSCNMatrix4FromFloat4x4(simd_float4x4 m) {
     scnNode.name = node.name;
 
     [parentNode addChildNode:scnNode];
-    
-    self.scnNodesForGLTFNodes[node.identifier] = scnNode;
-    
+
     NSArray<SCNNode *> *meshNodes = [self nodesForGLTFMesh:node.mesh skin:node.skin];
     for (SCNNode *meshNode in meshNodes) {
         [scnNode addChildNode:meshNode];
@@ -294,6 +292,15 @@ static SCNMatrix4 GLTFSCNMatrix4FromFloat4x4(simd_float4x4 m) {
     return source;
 }
 
+- (SCNNode *)makeSCNNodeForGLTFNode:(GLTFNode *)node {
+    SCNNode *scnNode = self.scnNodesForGLTFNodes[node.identifier];
+    if (scnNode == nil) {
+        scnNode = [SCNNode node];
+        self.scnNodesForGLTFNodes[node.identifier] = scnNode;
+    }
+    return scnNode;
+}
+
 - (NSArray<SCNNode *> *)bonesForGLTFSkin:(GLTFSkin *)skin {
     if (skin == nil) {
         return @[];
@@ -301,7 +308,7 @@ static SCNMatrix4 GLTFSCNMatrix4FromFloat4x4(simd_float4x4 m) {
     
     NSMutableArray<SCNNode *> *bones = [NSMutableArray array];
     for (GLTFNode *jointNode in skin.jointNodes) {
-        SCNNode *boneNode = self.scnNodesForGLTFNodes[jointNode.identifier];
+        SCNNode *boneNode = [self makeSCNNodeForGLTFNode:jointNode];
         if (boneNode != nil) {
             [bones addObject:boneNode];
         } else {
