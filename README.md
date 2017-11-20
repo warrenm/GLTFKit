@@ -2,6 +2,8 @@
 
 An Objective-C glTF 2.0 loader and Metal-based renderer
 
+![A screenshot of a glTF asset rendered with SceneKit](Images/screenshot-polly.jpg)
+
 ## Contents
 
 This project consists of several related parts:
@@ -92,6 +94,22 @@ id <MTLRenderCommandEncoder> renderEncoder = [commandBuffer renderCommandEncoder
 ```
 
 Note that if your glTF asset contains transparent meshes, these will be drawn in the order they appear in the scene graph, and may therefore not composite correctly with opaque content or other content.
+
+### Interoperating with SceneKit
+
+The included GLTFSCN framework can be used to easily transform glTF assets into collections of `SCNScene`s to interoperate with SceneKit.
+
+To get the collection of scenes contained in a glTF asset, use the `SCNScene` class extension method `+[SCNScene scenesFromGLTFAsset:options:]`. This method returns an array of scenes because there is no SceneKit type that represents a collection of scenes.
+
+Here is an example of how to load a GLTF asset, convert it to a collection of SceneKit scenes, and access the first scene:
+
+```obj-c
+id<GLTFBufferAllocator> bufferAllocator = [[GLTFDefaultBufferAllocator alloc] init];
+GLTFAsset *asset = [[GLTFAsset alloc] initWithURL:url bufferAllocator:bufferAllocator];
+SCNScene *scene = [[SCNScene scenesFromGLTFAsset:asset options:nil] firstObject];
+```
+
+Note the use of the `GLTFDefaultBufferAllocator` type. This is a buffer allocator that allocates regular memory rather than GPU-accessible memory. If you want to use an asset with both Metal and SceneKit, you should use the `GLTFMTLBufferAllocator` (as illustrated above) instead.
 
 ## Status and Conformance
 
