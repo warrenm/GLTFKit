@@ -123,12 +123,15 @@ static SCNMatrix4 GLTFSCNMatrix4FromFloat4x4(GLTFMatrix4 m) {
     
     for (GLTFAnimation *animation in self.asset.animations) {
         for (GLTFAnimationChannel *channel in animation.channels) {
-            CAKeyframeAnimation *keyframeAnimation = [CAKeyframeAnimation animationWithKeyPath:channel.targetPath];
+            CAKeyframeAnimation *keyframeAnimation = nil;
             if ([channel.targetPath isEqualToString:@"rotation"]) {
-                keyframeAnimation.values = [self rotationArrayFromQuaternionAccessor:channel.sampler.outputAccessor];
+                keyframeAnimation = [CAKeyframeAnimation animationWithKeyPath:@"orientation"];
+                keyframeAnimation.values = [self arrayFromQuaternionAccessor:channel.sampler.outputAccessor];
             } else if ([channel.targetPath isEqualToString:@"translation"]) {
+                keyframeAnimation = [CAKeyframeAnimation animationWithKeyPath:@"translation"];
                 keyframeAnimation.values = [self vectorArrayFromAccessor:channel.sampler.outputAccessor];
             } else if ([channel.targetPath isEqualToString:@"scale"]) {
+                keyframeAnimation = [CAKeyframeAnimation animationWithKeyPath:@"scale"];
                 keyframeAnimation.values = [self vectorArrayFromScalarAccessor:channel.sampler.outputAccessor];
             } else {
                 continue;
@@ -507,14 +510,12 @@ static SCNMatrix4 GLTFSCNMatrix4FromFloat4x4(GLTFMatrix4 m) {
     return color;
 }
 
-- (NSArray<NSValue *> *)rotationArrayFromQuaternionAccessor:(GLTFAccessor *)accessor {
+- (NSArray<NSValue *> *)arrayFromQuaternionAccessor:(GLTFAccessor *)accessor {
     NSMutableArray *values = [NSMutableArray array];
     const GLTFQuaternion *quaternions = accessor.bufferView.buffer.contents + accessor.bufferView.offset + accessor.offset;
     NSInteger count = accessor.count;
     for (NSInteger i = 0; i < count; ++i) {
-        simd_float3 axis; float angle;
-        GLTFAxisAngleFromQuaternion(quaternions[i], &axis, &angle);
-        SCNVector4 axisAngle = (SCNVector4){ axis.x, axis.y, axis.z, angle };
+        SCNVector4 axisAngle = (SCNVector4){ quaternions[i].x, quaternions[i].y, quaternions[i].z, quaternions[i].w };
         NSValue *value = [NSValue valueWithSCNVector4:axisAngle];
         [values addObject:value];
     }
