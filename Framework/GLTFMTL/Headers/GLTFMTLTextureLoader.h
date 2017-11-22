@@ -14,23 +14,14 @@
 //  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 //
 
-#import "TargetConditionals.h"
+#import <GLTF/GLTF.h>
 
-#if TARGET_OS_OSX
-#import <Cocoa/Cocoa.h>
-#elif TARGET_OS_IOS
-#import <UIKit/UIKit.h>
-#endif
+@import Metal;
 
-//! Project version number for GLTFMTL.
-FOUNDATION_EXPORT double GLTFMTLVersionNumber;
+@interface GLTFMTLTextureLoader : NSObject
 
-//! Project version string for GLTFMTL.
-FOUNDATION_EXPORT const unsigned char GLTFMTLVersionString[];
+- (instancetype)initWithDevice:(id<MTLDevice>)device;
 
-#import <GLTFMTL/GLTFMTLBufferAllocator.h>
-#import <GLTFMTL/GLTFMTLTextureLoader.h>
-#import <GLTFMTL/GLTFMTLLightingEnvironment.h>
-#import <GLTFMTL/GLTFMTLRenderer.h>
-#import <GLTFMTL/GLTFMTLShaderBuilder.h>
-#import <GLTFMTL/GLTFMTLUtilities.h>
+- (id<MTLTexture>)hdrTextureWithContentsOfURL:(NSURL *)url;
+
+@end

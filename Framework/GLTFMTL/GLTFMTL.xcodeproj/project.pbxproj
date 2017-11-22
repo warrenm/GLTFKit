@@ -9,6 +9,8 @@
 /* Begin PBXBuildFile section */
 		839945CB1F641E9000642E68 /* GLTFMTLLightingEnvironment.h in Headers */ = {isa = PBXBuildFile; fileRef = 839945C91F641E9000642E68 /* GLTFMTLLightingEnvironment.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		839945CC1F641E9000642E68 /* GLTFMTLLightingEnvironment.m in Sources */ = {isa = PBXBuildFile; fileRef = 839945CA1F641E9000642E68 /* GLTFMTLLightingEnvironment.m */; };
+		83AF30CC1FC4DB4D00053BED /* GLTFMTLTextureLoader.h in Headers */ = {isa = PBXBuildFile; fileRef = 83AF30CA1FC4DB4D00053BED /* GLTFMTLTextureLoader.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		83AF30CD1FC4DB4D00053BED /* GLTFMTLTextureLoader.m in Sources */ = {isa = PBXBuildFile; fileRef = 83AF30CB1FC4DB4D00053BED /* GLTFMTLTextureLoader.m */; };
 		83D600361F48C24F00F71E0C /* GLTF.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 83D600351F48C24F00F71E0C /* GLTF.framework */; };
 		83D600381F48C25500F71E0C /* MetalKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 83D600371F48C25500F71E0C /* MetalKit.framework */; };
 		83D6003C1F48C55C00F71E0C /* GLTFMTL.h in Headers */ = {isa = PBXBuildFile; fileRef = 83D6FFD81F48BDFB00F71E0C /* GLTFMTL.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -25,6 +27,8 @@
 /* Begin PBXFileReference section */
 		839945C91F641E9000642E68 /* GLTFMTLLightingEnvironment.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GLTFMTLLightingEnvironment.h; sourceTree = "<group>"; };
 		839945CA1F641E9000642E68 /* GLTFMTLLightingEnvironment.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = GLTFMTLLightingEnvironment.m; sourceTree = "<group>"; };
+		83AF30CA1FC4DB4D00053BED /* GLTFMTLTextureLoader.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GLTFMTLTextureLoader.h; sourceTree = "<group>"; };
+		83AF30CB1FC4DB4D00053BED /* GLTFMTLTextureLoader.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = GLTFMTLTextureLoader.m; sourceTree = "<group>"; };
 		83D600351F48C24F00F71E0C /* GLTF.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GLTF.framework; path = "../../../../../Library/Developer/Xcode/DerivedData/glTF-hfjwsbtojkmckmakuumesfrunwqe/Build/Products/Debug/GLTF.framework"; sourceTree = "<group>"; };
 		83D600371F48C25500F71E0C /* MetalKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MetalKit.framework; path = System/Library/Frameworks/MetalKit.framework; sourceTree = SDKROOT; };
 		83D6FFB11F48BCB500F71E0C /* GLTFMTL.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = GLTFMTL.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -88,6 +92,7 @@
 				83D6FFC71F48BDE700F71E0C /* GLTFMTLBufferAllocator.h */,
 				839945C91F641E9000642E68 /* GLTFMTLLightingEnvironment.h */,
 				83D6FFC81F48BDE700F71E0C /* GLTFMTLShaderBuilder.h */,
+				83AF30CA1FC4DB4D00053BED /* GLTFMTLTextureLoader.h */,
 				83D6FFCA1F48BDE700F71E0C /* GLTFMTLRenderer.h */,
 				83D6FFC91F48BDE700F71E0C /* GLTFMTLUtilities.h */,
 			);
@@ -100,6 +105,7 @@
 				83D6FFCC1F48BDE700F71E0C /* GLTFMTLBufferAllocator.m */,
 				839945CA1F641E9000642E68 /* GLTFMTLLightingEnvironment.m */,
 				83D6FFCD1F48BDE700F71E0C /* GLTFMTLShaderBuilder.m */,
+				83AF30CB1FC4DB4D00053BED /* GLTFMTLTextureLoader.m */,
 				83D6FFCE1F48BDE700F71E0C /* GLTFMTLUtilities.m */,
 				83D6FFCF1F48BDE700F71E0C /* GLTFMTLRenderer.m */,
 			);
@@ -116,8 +122,9 @@
 				83D6FFD31F48BDE700F71E0C /* GLTFMTLRenderer.h in Headers */,
 				83D6FFD01F48BDE700F71E0C /* GLTFMTLBufferAllocator.h in Headers */,
 				839945CB1F641E9000642E68 /* GLTFMTLLightingEnvironment.h in Headers */,
-				83D6FFD21F48BDE700F71E0C /* GLTFMTLUtilities.h in Headers */,
 				83D6FFD11F48BDE700F71E0C /* GLTFMTLShaderBuilder.h in Headers */,
+				83AF30CC1FC4DB4D00053BED /* GLTFMTLTextureLoader.h in Headers */,
+				83D6FFD21F48BDE700F71E0C /* GLTFMTLUtilities.h in Headers */,
 				83D6003C1F48C55C00F71E0C /* GLTFMTL.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -196,6 +203,7 @@
 				83D6FFD71F48BDE700F71E0C /* GLTFMTLRenderer.m in Sources */,
 				83D6FFD61F48BDE700F71E0C /* GLTFMTLUtilities.m in Sources */,
 				83D6FFD51F48BDE700F71E0C /* GLTFMTLShaderBuilder.m in Sources */,
+				83AF30CD1FC4DB4D00053BED /* GLTFMTLTextureLoader.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
