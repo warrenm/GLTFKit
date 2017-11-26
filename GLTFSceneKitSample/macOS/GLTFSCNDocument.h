@@ -14,10 +14,10 @@
 //  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 //
 
-#import <Cocoa/Cocoa.h>
-#import <Metal/Metal.h>
 #import <GLTF/GLTF.h>
 #import <GLTFSCN/GLTFSCN.h>
+
+@import Cocoa;
 
 @interface GLTFSCNDocument : NSDocument
 @property (nonatomic, strong) GLTFAsset *asset;

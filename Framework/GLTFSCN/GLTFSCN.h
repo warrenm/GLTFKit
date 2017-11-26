@@ -14,8 +14,8 @@
 //  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 //
 
-#import <Cocoa/Cocoa.h>
-#import <SceneKit/SceneKit.h>
+@import Cocoa;
+@import SceneKit;
 
 //! Project version number for GLTFSCN.
 FOUNDATION_EXPORT double GLTFSCNVersionNumber;

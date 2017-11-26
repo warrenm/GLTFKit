@@ -15,7 +15,8 @@
 //
 
 #import "GLTFMTLLightingEnvironment.h"
-#import <MetalKit/MetalKit.h>
+
+@import MetalKit;
 
 @implementation GLTFMTLLightingEnvironment
 

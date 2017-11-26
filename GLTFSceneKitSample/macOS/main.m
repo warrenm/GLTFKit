@@ -14,7 +14,7 @@
 //  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 //
 
-#import <Cocoa/Cocoa.h>
+@import Cocoa;
 
 @interface AppDelegate : NSObject <NSApplicationDelegate>
 @end

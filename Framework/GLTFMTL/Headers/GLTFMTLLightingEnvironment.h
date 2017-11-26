@@ -14,9 +14,10 @@
 //  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 //
 
-#import <Foundation/Foundation.h>
 #import <GLTF/GLTF.h>
-#import <Metal/Metal.h>
+
+@import Foundation;
+@import Metal;
 
 NS_ASSUME_NONNULL_BEGIN
 

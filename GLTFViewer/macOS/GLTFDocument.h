@@ -14,8 +14,9 @@
 //  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 //
 
-#import <Cocoa/Cocoa.h>
 #import <GLTF/GLTF.h>
+
+@import Cocoa;
 
 @interface GLTFDocument : NSDocument
 @property (nonatomic, strong) GLTFAsset *asset;

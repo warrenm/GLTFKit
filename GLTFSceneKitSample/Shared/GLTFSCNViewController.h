@@ -14,17 +14,17 @@
 //  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 //
 
-#import <SceneKit/SceneKit.h>
+#import <GLTF/GLTF.h>
 
 #if TARGET_OS_OSX
-#import <Cocoa/Cocoa.h>
+@import Cocoa;
 typedef NSViewController NSUIViewController;
 #else
-#import <UIKit/UIKit.h>
+@import UIKit;
 typedef UIViewController NSUIViewController;
 #endif
 
-#import <GLTF/GLTF.h>
+@import SceneKit;
 
 @interface GLTFSCNViewController : NSUIViewController
 

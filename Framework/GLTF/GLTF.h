@@ -17,9 +17,9 @@
 #include "TargetConditionals.h"
 
 #if TARGET_OS_OSX
-#import <Cocoa/Cocoa.h>
+@import Cocoa;
 #elif TARGET_OS_IOS
-#import <UIKit/UIKit.h>
+@import UIKit;
 #endif
 
 //! Project version number for GLTF.
