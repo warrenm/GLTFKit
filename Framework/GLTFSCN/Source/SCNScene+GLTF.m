@@ -81,6 +81,12 @@ static SCNMatrix4 GLTFSCNMatrix4FromFloat4x4(GLTFMatrix4 m) {
     return mOut;
 }
 
+@implementation GLTFSCNAnimationTargetPair
+@end
+
+@implementation GLTFSCNAsset
+@end
+
 @interface GLTFSCNSceneBuilder : NSObject
 
 @property (nonatomic, strong) GLTFAsset *asset;
@@ -91,7 +97,7 @@ static SCNMatrix4 GLTFSCNMatrix4FromFloat4x4(GLTFMatrix4 m) {
 
 - (instancetype)initWithGLTFAsset:(GLTFAsset *)asset options:(NSDictionary<id<NSCopying>, id> *)options;
 
-- (NSArray<SCNScene *> *)buildScenes;
+- (GLTFSCNAsset *)buildSceneContainer;
 
 @end
 
@@ -108,7 +114,9 @@ static SCNMatrix4 GLTFSCNMatrix4FromFloat4x4(GLTFMatrix4 m) {
     return self;
 }
 
-- (NSArray<SCNScene *> *)buildScenes {
+- (GLTFSCNAsset *)buildSceneContainer {
+    GLTFSCNAsset *scnAsset = [GLTFSCNAsset new];
+    
     NSMutableArray *scenes = [NSMutableArray array];
     
     for (GLTFScene *scene in self.asset.scenes) {
@@ -121,6 +129,7 @@ static SCNMatrix4 GLTFSCNMatrix4FromFloat4x4(GLTFMatrix4 m) {
         [scenes addObject:scnScene];
     }
     
+    NSMutableArray<GLTFSCNAnimationTargetPair *> *animations = [NSMutableArray array];
     for (GLTFAnimation *animation in self.asset.animations) {
         for (GLTFAnimationChannel *channel in animation.channels) {
             CAKeyframeAnimation *keyframeAnimation = nil;
@@ -142,14 +151,27 @@ static SCNMatrix4 GLTFSCNMatrix4FromFloat4x4(GLTFMatrix4 m) {
             
             SCNNode *scnNode = self.scnNodesForGLTFNodes[channel.targetNode.identifier];
             if (scnNode != nil) {
-                [scnNode addAnimation:keyframeAnimation forKey:nil];
+                GLTFSCNAnimationTargetPair *pair = [GLTFSCNAnimationTargetPair new];
+                pair.animation = keyframeAnimation;
+                pair.target = scnNode;
+                [animations addObject:pair];
             } else {
                 NSLog(@"WARNING: Could not find node for channel target node identifier %@", channel.targetNode.identifier);
             }
         }
     }
+    
+    scnAsset.scenes = [scenes copy];
+    scnAsset.animations = [animations copy];
+    
+    if (self.asset.defaultScene != nil) {
+        NSUInteger defaultSceneIndex = [self.asset.scenes indexOfObject:self.asset.defaultScene];
+        if (defaultSceneIndex < scenes.count) {
+            scnAsset.defaultScene = scenes[defaultSceneIndex];
+        }
+    }
 
-    return scenes;
+    return scnAsset;
 }
 
 - (void)recursiveAddNode:(GLTFNode *)node toSCNNode:(SCNNode *)parentNode {
@@ -563,9 +585,9 @@ static SCNMatrix4 GLTFSCNMatrix4FromFloat4x4(GLTFMatrix4 m) {
 
 @implementation SCNScene (GLTF)
 
-+ (NSArray<SCNScene *> *)scenesFromGLTFAsset:(GLTFAsset *)asset options:(NSDictionary<id<NSCopying>, id> *)options {
++ (GLTFSCNAsset *)assetFromGLTFAsset:(GLTFAsset *)asset options:(NSDictionary<id<NSCopying>, id> *)options {
     GLTFSCNSceneBuilder *builder = [[GLTFSCNSceneBuilder alloc] initWithGLTFAsset:asset options:options];
-    return [builder buildScenes];
+    return [builder buildSceneContainer];
 }
 
 @end

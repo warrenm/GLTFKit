@@ -15,10 +15,28 @@
 //
 
 #import <GLTF/GLTF.h>
-#import <SceneKit/SceneKit.h>
+
+@import SceneKit;
+
+NS_ASSUME_NONNULL_BEGIN
+
+@interface GLTFSCNAnimationTargetPair : NSObject
+@property (nonatomic, strong) CAAnimation *animation;
+@property (nonatomic, strong) SCNNode *target;
+@end
+
+@interface GLTFSCNAsset : NSObject
+@property (nonatomic, copy) NSArray<SCNScene *> *scenes;
+@property (nonatomic, strong) SCNScene * _Nullable defaultScene;
+@property (nonatomic, copy) NSArray<GLTFSCNAnimationTargetPair *> *animations;
+//@property (nonatomic, copy) NSArray<SCNCamera *> *cameras;
+//@property (nonatomic, copy) NSArray<SCNLight *> *lights;
+@end
 
 @interface SCNScene (GLTF)
 
-+ (NSArray<SCNScene *> *)scenesFromGLTFAsset:(GLTFAsset *)asset options:(NSDictionary<id<NSCopying>, id> *)options;
++ (GLTFSCNAsset *)assetFromGLTFAsset:(GLTFAsset *)asset options:(NSDictionary<id<NSCopying>, id> *)options;
 
 @end
+
+NS_ASSUME_NONNULL_END

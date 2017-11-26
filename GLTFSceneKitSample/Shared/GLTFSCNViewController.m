@@ -37,7 +37,11 @@
 }
 
 - (void)setAsset:(GLTFAsset *)asset {
-    _scene = [[SCNScene scenesFromGLTFAsset:asset options:nil] firstObject];
+    GLTFSCNAsset *scnAsset = [SCNScene assetFromGLTFAsset:asset options:@{}];
+    _scene = scnAsset.defaultScene;
+    for (GLTFSCNAnimationTargetPair *animation in scnAsset.animations) {
+        [animation.target addAnimation:animation.animation forKey:nil];
+    }
     
     _scene.lightingEnvironment.contents = @"Ridgecrest_Road_Ref.hdr";
     _scene.lightingEnvironment.intensity = 3.0;
