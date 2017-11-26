@@ -44,7 +44,7 @@ typedef struct {
     size_t dataOffset;
 } GLTFRGBEHeader;
 
-static inline void GLTFRGBFromRGBE(const uint8_t *rgbe, float *rgb)
+static inline void GLTFRGBAFromRGBE(const uint8_t *rgbe, float *rgb)
 {
     int e = (int)rgbe[3] - (128 + 8);
     
@@ -186,7 +186,7 @@ static inline void GLTFRGBFromRGBE(const uint8_t *rgbe, float *rgb)
     buffer += header.dataOffset;
     while (pixelCount > 0) {
         memcpy(rgbe, buffer, 4);
-        GLTFRGBFromRGBE(rgbe, pixelData);
+        GLTFRGBAFromRGBE(rgbe, pixelData);
         buffer += 4;
         pixelData += 4;
         --pixelCount;
@@ -208,7 +208,7 @@ static inline void GLTFRGBFromRGBE(const uint8_t *rgbe, float *rgb)
         memcpy(rgbe, buffer, 4);
         buffer += 4;
         if (rgbe[0] != 2 || rgbe[1] != 2 || rgbe[2] & 0x80) {
-            GLTFRGBFromRGBE(buffer, pixelData);
+            GLTFRGBAFromRGBE(buffer, pixelData);
             pixelData += 3;
             buffer += 3;
             pixelCount -= 1;
@@ -259,10 +259,10 @@ static inline void GLTFRGBFromRGBE(const uint8_t *rgbe, float *rgb)
                 scanline[header.width * 2 + p],
                 scanline[header.width * 3 + p],
             };
-            GLTFRGBFromRGBE(&rgbe[0], pixelData);
+            GLTFRGBAFromRGBE(&rgbe[0], pixelData);
             pixelData += 4;
-            pixelCount -= header.width;
         }
+        pixelCount -= header.width;
     }
     
     free(scanline);
