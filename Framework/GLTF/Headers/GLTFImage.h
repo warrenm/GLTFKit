@@ -20,20 +20,24 @@
 @import Foundation;
 @import CoreGraphics;
 
+NS_ASSUME_NONNULL_BEGIN
+
 @interface GLTFImage : GLTFObject
 
-+ (CGImageRef)newImageForDataURI:(NSString *)uriData;
++ (_Nullable CGImageRef)newImageForDataURI:(NSString *)uriData;
 
 /// A reference to a buffer view containing image data, if url is nil
-@property (nonatomic, strong) GLTFBufferView *bufferView;
+@property (nonatomic, strong) GLTFBufferView * _Nullable bufferView;
 
 /// The MIME type of the data contained in this image's buffer view
-@property (nonatomic, copy) NSString *mimeType;
+@property (nonatomic, copy) NSString * _Nullable mimeType;
 
 /// A file URL, if the URI was not a decodable data-uri; otherwise nil
-@property (nonatomic, copy) NSURL *url;
+@property (nonatomic, copy) NSURL * _Nullable url;
 
 /// An image, if the URI was a decodable data-uri; otherwise nil
-@property (nonatomic, assign) CGImageRef cgImage;
+@property (nonatomic, assign) CGImageRef _Nullable cgImage;
 
 @end
+
+NS_ASSUME_NONNULL_END

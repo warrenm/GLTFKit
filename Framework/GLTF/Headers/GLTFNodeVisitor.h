@@ -16,6 +16,8 @@
 
 #import <Foundation/Foundation.h>
 
+NS_ASSUME_NONNULL_BEGIN
+
 @class GLTFNode;
 
 typedef NS_ENUM(NSInteger, GLTFVisitationStrategy) {
@@ -27,3 +29,5 @@ typedef void (^GLTFNodeVisitor)(GLTFNode *node, int depth, BOOL *stop);
 @protocol GLTFNodeVisitable <NSObject>
 - (void)acceptVisitor:(GLTFNodeVisitor)visitor strategy:(GLTFVisitationStrategy)strategy;
 @end
+
+NS_ASSUME_NONNULL_END

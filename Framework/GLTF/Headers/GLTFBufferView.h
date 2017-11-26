@@ -17,6 +17,8 @@
 #import "GLTFObject.h"
 #import "GLTFEnums.h"
 
+NS_ASSUME_NONNULL_BEGIN
+
 @protocol GLTFBuffer;
 
 @interface GLTFBufferView : GLTFObject
@@ -27,3 +29,4 @@
 @property (nonatomic, assign) NSInteger stride;
 @end
 
+NS_ASSUME_NONNULL_END

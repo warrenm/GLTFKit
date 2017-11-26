@@ -19,21 +19,23 @@
 #import "GLTFObject.h"
 #import "GLTFEnums.h"
 
+NS_ASSUME_NONNULL_BEGIN
+
 @class GLTFScene, GLTFCamera, GLTFAnimation;
 @protocol GLTFBufferAllocator;
 
 @interface GLTFAsset : NSObject
 
 @property (nonatomic, readonly, copy) NSArray<GLTFScene *> *scenes;
-@property (nonatomic, readonly) GLTFScene *defaultScene;
+@property (nonatomic, readonly) GLTFScene * _Nullable defaultScene;
 
 @property (nonatomic, readonly, copy) NSArray<GLTFAnimation *> *animations;
 
 @property (nonatomic, readonly, copy) NSArray<GLTFCamera *> *cameras;
 
-@property (nonatomic, copy) NSString *generator;
-@property (nonatomic, copy) NSString *copyright;
-@property (nonatomic, copy) NSString *formatVersion;
+@property (nonatomic, copy) NSString * _Nullable generator;
+@property (nonatomic, copy) NSString * _Nullable copyright;
+@property (nonatomic, copy) NSString * _Nullable formatVersion;
 
 @property (nonatomic, copy) NSArray<NSString *> *extensionsUsed;
 
@@ -41,3 +43,4 @@
 
 @end
 
+NS_ASSUME_NONNULL_END

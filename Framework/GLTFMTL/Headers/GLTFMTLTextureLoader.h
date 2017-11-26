@@ -18,10 +18,14 @@
 
 @import Metal;
 
+NS_ASSUME_NONNULL_BEGIN
+
 @interface GLTFMTLTextureLoader : NSObject
 
 - (instancetype)initWithDevice:(id<MTLDevice>)device;
 
-- (id<MTLTexture>)hdrTextureWithContentsOfURL:(NSURL *)url;
+- (id<MTLTexture> _Nullable)hdrTextureWithContentsOfURL:(NSURL *)url;
 
 @end
+
+NS_ASSUME_NONNULL_END

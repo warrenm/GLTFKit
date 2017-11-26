@@ -17,6 +17,8 @@
 #import "GLTFObject.h"
 #import "GLTFEnums.h"
 
+NS_ASSUME_NONNULL_BEGIN
+
 @class GLTFTextureSampler, GLTFImage;
 
 @interface GLTFTexture : GLTFObject
@@ -31,3 +33,6 @@
 // GLTFTextureTargetTexture2D
 @property (nonatomic, assign) GLTFTextureTarget target;
 @end
+
+NS_ASSUME_NONNULL_END
+

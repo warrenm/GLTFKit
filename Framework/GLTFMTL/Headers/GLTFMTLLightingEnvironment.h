@@ -18,6 +18,8 @@
 #import <GLTF/GLTF.h>
 #import <Metal/Metal.h>
 
+NS_ASSUME_NONNULL_BEGIN
+
 @interface GLTFMTLLightingEnvironment : NSObject
 
 @property (nonatomic, retain) id<MTLTexture> diffuseCube;
@@ -32,3 +34,5 @@
                                  error:(NSError **)error;
 
 @end
+
+NS_ASSUME_NONNULL_END

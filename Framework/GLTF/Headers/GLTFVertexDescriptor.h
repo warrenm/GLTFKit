@@ -17,6 +17,8 @@
 @import Foundation;
 #import "GLTFEnums.h"
 
+NS_ASSUME_NONNULL_BEGIN
+
 extern const NSInteger GLTFVertexDescriptorMaxAttributeCount;
 extern const NSInteger GLTFVertexDescriptorMaxBufferLayoutCount;
 
@@ -44,3 +46,5 @@ extern NSString *const GLTFAttributeSemanticWeights0;
 @property (nonatomic, copy) NSArray<GLTFVertexAttribute *> *attributes;
 @property (nonatomic, copy) NSArray<GLTFBufferLayout *> *bufferLayouts;
 @end
+
+NS_ASSUME_NONNULL_END

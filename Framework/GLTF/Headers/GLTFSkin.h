@@ -17,6 +17,8 @@
 #import <Foundation/Foundation.h>
 #import "GLTFObject.h"
 
+NS_ASSUME_NONNULL_BEGIN
+
 @class GLTFAccessor, GLTFNode;
 
 @interface GLTFSkin : GLTFObject
@@ -24,3 +26,5 @@
 @property (nonatomic, copy) NSArray<GLTFNode *> *jointNodes;
 @property (nonatomic, assign) GLTFNode *skeletonRootNode;
 @end
+
+NS_ASSUME_NONNULL_END

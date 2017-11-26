@@ -18,14 +18,18 @@
 
 @import Metal;
 
+NS_ASSUME_NONNULL_BEGIN
+
 @class GLTFMTLLightingEnvironment;
 
 @interface GLTFMTLShaderBuilder : NSObject
 
 - (id<MTLRenderPipelineState>)renderPipelineStateForSubmesh:(GLTFSubmesh *)submesh
-                                        lightingEnvironment:(GLTFMTLLightingEnvironment *)lightingEnvironment
+                                        lightingEnvironment:(GLTFMTLLightingEnvironment * _Nullable)lightingEnvironment
                                            colorPixelFormat:(MTLPixelFormat)colorPixelFormat
                                     depthStencilPixelFormat:(MTLPixelFormat)depthStencilPixelFormat
                                                      device:(id<MTLDevice>)device;
 
 @end
+
+NS_ASSUME_NONNULL_END

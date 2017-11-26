@@ -19,6 +19,8 @@
 @import Foundation;
 @import simd;
 
+NS_ASSUME_NONNULL_BEGIN
+
 typedef struct __attribute__((packed)) {
     float x, y, z;
 } GLTFVector3;
@@ -90,3 +92,5 @@ extern simd_float4 GLTFVectorFloat4FromArray(NSArray *array);
 extern GLTFQuaternion GLTFQuaternionFromArray(NSArray *array);
 
 extern simd_float4x4 GLTFMatrixFloat4x4FromArray(NSArray *array);
+
+NS_ASSUME_NONNULL_END

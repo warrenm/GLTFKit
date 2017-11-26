@@ -16,6 +16,8 @@
 
 #import "GLTFObject.h"
 
+NS_ASSUME_NONNULL_BEGIN
+
 @protocol GLTFBuffer <GLTFObject>
 
 @property (nonatomic, readonly) NSInteger length;
@@ -24,3 +26,5 @@
 @property (nonatomic, readonly) void *contents;
 
 @end
+
+NS_ASSUME_NONNULL_END

@@ -19,6 +19,8 @@
 @import Metal;
 @import simd;
 
+NS_ASSUME_NONNULL_BEGIN
+
 typedef NS_ENUM(NSInteger, GLTFMTLTextureBindIndex) {
     GLTFTextureBindIndexBaseColor,
     GLTFTextureBindIndexNormal,
@@ -57,3 +59,5 @@ extern simd_float3x3 GLTFMatrixUpperLeft3x3(simd_float4x4 m);
 extern simd_float3x3 GLTFNormalMatrixFromModelMatrix(simd_float4x4 m);
 
 extern simd_float4x4 GLTFPerspectiveProjectionMatrixAspectFovRH(const float fovY, const float aspect, const float nearZ, const float farZ);
+
+NS_ASSUME_NONNULL_END

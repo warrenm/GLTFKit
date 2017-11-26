@@ -18,9 +18,12 @@
 
 @import Foundation;
 
+NS_ASSUME_NONNULL_BEGIN
+
 @protocol GLTFBufferAllocator
 + (uint64_t)liveAllocationSize;
 - (id<GLTFBuffer>)newBufferWithLength:(NSInteger)length;
 - (id<GLTFBuffer>)newBufferWithData:(NSData *)data;
 @end
 
+NS_ASSUME_NONNULL_END

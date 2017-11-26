@@ -18,6 +18,10 @@
 
 #import "GLTFBufferAllocator.h"
 
+NS_ASSUME_NONNULL_BEGIN
+
 @interface GLTFDefaultBufferAllocator : NSObject <GLTFBufferAllocator>
 
 @end
+
+NS_ASSUME_NONNULL_END

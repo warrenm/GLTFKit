@@ -18,9 +18,13 @@
 #import "GLTFUtilities.h"
 #import "GLTFNodeVisitor.h"
 
+NS_ASSUME_NONNULL_BEGIN
+
 @class GLTFNode;
 
 @interface GLTFScene : GLTFObject <GLTFNodeVisitable>
 @property (nonatomic, copy) NSArray<GLTFNode *> *nodes;
 @property (nonatomic, readonly, assign) GLTFBoundingBox approximateBounds;
 @end
+
+NS_ASSUME_NONNULL_END

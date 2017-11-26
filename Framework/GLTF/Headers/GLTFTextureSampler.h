@@ -17,6 +17,8 @@
 #import "GLTFObject.h"
 #import "GLTFEnums.h"
 
+NS_ASSUME_NONNULL_BEGIN
+
 @interface GLTFTextureSampler : GLTFObject <NSCopying>
 
 // GLTFSamplingFilterLinear
@@ -28,3 +30,5 @@
 // GLTFAddressModeRepeat
 @property (nonatomic, assign) GLTFAddressMode tAddressMode;
 @end
+
+NS_ASSUME_NONNULL_END

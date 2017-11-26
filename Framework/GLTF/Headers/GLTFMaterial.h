@@ -18,6 +18,8 @@
 
 @import simd;
 
+NS_ASSUME_NONNULL_BEGIN
+
 @class GLTFParameter, GLTFTexture;
 
 typedef NS_ENUM(NSInteger, GLTFAlphaMode) {
@@ -37,11 +39,11 @@ typedef NS_ENUM(NSInteger, GLTFAlphaMode) {
 @property (nonatomic, assign) float glossinessFactor; // Only used by KHR_materials_pbrSpecularGlossiness extension
 @property (nonatomic, assign) simd_float3 specularFactor; // Only used by KHR_materials_pbrSpecularGlossiness extension
 
-@property (nonatomic, strong) GLTFTexture *baseColorTexture;
-@property (nonatomic, strong) GLTFTexture *metallicRoughnessTexture;
-@property (nonatomic, strong) GLTFTexture *normalTexture;
-@property (nonatomic, strong) GLTFTexture *emissiveTexture;
-@property (nonatomic, strong) GLTFTexture *occlusionTexture;
+@property (nonatomic, strong) GLTFTexture * _Nullable baseColorTexture;
+@property (nonatomic, strong) GLTFTexture * _Nullable metallicRoughnessTexture;
+@property (nonatomic, strong) GLTFTexture * _Nullable normalTexture;
+@property (nonatomic, strong) GLTFTexture * _Nullable emissiveTexture;
+@property (nonatomic, strong) GLTFTexture * _Nullable occlusionTexture;
 
 @property (nonatomic, assign) NSInteger baseColorTexCoord;
 @property (nonatomic, assign) NSInteger metallicRoughnessTexCoord;
@@ -56,3 +58,4 @@ typedef NS_ENUM(NSInteger, GLTFAlphaMode) {
 
 @end
 
+NS_ASSUME_NONNULL_END

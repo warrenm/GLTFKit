@@ -18,6 +18,8 @@
 @import Foundation;
 @import Metal;
 
+NS_ASSUME_NONNULL_BEGIN
+
 #define GLTFMTLRendererDynamicConstantsBufferSize (1024 * 1024)
 #define GLTFMTLRendererMaxInflightFrames 3
 
@@ -33,7 +35,7 @@
 @property (nonatomic, assign) MTLPixelFormat colorPixelFormat;
 @property (nonatomic, assign) MTLPixelFormat depthStencilPixelFormat;
 
-@property (nonatomic, strong) GLTFMTLLightingEnvironment *lightingEnvironment;
+@property (nonatomic, strong) GLTFMTLLightingEnvironment * _Nullable lightingEnvironment;
 
 - (instancetype)initWithDevice:(id<MTLDevice>)device;
 
@@ -44,3 +46,5 @@
 - (void)signalFrameCompletion;
 
 @end
+
+NS_ASSUME_NONNULL_END

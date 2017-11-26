@@ -19,6 +19,8 @@
 @import Foundation;
 @import Metal;
 
+NS_ASSUME_NONNULL_BEGIN
+
 @interface GLTFMTLBuffer : NSObject<GLTFBuffer>
 
 @property (nonatomic, readonly) id<MTLBuffer> buffer;
@@ -30,3 +32,5 @@
 - (instancetype)initWithDevice:(id<MTLDevice>)device;
 
 @end
+
+NS_ASSUME_NONNULL_END

@@ -17,6 +17,8 @@
 #import "GLTFObject.h"
 #import "GLTFEnums.h"
 
+NS_ASSUME_NONNULL_BEGIN
+
 @class GLTFNode, GLTFAccessor;
 
 @interface GLTFAnimation : GLTFObject
@@ -38,3 +40,5 @@
 @property (nonatomic, weak) NSString *targetPath;
 @property (nonatomic, weak) GLTFAnimationSampler *sampler;
 @end
+
+NS_ASSUME_NONNULL_END

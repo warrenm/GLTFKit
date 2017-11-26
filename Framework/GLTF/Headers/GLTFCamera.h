@@ -19,6 +19,8 @@
 
 @import simd;
 
+NS_ASSUME_NONNULL_BEGIN
+
 @class GLTFNode;
 
 @interface GLTFCamera : GLTFObject
@@ -38,3 +40,5 @@
 - (void)buildProjectionMatrix;
 
 @end
+
+NS_ASSUME_NONNULL_END

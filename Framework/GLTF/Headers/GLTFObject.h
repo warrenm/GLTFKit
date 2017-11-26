@@ -16,10 +16,12 @@
 
 @import Foundation;
 
+NS_ASSUME_NONNULL_BEGIN
+
 @protocol GLTFObject
 
 /// The user-defined name of this object. Need not be unique.
-@property (nonatomic, copy) NSString *name;
+@property (nonatomic, copy) NSString * _Nullable name;
 /// Data specific to any extensions used in this document
 @property (nonatomic, copy) NSDictionary *extensions;
 /// Contains application-specific information that is passed through but not parsed
@@ -32,10 +34,12 @@
 /// A unique identifier for this object
 @property (nonatomic, readonly) NSUUID *identifier;
 /// The user-defined name of this object. Need not be unique.
-@property (nonatomic, copy) NSString *name;
+@property (nonatomic, copy) NSString * _Nullable name;
 /// Data specific to any extensions used in this document
 @property (nonatomic, copy) NSDictionary *extensions;
 /// Contains application-specific information that is passed through but not parsed
 @property (nonatomic, copy) NSDictionary *extras;
 
 @end
+
+NS_ASSUME_NONNULL_END

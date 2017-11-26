@@ -17,7 +17,9 @@
 #import "GLTFObject.h"
 #import "GLTFEnums.h"
 
-@class GLTFAccessor, GLTFVertexDescriptor, GLTFMaterial;
+NS_ASSUME_NONNULL_BEGIN
+
+@class GLTFAccessor, GLTFVertexDescriptor, GLTFSubmesh, GLTFMaterial;
 
 @interface GLTFMesh : GLTFObject
 @property (nonatomic, copy) NSArray *submeshes;
@@ -31,3 +33,5 @@
 
 @property (nonatomic, readonly) GLTFVertexDescriptor *vertexDescriptor;
 @end
+
+NS_ASSUME_NONNULL_END

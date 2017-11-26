@@ -19,6 +19,8 @@
 
 @import simd;
 
+NS_ASSUME_NONNULL_BEGIN
+
 @class GLTFBufferView;
 
 typedef struct {
@@ -34,3 +36,5 @@ typedef struct {
 @property (nonatomic, assign) NSInteger count;
 @property (nonatomic, assign) GLTFValueRange valueRange;
 @end
+
+NS_ASSUME_NONNULL_END
