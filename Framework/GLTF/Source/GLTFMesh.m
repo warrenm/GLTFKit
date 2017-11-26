@@ -23,6 +23,9 @@
 @implementation GLTFMesh
 @end
 
+@implementation GLTFMorphTarget
+@end
+
 @interface GLTFSubmesh ()
 @property (nonatomic, strong) GLTFVertexDescriptor *cachedVertexDescriptor;
 @end

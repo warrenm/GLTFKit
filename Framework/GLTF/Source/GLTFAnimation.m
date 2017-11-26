@@ -91,6 +91,12 @@
         float frameProgress = timeWithinFrame / frameTimeDelta;
         
         if ([path isEqualToString:@"rotation"]) {
+            if(sampler.outputAccessor.componentType != GLTFDataTypeFloat) {
+                static dispatch_once_t floatRotationsNonce;
+                dispatch_once(&floatRotationsNonce, ^{
+                    NSLog(@"WARNING: Only float accessors are supported for rotation animations. This will only be reported once.");
+                });
+            }
             const GLTFQuaternion *rotationValues = sampler.outputValues;
             
             GLTFQuaternion previousRotation = rotationValues[previousKeyFrame];
@@ -119,12 +125,28 @@
             
             float interpScale = ((1 - frameProgress) * previousScale) + (frameProgress * nextScale);
             
-            target.scale = interpScale;
+            target.scale = (simd_float3)interpScale;
         } else if ([path isEqualToString:@"weights"]) {
-            static dispatch_once_t onceToken;
-            dispatch_once(&onceToken, ^{
-                NSLog(@"WARNING: Morph target animations are not currently supported. This will only be reported once.");
-            });
+            if(sampler.outputAccessor.componentType != GLTFDataTypeFloat) {
+                static dispatch_once_t floatWeightsNonce;
+                dispatch_once(&floatWeightsNonce, ^{
+                    NSLog(@"WARNING: Only scalar float accessors are supported for rotation animations. This will only be reported once.");
+                });
+            }
+            const float *weightValues = sampler.outputValues;
+            
+            long weightCount = sampler.outputAccessor.count / keyFrameCount;
+            
+            const float *previousWeights = weightValues + (previousKeyFrame * weightCount);
+            const float *nextWeights = weightValues + (nextKeyFrame * weightCount);
+            
+            NSMutableArray *interpWeights = [NSMutableArray array];
+            for (int i = 0; i < weightCount; ++i) {
+                float interpWeight = ((1 - frameProgress) * previousWeights[i]) + (frameProgress * nextWeights[i]);
+                [interpWeights addObject:@(interpWeight)];
+            }
+
+            target.morphTargetWeights = [interpWeights copy];
         }
     }
 }

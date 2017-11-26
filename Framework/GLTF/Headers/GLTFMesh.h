@@ -22,7 +22,12 @@ NS_ASSUME_NONNULL_BEGIN
 @class GLTFAccessor, GLTFVertexDescriptor, GLTFSubmesh, GLTFMaterial;
 
 @interface GLTFMesh : GLTFObject
-@property (nonatomic, copy) NSArray *submeshes;
+@property (nonatomic, copy) NSArray<GLTFSubmesh *> *submeshes;
+@property (nonatomic, copy) NSArray<NSNumber *> *defaultMorphTargetWeights;
+@end
+
+@interface GLTFMorphTarget : GLTFObject
+@property (nonatomic, copy) NSDictionary<NSString *, GLTFAccessor *> *accessorsForAttributes;
 @end
 
 @interface GLTFSubmesh : GLTFObject
@@ -30,6 +35,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, weak) GLTFAccessor *indexAccessor;
 @property (nonatomic, weak) GLTFMaterial *material;
 @property (nonatomic, assign) GLTFPrimitiveType primitiveType;
+@property (nonatomic, copy) NSArray<GLTFMorphTarget *> *morphTargets;
 
 @property (nonatomic, readonly) GLTFVertexDescriptor *vertexDescriptor;
 @end

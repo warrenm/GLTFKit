@@ -31,6 +31,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, weak) GLTFSkin * _Nullable skin;
 @property (nonatomic, copy) NSString * _Nullable jointName;
 @property (nonatomic, weak) GLTFMesh * _Nullable mesh;
+@property (nonatomic, copy) NSArray<NSNumber *> *morphTargetWeights;
 @property (nonatomic, assign) GLTFQuaternion rotationQuaternion;
 @property (nonatomic, assign) simd_float3 scale;
 @property (nonatomic, assign) simd_float3 translation;

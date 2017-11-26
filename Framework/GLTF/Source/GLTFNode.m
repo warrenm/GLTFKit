@@ -33,6 +33,7 @@
         _rotationQuaternion = (GLTFQuaternion){ 0, 0, 0, 1 };
         _scale = vector3(1.0f, 1.0f, 1.0f);
         _translation = vector3(0.0f, 0.0f, 0.0f);
+        _morphTargetWeights = @[];
     }
     return self;
 }

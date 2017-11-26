@@ -497,11 +497,12 @@ static NSString *const GLTFExtensionKHRMaterialsPBRSpecularGlossiness = @"KHR_ma
     
     NSMutableArray *meshes = [NSMutableArray arrayWithCapacity:meshesMap.count];
     for (NSDictionary *properties in meshesMap) {
-    
         GLTFMesh *mesh = [[GLTFMesh alloc] init];
         mesh.name = properties[@"name"];
         mesh.extensions = properties[@"extensions"];
         mesh.extras = properties[@"extras"];
+        
+        mesh.defaultMorphTargetWeights = properties[@"weights"] ?: @[];
         
         NSArray *submeshesProperties = properties[@"primitives"];
         NSMutableArray *submeshes = [NSMutableArray arrayWithCapacity:submeshesProperties.count];
@@ -565,6 +566,22 @@ static NSString *const GLTFExtensionKHRMaterialsPBRSpecularGlossiness = @"KHR_ma
             if (submeshProperties[@"mode"]) {
                 submesh.primitiveType = (GLTFPrimitiveType)[submeshProperties[@"mode"] intValue];
             }
+            
+            NSMutableArray *morphTargets = [NSMutableArray array];
+            for (NSDictionary *targetProperties in submeshProperties[@"targets"]) {
+                GLTFMorphTarget *morphTarget = [GLTFMorphTarget new];
+                NSMutableDictionary *attributeAccessors = [NSMutableDictionary dictionaryWithCapacity:submeshAttributes.count];
+                [targetProperties enumerateKeysAndObjectsUsingBlock:^(NSString *attributeName, NSNumber *accessorIndexValue, BOOL *stop) {
+                    NSUInteger accessorIndex = accessorIndexValue.unsignedIntegerValue;
+                    if (accessorIndex < _accessors.count) {
+                        GLTFAccessor *accessor = _accessors[accessorIndex];
+                        attributeAccessors[attributeName] = accessor;
+                    }
+                }];
+                morphTarget.accessorsForAttributes = [attributeAccessors copy];
+                [morphTargets addObject:morphTarget];
+            }
+            submesh.morphTargets = [morphTargets copy];
             
             [submeshes addObject:submesh];
         }
