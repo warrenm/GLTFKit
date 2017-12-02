@@ -1,5 +1,5 @@
 Pod::Spec.new do |s|
-  s.name         = "GLTF"
+  s.name         = "GLTFKit"
   s.version      = "0.5.0"
   s.summary      = "A framework for loading GL Transmission Format (glTF) models"
   s.homepage     = "https://github.com/warrenm/GLTFKit"
@@ -18,4 +18,21 @@ Pod::Spec.new do |s|
   s.public_header_files = "Framework/GLTF/*.h", "Framework/GLTF/Headers/*.h"
 
   s.requires_arc        = true
+
+  s.default_subspec = ''
+
+  s.subspec 'GLTFMTL' do |ss|
+    ss.source_files        = "Framework/GLTFMTL/*.h", "Framework/GLTFMTL/Headers/*.h", "Framework/GLTFMTL/Source/*.m"
+    ss.public_header_files = "Framework/GLTFMTL/*.h", "Framework/GLTFMTL/Headers/*.h"
+    ss.resource            = "GLTFViewer/Resources/Shaders/pbr.metal"
+
+    ss.frameworks   = 'Metal', 'MetalKit'
+  end
+
+  s.subspec 'GLTFSCN' do |ss|
+    ss.source_files        = "Framework/GLTFSCN/*.h", "Framework/GLTFSCN/Headers/*.h", "Framework/GLTFSCN/Source/*.m"
+    ss.public_header_files = "Framework/GLTFSCN/*.h", "Framework/GLTFSCN/Headers/*.h"
+
+    ss.frameworks = 'SceneKit'
+  end
 end
