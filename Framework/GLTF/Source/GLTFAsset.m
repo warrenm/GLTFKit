@@ -225,7 +225,9 @@ static NSString *const GLTFExtensionKHRMaterialsPBRSpecularGlossiness = @"KHR_ma
         
         id<GLTFBuffer> buffer = [_bufferAllocator newBufferWithData:data];
         
-        NSParameterAssert(byteLength == [buffer length]);
+        if (byteLength != [buffer length]) {
+            NSLog(@"WARNING: Expected to load buffer of length %lu bytes; got %lu bytes", byteLength, [buffer length]);
+        }
         [buffers addObject: buffer];
     }
     
