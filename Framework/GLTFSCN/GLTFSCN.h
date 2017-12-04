@@ -14,7 +14,12 @@
 //  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 //
 
+#if TARGET_OS_OSX
 @import Cocoa;
+#elif TARGET_OS_IOS
+@import UIKit;
+#endif
+
 @import SceneKit;
 
 //! Project version number for GLTFSCN.
