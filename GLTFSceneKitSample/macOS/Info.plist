@@ -20,7 +20,19 @@
 				<string>????</string>
 			</array>
 			<key>CFBundleTypeRole</key>
-			<string>Editor</string>
+			<string>Viewer</string>
+			<key>NSDocumentClass</key>
+			<string>GLTFSCNDocument</string>
+		</dict>
+		<dict>
+			<key>CFBundleTypeExtensions</key>
+			<array>
+				<string>glb</string>
+			</array>
+			<key>CFBundleTypeName</key>
+			<string>glTF (Binary)</string>
+			<key>CFBundleTypeRole</key>
+			<string>Viewer</string>
 			<key>NSDocumentClass</key>
 			<string>GLTFSCNDocument</string>
 		</dict>
@@ -49,5 +61,42 @@
 	<string>Main</string>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
+	<key>UTImportedTypeDeclarations</key>
+	<array>
+		<dict>
+			<key>UTTypeDescription</key>
+			<string>glTF</string>
+			<key>UTTypeIdentifier</key>
+			<string>org.khronos.gltf</string>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array>
+					<string>gltf</string>
+				</array>
+				<key>public.mime-type</key>
+				<array>
+					<string>model/gltf+json</string>
+				</array>
+			</dict>
+		</dict>
+		<dict>
+			<key>UTTypeDescription</key>
+			<string>glTF (Binary)</string>
+			<key>UTTypeIdentifier</key>
+			<string>org.khronos.gltf</string>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array>
+					<string>glb</string>
+				</array>
+				<key>public.mime-type</key>
+				<array>
+					<string>model/gltf-binary</string>
+				</array>
+			</dict>
+		</dict>
+	</array>
 </dict>
 </plist>

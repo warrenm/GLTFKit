@@ -17,6 +17,7 @@
 #import "GLTFAsset.h"
 #import "GLTFAnimation.h"
 #import "GLTFAccessor.h"
+#import "GLTFBinaryChunk.h"
 #import "GLTFBuffer.h"
 #import "GLTFBufferAllocator.h"
 #import "GLTFBufferView.h"
@@ -52,6 +53,7 @@ static NSString *const GLTFExtensionKHRMaterialsPBRSpecularGlossiness = @"KHR_ma
 @property (nonatomic, copy) NSArray *nodes;
 @property (nonatomic, copy) NSArray *animations;
 @property (nonatomic, copy) NSArray<GLTFSkin *> *skins;
+@property (nonatomic, copy) NSArray<GLTFBinaryChunk *> *chunks;
 @property (nonatomic, strong) GLTFMaterial *defaultMaterial;
 @property (nonatomic, strong) GLTFTextureSampler *defaultSampler;
 @property (nonatomic, assign) BOOL usesPBRSpecularGlossiness;
@@ -77,8 +79,16 @@ static NSString *const GLTFExtensionKHRMaterialsPBRSpecularGlossiness = @"KHR_ma
 
 - (BOOL)loadWithError:(NSError **)errorOrNil {
     NSData *assetData = [NSData dataWithContentsOfURL:_url];
+
     NSError *error = nil;
-    NSDictionary *rootObject = [NSJSONSerialization JSONObjectWithData:assetData options:0 error:&error];
+    NSDictionary *rootObject = nil;
+    
+    if ([self assetIsGLB:assetData]) {
+        [self readBinaryChunks:assetData];
+        rootObject = [NSJSONSerialization JSONObjectWithData:_chunks.firstObject.data options:0 error:&error];
+    } else {
+        rootObject = [NSJSONSerialization JSONObjectWithData:assetData options:0 error:&error];
+    }
     
     if (!rootObject) {
         if (errorOrNil) { *errorOrNil = error; }
@@ -129,6 +139,49 @@ static NSString *const GLTFExtensionKHRMaterialsPBRSpecularGlossiness = @"KHR_ma
             NSLog(@"WARNING: Unsupported extension \"%@\" used", extension);
         }
     }
+}
+
+- (BOOL)assetIsGLB:(NSData *)assetData {
+    if (assetData.length < sizeof(GLTFBinaryHeader)) {
+        return NO;
+    } else {
+        GLTFBinaryHeader header;
+        [assetData getBytes:&header length:sizeof(header)];
+        return (header.magic == GLTFBinaryMagic);
+    }
+}
+
+- (void)readBinaryChunks:(NSData *)assetData {
+    NSMutableArray *chunks = [NSMutableArray array];
+    
+    GLTFBinaryHeader header;
+    [assetData getBytes:&header length:sizeof(GLTFBinaryHeader)];
+    
+    NSInteger offset = sizeof(GLTFBinaryHeader);
+    while (offset < header.length && offset < assetData.length) {
+        GLTFBinaryChunk *chunk = [GLTFBinaryChunk new];
+        struct {
+            UInt32 length;
+            UInt32 type;
+        } chunkHeader;
+        
+        [assetData getBytes:&chunkHeader range:NSMakeRange(offset, sizeof(chunkHeader))];
+        
+        NSData *chunkData = [NSData dataWithBytesNoCopy:(void *)(assetData.bytes + offset + sizeof(chunkHeader))
+                                                 length:chunkHeader.length
+                                           freeWhenDone:NO];
+        chunk.data = chunkData;
+        chunk.chunkType = chunkHeader.type;
+        
+        [chunks addObject:chunk];
+        
+        offset += sizeof(chunkHeader) + chunkHeader.length;
+    }
+    
+    _chunks = [chunks copy];
+    
+    NSAssert(_chunks.firstObject.chunkType == GLTFChunkTypeJSON, @"First chunk in GLB file had type %u rather than expected %u",
+             (unsigned int)_chunks.firstObject.chunkType, (unsigned int)GLTFChunkTypeJSON);
 }
 
 - (BOOL)loadAssetProperties:(NSDictionary *)propertiesMap {
@@ -221,6 +274,8 @@ static NSString *const GLTFExtensionKHRMaterialsPBRSpecularGlossiness = @"KHR_ma
             NSError *error = nil;
             data = [NSData dataWithContentsOfURL:fileURL options:0 error:&error];
             NSAssert(data != nil, @"Unable to load data at URL %@; error %@", fileURL, error);
+        } else if (_chunks.count > 1) {
+            data = _chunks[1].data;
         }
         
         id<GLTFBuffer> buffer = [_bufferAllocator newBufferWithData:data];

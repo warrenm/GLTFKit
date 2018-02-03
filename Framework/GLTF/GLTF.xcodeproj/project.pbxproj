@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		83319299202589FC00B6C7E9 /* GLTFBinaryChunk.h in Headers */ = {isa = PBXBuildFile; fileRef = 83319297202589FC00B6C7E9 /* GLTFBinaryChunk.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		8331929C20258A4000B6C7E9 /* GLTFBinaryChunk.m in Sources */ = {isa = PBXBuildFile; fileRef = 8331929B20258A4000B6C7E9 /* GLTFBinaryChunk.m */; };
 		83534F401FA284E10063B351 /* GLTFDefaultBufferAllocator.m in Sources */ = {isa = PBXBuildFile; fileRef = 83534F3E1FA284E10063B351 /* GLTFDefaultBufferAllocator.m */; };
 		837EEE461FA2B0C0004BA504 /* GLTFDefaultBufferAllocator.h in Headers */ = {isa = PBXBuildFile; fileRef = 837EEE441FA2B0C0004BA504 /* GLTFDefaultBufferAllocator.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		837EEE471FA2B0C0004BA504 /* GLTFVertexDescriptor.h in Headers */ = {isa = PBXBuildFile; fileRef = 837EEE451FA2B0C0004BA504 /* GLTFVertexDescriptor.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -52,6 +54,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		83319297202589FC00B6C7E9 /* GLTFBinaryChunk.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GLTFBinaryChunk.h; sourceTree = "<group>"; };
+		8331929B20258A4000B6C7E9 /* GLTFBinaryChunk.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GLTFBinaryChunk.m; sourceTree = "<group>"; };
 		83534F3E1FA284E10063B351 /* GLTFDefaultBufferAllocator.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = GLTFDefaultBufferAllocator.m; path = Source/GLTFDefaultBufferAllocator.m; sourceTree = SOURCE_ROOT; };
 		837EEE441FA2B0C0004BA504 /* GLTFDefaultBufferAllocator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GLTFDefaultBufferAllocator.h; path = Headers/GLTFDefaultBufferAllocator.h; sourceTree = SOURCE_ROOT; };
 		837EEE451FA2B0C0004BA504 /* GLTFVertexDescriptor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GLTFVertexDescriptor.h; path = Headers/GLTFVertexDescriptor.h; sourceTree = SOURCE_ROOT; };
@@ -144,6 +148,7 @@
 				83D6FF551F48BBFA00F71E0C /* GLTFAccessor.h */,
 				83D6FF561F48BBFA00F71E0C /* GLTFAnimation.h */,
 				83D6FF571F48BBFA00F71E0C /* GLTFAsset.h */,
+				83319297202589FC00B6C7E9 /* GLTFBinaryChunk.h */,
 				83D6FF581F48BBFA00F71E0C /* GLTFBuffer.h */,
 				83D600B81F4A195400F71E0C /* GLTFBufferAllocator.h */,
 				83D6FF591F48BBFA00F71E0C /* GLTFBufferView.h */,
@@ -173,6 +178,7 @@
 				83D6FF6B1F48BBFA00F71E0C /* GLTFAccessor.m */,
 				83D6FF6C1F48BBFA00F71E0C /* GLTFAnimation.m */,
 				83D6FF6D1F48BBFA00F71E0C /* GLTFAsset.m */,
+				8331929B20258A4000B6C7E9 /* GLTFBinaryChunk.m */,
 				83D6FF701F48BBFA00F71E0C /* GLTFBufferView.m */,
 				83D6FF711F48BBFA00F71E0C /* GLTFCamera.m */,
 				83534F3E1FA284E10063B351 /* GLTFDefaultBufferAllocator.m */,
@@ -210,6 +216,7 @@
 				83D6FFA51F48BBFA00F71E0C /* GLTF.h in Headers */,
 				83D6FF7F1F48BBFA00F71E0C /* GLTFAccessor.h in Headers */,
 				83D6FF801F48BBFA00F71E0C /* GLTFAnimation.h in Headers */,
+				83319299202589FC00B6C7E9 /* GLTFBinaryChunk.h in Headers */,
 				83D6FF811F48BBFA00F71E0C /* GLTFAsset.h in Headers */,
 				83D6FF821F48BBFA00F71E0C /* GLTFBuffer.h in Headers */,
 				83D600B91F4A195400F71E0C /* GLTFBufferAllocator.h in Headers */,
@@ -316,6 +323,7 @@
 				837EEE491FA2B0DE004BA504 /* GLTFSkin.m in Sources */,
 				83D6FF991F48BBFA00F71E0C /* GLTFCamera.m in Sources */,
 				83D6FF981F48BBFA00F71E0C /* GLTFBufferView.m in Sources */,
+				8331929C20258A4000B6C7E9 /* GLTFBinaryChunk.m in Sources */,
 				83D6FF941F48BBFA00F71E0C /* GLTFAnimation.m in Sources */,
 				83D6FFA41F48BBFA00F71E0C /* GLTFVertexDescriptor.m in Sources */,
 				83D6FF9B1F48BBFA00F71E0C /* GLTFMaterial.m in Sources */,
