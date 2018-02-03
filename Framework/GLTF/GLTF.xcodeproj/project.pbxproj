@@ -9,6 +9,8 @@
 /* Begin PBXBuildFile section */
 		83319299202589FC00B6C7E9 /* GLTFBinaryChunk.h in Headers */ = {isa = PBXBuildFile; fileRef = 83319297202589FC00B6C7E9 /* GLTFBinaryChunk.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		8331929C20258A4000B6C7E9 /* GLTFBinaryChunk.m in Sources */ = {isa = PBXBuildFile; fileRef = 8331929B20258A4000B6C7E9 /* GLTFBinaryChunk.m */; };
+		8331929F2025911D00B6C7E9 /* GLTFExtensionNames.m in Sources */ = {isa = PBXBuildFile; fileRef = 8331929E2025911D00B6C7E9 /* GLTFExtensionNames.m */; };
+		833192A4202591CC00B6C7E9 /* GLTFExtensionNames.h in Headers */ = {isa = PBXBuildFile; fileRef = 833192A22025916600B6C7E9 /* GLTFExtensionNames.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		83534F401FA284E10063B351 /* GLTFDefaultBufferAllocator.m in Sources */ = {isa = PBXBuildFile; fileRef = 83534F3E1FA284E10063B351 /* GLTFDefaultBufferAllocator.m */; };
 		837EEE461FA2B0C0004BA504 /* GLTFDefaultBufferAllocator.h in Headers */ = {isa = PBXBuildFile; fileRef = 837EEE441FA2B0C0004BA504 /* GLTFDefaultBufferAllocator.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		837EEE471FA2B0C0004BA504 /* GLTFVertexDescriptor.h in Headers */ = {isa = PBXBuildFile; fileRef = 837EEE451FA2B0C0004BA504 /* GLTFVertexDescriptor.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -33,7 +35,6 @@
 		83D6FF8E1F48BBFA00F71E0C /* GLTFTexture.h in Headers */ = {isa = PBXBuildFile; fileRef = 83D6FF641F48BBFA00F71E0C /* GLTFTexture.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		83D6FF8F1F48BBFA00F71E0C /* GLTFTextureSampler.h in Headers */ = {isa = PBXBuildFile; fileRef = 83D6FF651F48BBFA00F71E0C /* GLTFTextureSampler.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		83D6FF901F48BBFA00F71E0C /* GLTFUtilities.h in Headers */ = {isa = PBXBuildFile; fileRef = 83D6FF661F48BBFA00F71E0C /* GLTFUtilities.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		83D6FF911F48BBFA00F71E0C /* GLTFKHRLight.h in Headers */ = {isa = PBXBuildFile; fileRef = 83D6FF691F48BBFA00F71E0C /* GLTFKHRLight.h */; };
 		83D6FF921F48BBFA00F71E0C /* GLTFKHRLight.m in Sources */ = {isa = PBXBuildFile; fileRef = 83D6FF6A1F48BBFA00F71E0C /* GLTFKHRLight.m */; };
 		83D6FF931F48BBFA00F71E0C /* GLTFAccessor.m in Sources */ = {isa = PBXBuildFile; fileRef = 83D6FF6B1F48BBFA00F71E0C /* GLTFAccessor.m */; };
 		83D6FF941F48BBFA00F71E0C /* GLTFAnimation.m in Sources */ = {isa = PBXBuildFile; fileRef = 83D6FF6C1F48BBFA00F71E0C /* GLTFAnimation.m */; };
@@ -56,6 +57,9 @@
 /* Begin PBXFileReference section */
 		83319297202589FC00B6C7E9 /* GLTFBinaryChunk.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GLTFBinaryChunk.h; sourceTree = "<group>"; };
 		8331929B20258A4000B6C7E9 /* GLTFBinaryChunk.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GLTFBinaryChunk.m; sourceTree = "<group>"; };
+		8331929E2025911D00B6C7E9 /* GLTFExtensionNames.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = GLTFExtensionNames.m; sourceTree = "<group>"; };
+		833192A22025916600B6C7E9 /* GLTFExtensionNames.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GLTFExtensionNames.h; sourceTree = "<group>"; };
+		833192A32025916600B6C7E9 /* GLTFKHRLight.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GLTFKHRLight.h; sourceTree = "<group>"; };
 		83534F3E1FA284E10063B351 /* GLTFDefaultBufferAllocator.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = GLTFDefaultBufferAllocator.m; path = Source/GLTFDefaultBufferAllocator.m; sourceTree = SOURCE_ROOT; };
 		837EEE441FA2B0C0004BA504 /* GLTFDefaultBufferAllocator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GLTFDefaultBufferAllocator.h; path = Headers/GLTFDefaultBufferAllocator.h; sourceTree = SOURCE_ROOT; };
 		837EEE451FA2B0C0004BA504 /* GLTFVertexDescriptor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GLTFVertexDescriptor.h; path = Headers/GLTFVertexDescriptor.h; sourceTree = SOURCE_ROOT; };
@@ -81,7 +85,6 @@
 		83D6FF641F48BBFA00F71E0C /* GLTFTexture.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GLTFTexture.h; sourceTree = "<group>"; };
 		83D6FF651F48BBFA00F71E0C /* GLTFTextureSampler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GLTFTextureSampler.h; sourceTree = "<group>"; };
 		83D6FF661F48BBFA00F71E0C /* GLTFUtilities.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GLTFUtilities.h; sourceTree = "<group>"; };
-		83D6FF691F48BBFA00F71E0C /* GLTFKHRLight.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GLTFKHRLight.h; sourceTree = "<group>"; };
 		83D6FF6A1F48BBFA00F71E0C /* GLTFKHRLight.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GLTFKHRLight.m; sourceTree = "<group>"; };
 		83D6FF6B1F48BBFA00F71E0C /* GLTFAccessor.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GLTFAccessor.m; sourceTree = "<group>"; };
 		83D6FF6C1F48BBFA00F71E0C /* GLTFAnimation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GLTFAnimation.m; sourceTree = "<group>"; };
@@ -114,6 +117,15 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		833192A12025916600B6C7E9 /* Extensions */ = {
+			isa = PBXGroup;
+			children = (
+				833192A22025916600B6C7E9 /* GLTFExtensionNames.h */,
+				833192A32025916600B6C7E9 /* GLTFKHRLight.h */,
+			);
+			path = Extensions;
+			sourceTree = "<group>";
+		};
 		83D600391F48C2FF00F71E0C /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
@@ -145,6 +157,7 @@
 		83D6FF541F48BBFA00F71E0C /* Headers */ = {
 			isa = PBXGroup;
 			children = (
+				833192A12025916600B6C7E9 /* Extensions */,
 				83D6FF551F48BBFA00F71E0C /* GLTFAccessor.h */,
 				83D6FF561F48BBFA00F71E0C /* GLTFAnimation.h */,
 				83D6FF571F48BBFA00F71E0C /* GLTFAsset.h */,
@@ -200,7 +213,7 @@
 		83D6FF681F48BBFA00F71E0C /* Extensions */ = {
 			isa = PBXGroup;
 			children = (
-				83D6FF691F48BBFA00F71E0C /* GLTFKHRLight.h */,
+				8331929E2025911D00B6C7E9 /* GLTFExtensionNames.m */,
 				83D6FF6A1F48BBFA00F71E0C /* GLTFKHRLight.m */,
 			);
 			path = Extensions;
@@ -229,6 +242,7 @@
 				83D6FF881F48BBFA00F71E0C /* GLTFMesh.h in Headers */,
 				83D6FF891F48BBFA00F71E0C /* GLTFNode.h in Headers */,
 				83C900931F981AEE003893A9 /* GLTFNodeVisitor.h in Headers */,
+				833192A4202591CC00B6C7E9 /* GLTFExtensionNames.h in Headers */,
 				83D6FF8A1F48BBFA00F71E0C /* GLTFObject.h in Headers */,
 				83D6FF8B1F48BBFA00F71E0C /* GLTFScene.h in Headers */,
 				83D6FF8C1F48BBFA00F71E0C /* GLTFSkin.h in Headers */,
@@ -236,7 +250,6 @@
 				83D6FF8F1F48BBFA00F71E0C /* GLTFTextureSampler.h in Headers */,
 				837EEE471FA2B0C0004BA504 /* GLTFVertexDescriptor.h in Headers */,
 				83D6FF901F48BBFA00F71E0C /* GLTFUtilities.h in Headers */,
-				83D6FF911F48BBFA00F71E0C /* GLTFKHRLight.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -326,6 +339,7 @@
 				8331929C20258A4000B6C7E9 /* GLTFBinaryChunk.m in Sources */,
 				83D6FF941F48BBFA00F71E0C /* GLTFAnimation.m in Sources */,
 				83D6FFA41F48BBFA00F71E0C /* GLTFVertexDescriptor.m in Sources */,
+				8331929F2025911D00B6C7E9 /* GLTFExtensionNames.m in Sources */,
 				83D6FF9B1F48BBFA00F71E0C /* GLTFMaterial.m in Sources */,
 				83D6FFA01F48BBFA00F71E0C /* GLTFTexture.m in Sources */,
 			);

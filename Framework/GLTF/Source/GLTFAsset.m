@@ -22,10 +22,11 @@
 #import "GLTFBufferAllocator.h"
 #import "GLTFBufferView.h"
 #import "GLTFCamera.h"
+#import "GLTFExtensionNames.h"
+#import "GLTFImage.h"
 #import "GLTFMaterial.h"
 #import "GLTFMesh.h"
 #import "GLTFNode.h"
-#import "GLTFImage.h"
 #import "GLTFTexture.h"
 #import "GLTFTextureSampler.h"
 #import "GLTFScene.h"
@@ -35,8 +36,6 @@
 @import simd;
 
 #define USE_AGGRESSIVE_ALIGNMENT 0
-
-static NSString *const GLTFExtensionKHRMaterialsPBRSpecularGlossiness = @"KHR_materials_pbrSpecularGlossiness";
 
 @interface GLTFAsset ()
 @property (nonatomic, strong) NSURL *url;
