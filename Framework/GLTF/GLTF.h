@@ -31,12 +31,14 @@ FOUNDATION_EXPORT const unsigned char GLTFVersionString[];
 #import <GLTF/GLTFAccessor.h>
 #import <GLTF/GLTFAnimation.h>
 #import <GLTF/GLTFAsset.h>
+#import <GLTF/GLTFBinaryChunk.h>
 #import <GLTF/GLTFBuffer.h>
 #import <GLTF/GLTFBufferAllocator.h>
 #import <GLTF/GLTFBufferView.h>
 #import <GLTF/GLTFCamera.h>
 #import <GLTF/GLTFDefaultBufferAllocator.h>
 #import <GLTF/GLTFEnums.h>
+#import <GLTF/GLTFExtensionNames.h>
 #import <GLTF/GLTFImage.h>
 #import <GLTF/GLTFMaterial.h>
 #import <GLTF/GLTFMesh.h>
