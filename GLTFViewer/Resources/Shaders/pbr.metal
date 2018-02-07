@@ -42,7 +42,6 @@ constant int textureIndexBRDFLookup          = 7;
 #define HAS_METALLIC_ROUGHNESS_MAP 1
 #define HAS_OCCLUSION_MAP 1
 #define HAS_EMISSIVE_MAP 1
-#define SPECULAR_ENV_MAP_LOD_LEVELS 9
 
 #define baseColorTexCoord          texCoord0
 #define normalTexCoord             texCoord0
@@ -317,10 +316,13 @@ fragment float4 fragment_main(VertexOut in [[stage_in]],
     #if USE_IBL
         constexpr sampler linearSampler(coord::normalized, min_filter::linear, mag_filter::linear, mip_filter::linear, address::clamp_to_edge);
     
-        float mipCount(SPECULAR_ENV_MAP_LOD_LEVELS);
+        float envIntensity = 1.0;
+    
+        float mipCount = specularEnvTexture.get_num_mip_levels();
         float lod = perceptualRoughness * mipCount;
-        float3 brdf = brdfLUT.sample(linearSampler, float2(NdotV, perceptualRoughness)).rgb;
+        float2 brdf = brdfLUT.sample(linearSampler, float2(NdotV, perceptualRoughness)).xy;
         float3 diffuseLight = diffuseEnvTexture.sample(linearSampler, n).rgb;
+        diffuseLight *= envIntensity;
     
         float3 specularLight;
         if (mipCount > 1) {
@@ -328,6 +330,7 @@ fragment float4 fragment_main(VertexOut in [[stage_in]],
         } else {
             specularLight = specularEnvTexture.sample(linearSampler, reflection).rgb;
         }
+        specularLight *= envIntensity;
     
         float3 iblDiffuse = diffuseLight * diffuseColor;
         float3 iblSpecular = specularLight * ((specularColor * brdf.x) + brdf.y);

@@ -99,10 +99,8 @@
     [specularURLs addObject:[[NSBundle mainBundle] URLForResource:@"output_pmrem_3" withExtension:@"png"]];
     [specularURLs addObject:[[NSBundle mainBundle] URLForResource:@"output_pmrem_4" withExtension:@"png"]];
     [specularURLs addObject:[[NSBundle mainBundle] URLForResource:@"output_pmrem_5" withExtension:@"png"]];
-    NSURL *brdfURL = [[NSBundle mainBundle] URLForResource:@"brdfLUT" withExtension:@"png"];
     self.lightingEnvironment = [[GLTFMTLLightingEnvironment alloc] initWithDiffuseCubeURL:diffuseURL
                                                                          specularCubeURLs:specularURLs
-                                                                               brdfLUTURL:brdfURL
                                                                                    device:self.device
                                                                                     error:&error];
     self.renderer.lightingEnvironment = self.lightingEnvironment;

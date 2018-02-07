@@ -132,7 +132,6 @@
     [shaderFeatures appendFormat:@"#define HAS_METALLIC_ROUGHNESS_MAP %d\n", hasMetallicRoughnessMap];
     [shaderFeatures appendFormat:@"#define HAS_OCCLUSION_MAP %d\n", hasOcclusionMap];
     [shaderFeatures appendFormat:@"#define HAS_EMISSIVE_MAP %d\n", hasEmissiveMap];
-    [shaderFeatures appendFormat:@"#define SPECULAR_ENV_MAP_LOD_LEVELS %d\n\n", (int)lightingEnvironment.specularLODLevelCount];
 
     [shaderFeatures appendFormat:@"#define baseColorTexCoord          texCoord%d\n", (int)submesh.material.baseColorTexCoord];
     [shaderFeatures appendFormat:@"#define normalTexCoord             texCoord%d\n", (int)submesh.material.normalTexCoord];

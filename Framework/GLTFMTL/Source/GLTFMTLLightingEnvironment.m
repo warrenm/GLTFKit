@@ -18,11 +18,14 @@
 
 @import MetalKit;
 
+@interface GLTFMTLLightingEnvironment ()
+@property (nonatomic, strong) id<MTLComputePipelineState> brdfComputePipeline;
+@end
+
 @implementation GLTFMTLLightingEnvironment
 
 - (instancetype)initWithDiffuseCubeURL:(NSURL *)diffuseCubeURL
                       specularCubeURLs:(NSArray<NSURL *> *)specularCubeURLs
-                            brdfLUTURL:(NSURL *)brdfLUTURL
                                 device:(id<MTLDevice>)device
                                  error:(NSError **)error
 {
@@ -30,6 +33,16 @@
         NSError *internalError = nil;
         
         id<MTLCommandQueue> commandQueue = [device newCommandQueue];
+        
+        id<MTLLibrary> library = [device newDefaultLibrary];
+        id<MTLFunction> brdfFunction = [library newFunctionWithName:@"integrate_brdf"];
+        _brdfComputePipeline = [device newComputePipelineStateWithFunction:brdfFunction error:&internalError];
+        if (_brdfComputePipeline == nil) {
+            if (error) {
+                *error = internalError;
+            }
+            return nil;
+        }
         
         MTKTextureLoader *textureLoader = [[MTKTextureLoader alloc] initWithDevice:device];
         
@@ -39,14 +52,7 @@
         id options = @{ MTKTextureLoaderOptionOrigin : MTKTextureLoaderOriginTopLeft,
                         MTKTextureLoaderOptionSRGB : @(NO)
                       };
-        _brdfLUT = [textureLoader newTextureWithContentsOfURL:brdfLUTURL options:options error:&internalError];
-        if (_brdfLUT == nil) {
-            if (error != nil) {
-                *error = internalError;
-            }
-            return nil;
-        }
-        
+
         id<MTLTexture> diffuseStrip = [textureLoader newTextureWithContentsOfURL:diffuseCubeURL options:options error:&internalError];
         if (diffuseStrip == nil) {
             if (error != nil) {
@@ -115,6 +121,9 @@
         }
         
         [blitEncoder endEncoding];
+
+        [self generateBRDFLookupWithSize:CGSizeMake(256, 256) commandBuffer:commandBuffer device:device];
+
         [commandBuffer commit];
         [commandBuffer waitUntilCompleted];
     }
@@ -122,8 +131,23 @@
     return self;
 }
 
-- (NSUInteger)specularLODLevelCount {
-    return self.specularCube.mipmapLevelCount;
+- (void)generateBRDFLookupWithSize:(CGSize)size commandBuffer:(id<MTLCommandBuffer>)commandBuffer device:(id<MTLDevice>)device {
+    
+    MTLTextureDescriptor *textureDesc = [MTLTextureDescriptor texture2DDescriptorWithPixelFormat:MTLPixelFormatRG16Float
+                                                                                           width:size.width
+                                                                                          height:size.height
+                                                                                       mipmapped:NO];
+    textureDesc.usage = MTLTextureUsageShaderRead | MTLTextureUsageShaderWrite;
+    id <MTLTexture> lookupTexture = [device newTextureWithDescriptor:textureDesc];
+    
+    id<MTLComputeCommandEncoder> commandEncoder = [commandBuffer computeCommandEncoder];
+    [commandEncoder setComputePipelineState:_brdfComputePipeline];
+    [commandEncoder setTexture:lookupTexture atIndex:0];
+    MTLSize threadsPerThreadgroup = MTLSizeMake(16, 16, 1);
+    MTLSize threadgroups = MTLSizeMake(size.width / threadsPerThreadgroup.width, size.height / threadsPerThreadgroup.height, 1);
+    [commandEncoder dispatchThreadgroups:threadgroups threadsPerThreadgroup:threadsPerThreadgroup];
+    [commandEncoder endEncoding];
+    _brdfLUT = lookupTexture;
 }
 
 @end

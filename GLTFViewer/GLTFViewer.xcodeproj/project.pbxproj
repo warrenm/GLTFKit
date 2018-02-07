@@ -26,7 +26,6 @@
 		83D32B2F1FA915D000703763 /* output_pmrem_4.png in Resources */ = {isa = PBXBuildFile; fileRef = 83D32B251FA915D000703763 /* output_pmrem_4.png */; };
 		83D32B301FA915D000703763 /* output_pmrem_5.png in Resources */ = {isa = PBXBuildFile; fileRef = 83D32B261FA915D000703763 /* output_pmrem_5.png */; };
 		83D32B311FA915D000703763 /* output_iem.png in Resources */ = {isa = PBXBuildFile; fileRef = 83D32B271FA915D000703763 /* output_iem.png */; };
-		83D32B321FA915D000703763 /* brdfLUT.png in Resources */ = {isa = PBXBuildFile; fileRef = 83D32B281FA915D000703763 /* brdfLUT.png */; };
 		83D32B341FA917E200703763 /* pbr.metal in CopyFiles */ = {isa = PBXBuildFile; fileRef = 83D32B1F1FA915D000703763 /* pbr.metal */; };
 		83DBFDA71FA51F3400722FA8 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 83850FBA1F4A5C5C00F9A444 /* Assets.xcassets */; };
 /* End PBXBuildFile section */
@@ -61,6 +60,7 @@
 		8341680F1F8D70210052E7FE /* GLTFViewerOrbitCamera.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = GLTFViewerOrbitCamera.m; path = Shared/GLTFViewerOrbitCamera.m; sourceTree = "<group>"; };
 		834168111F8D70730052E7FE /* GLTFViewerFirstPersonCamera.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = GLTFViewerFirstPersonCamera.h; path = Shared/GLTFViewerFirstPersonCamera.h; sourceTree = "<group>"; };
 		834168121F8D70730052E7FE /* GLTFViewerFirstPersonCamera.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = GLTFViewerFirstPersonCamera.m; path = Shared/GLTFViewerFirstPersonCamera.m; sourceTree = "<group>"; };
+		834E000A202A70B200DCB66E /* brdf.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = brdf.metal; sourceTree = "<group>"; };
 		837EEE511FA2B48F004BA504 /* GLTFSCN.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = GLTFSCN.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		83850FB01F4A403800F9A444 /* GLTF.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = GLTF.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		83850FB31F4A403800F9A444 /* GLTFMTL.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = GLTFMTL.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -84,7 +84,6 @@
 		83D32B251FA915D000703763 /* output_pmrem_4.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = output_pmrem_4.png; sourceTree = "<group>"; };
 		83D32B261FA915D000703763 /* output_pmrem_5.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = output_pmrem_5.png; sourceTree = "<group>"; };
 		83D32B271FA915D000703763 /* output_iem.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = output_iem.png; sourceTree = "<group>"; };
-		83D32B281FA915D000703763 /* brdfLUT.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = brdfLUT.png; sourceTree = "<group>"; };
 		83D600011F48BECB00F71E0C /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		83D6000A1F48BECB00F71E0C /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		83D6000C1F48BECB00F71E0C /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -153,6 +152,7 @@
 			children = (
 				83D32B1E1FA915D000703763 /* skybox.metal */,
 				83D32B1F1FA915D000703763 /* pbr.metal */,
+				834E000A202A70B200DCB66E /* brdf.metal */,
 			);
 			path = Shaders;
 			sourceTree = "<group>";
@@ -167,7 +167,6 @@
 				83D32B251FA915D000703763 /* output_pmrem_4.png */,
 				83D32B261FA915D000703763 /* output_pmrem_5.png */,
 				83D32B271FA915D000703763 /* output_iem.png */,
-				83D32B281FA915D000703763 /* brdfLUT.png */,
 			);
 			path = Environment;
 			sourceTree = "<group>";
@@ -292,7 +291,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				83D32B2D1FA915D000703763 /* output_pmrem_2.png in Resources */,
-				83D32B321FA915D000703763 /* brdfLUT.png in Resources */,
 				83DBFDA71FA51F3400722FA8 /* Assets.xcassets in Resources */,
 				83D32B2E1FA915D000703763 /* output_pmrem_3.png in Resources */,
 				83850FF71F4A715D00F9A444 /* Main.storyboard in Resources */,
@@ -313,6 +311,7 @@
 			files = (
 				83A6C51B1F88208E0095A4DC /* GLTFViewerCamera.m in Sources */,
 				834168101F8D70210052E7FE /* GLTFViewerOrbitCamera.m in Sources */,
+				834E000B202A70B200DCB66E /* brdf.metal in Sources */,
 				83850FC71F4A5F4D00F9A444 /* GLTFViewerViewController.m in Sources */,
 				83D32B291FA915D000703763 /* skybox.metal in Sources */,
 				83D32B2A1FA915D000703763 /* pbr.metal in Sources */,
