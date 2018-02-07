@@ -18,34 +18,38 @@
 
 @implementation GLTFImage
 
++ (CGImageRef)newImageForData:(NSData *)data mimeType:(NSString *)mimeType {
+    CGImageRef image = NULL;
+    CGDataProviderRef provider = CGDataProviderCreateWithCFData((__bridge CFDataRef)data);
+    if ([mimeType isEqualToString:@"image/jpeg"]) {
+        image = CGImageCreateWithJPEGDataProvider(provider, NULL, false, kCGRenderingIntentDefault);
+    } else if ([mimeType isEqualToString:@"image/png"]) {
+        image = CGImageCreateWithPNGDataProvider(provider, NULL, false, kCGRenderingIntentDefault);
+    } else {
+        NSLog(@"Unknown MIME type encountered when decoding image: %@", mimeType);
+    }
+    CGDataProviderRelease(provider);
+    return image;
+}
+
 + (CGImageRef)newImageForDataURI:(NSString *)uriData {
-    NSString *pngHeader = @"data:image/png;base64,";
-    if ([uriData hasPrefix:pngHeader]) {
-        NSString *encodedImageData = [uriData substringFromIndex:pngHeader.length];
-        NSData *imageData = [[NSData alloc] initWithBase64EncodedString:encodedImageData
-                                                                options:NSDataBase64DecodingIgnoreUnknownCharacters];
-        CGDataProviderRef provider = CGDataProviderCreateWithCFData((__bridge CFDataRef)imageData);
-        
-        CGImageRef image = CGImageCreateWithPNGDataProvider(provider, NULL, false, kCGRenderingIntentDefault);
-        CGDataProviderRelease(provider);
-        return image;
+    NSString *prefix = @"data:";
+    if ([uriData hasPrefix:prefix]) {
+        NSInteger prefixEnd = prefix.length;
+        NSInteger firstComma = [uriData rangeOfString:@","].location;
+        if (firstComma != NSNotFound) {
+            NSString *mediaTypeAndTokenString = [uriData substringWithRange:NSMakeRange(prefixEnd, firstComma - prefixEnd)];
+            NSArray *mediaTypeAndToken = [mediaTypeAndTokenString componentsSeparatedByString:@";"];
+            if (mediaTypeAndToken.count > 0) {
+                NSString *mediaType = mediaTypeAndToken.firstObject;
+                NSString *encodedImageData = [uriData substringFromIndex:prefixEnd];
+                NSData *imageData = [[NSData alloc] initWithBase64EncodedString:encodedImageData
+                                                                        options:NSDataBase64DecodingIgnoreUnknownCharacters];
+                return [self newImageForData:imageData mimeType:mediaType];
+            }
+        }
     }
-    
-    NSString *jpegHeader = @"data:image/jpeg;base64,";
-    if ([uriData hasPrefix:jpegHeader]) {
-        NSString *encodedImageData = [uriData substringFromIndex:jpegHeader.length];
-        NSData *imageData = [[NSData alloc] initWithBase64EncodedString:encodedImageData
-                                                                options:NSDataBase64DecodingIgnoreUnknownCharacters];
-        CGDataProviderRef provider = CGDataProviderCreateWithCFData((__bridge CFDataRef)imageData);
-        
-        CGImageRef image = CGImageCreateWithJPEGDataProvider(provider, NULL, false, kCGRenderingIntentDefault);
-        CGDataProviderRelease(provider);
-        return image;
-    }
-    
-    // TODO: Support for GIF, BMP, etc.
-    
-    return nil;
+    return NULL;
 }
 
 - (void)dealloc {

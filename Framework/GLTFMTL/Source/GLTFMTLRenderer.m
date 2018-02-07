@@ -106,9 +106,9 @@ struct FragmentUniforms {
                     MTKTextureLoaderOptionSRGB : @(NO) };
     
     NSError *error = nil;
-    if (image.cgImage) {
+    if (image.cgImage != NULL) {
         texture = [self.textureLoader newTextureWithCGImage:image.cgImage options:options error:&error];
-    } else if (image.url) {
+    } else if (image.url != nil) {
         CGImageSourceRef imageSource = CGImageSourceCreateWithURL((__bridge CFURLRef)image.url, nil);
         CGImageRef cgImage = CGImageSourceCreateImageAtIndex(imageSource, 0, nil);
         
@@ -137,6 +137,12 @@ struct FragmentUniforms {
         if (imageSource != NULL) {
             CFRelease(imageSource);
         }
+    } else if (image.bufferView != nil) {
+        GLTFBufferView *bufferView = image.bufferView;
+        NSData *data = [NSData dataWithBytesNoCopy:bufferView.buffer.contents + bufferView.offset length:bufferView.length freeWhenDone:NO];
+        CGImageRef cgImage = [GLTFImage newImageForData:data mimeType: image.mimeType];
+        texture = [self.textureLoader newTextureWithCGImage:cgImage options:options error:&error];
+        CGImageRelease(cgImage);
     }
     
     if (!texture) {

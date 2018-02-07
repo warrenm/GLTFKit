@@ -24,6 +24,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface GLTFImage : GLTFObject
 
++ (_Nullable CGImageRef)newImageForData:(NSData *)data mimeType:(NSString *)mimeType;
+
 + (_Nullable CGImageRef)newImageForDataURI:(NSString *)uriData;
 
 /// A reference to a buffer view containing image data, if url is nil
