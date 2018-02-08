@@ -122,7 +122,7 @@
         
         [blitEncoder endEncoding];
 
-        [self generateBRDFLookupWithSize:CGSizeMake(256, 256) commandBuffer:commandBuffer device:device];
+        [self generateBRDFLookupWithSize:128 commandBuffer:commandBuffer device:device];
 
         [commandBuffer commit];
         [commandBuffer waitUntilCompleted];
@@ -131,11 +131,11 @@
     return self;
 }
 
-- (void)generateBRDFLookupWithSize:(CGSize)size commandBuffer:(id<MTLCommandBuffer>)commandBuffer device:(id<MTLDevice>)device {
+- (void)generateBRDFLookupWithSize:(int)size commandBuffer:(id<MTLCommandBuffer>)commandBuffer device:(id<MTLDevice>)device {
     
     MTLTextureDescriptor *textureDesc = [MTLTextureDescriptor texture2DDescriptorWithPixelFormat:MTLPixelFormatRG16Float
-                                                                                           width:size.width
-                                                                                          height:size.height
+                                                                                           width:size
+                                                                                          height:size
                                                                                        mipmapped:NO];
     textureDesc.usage = MTLTextureUsageShaderRead | MTLTextureUsageShaderWrite;
     id <MTLTexture> lookupTexture = [device newTextureWithDescriptor:textureDesc];
@@ -144,7 +144,7 @@
     [commandEncoder setComputePipelineState:_brdfComputePipeline];
     [commandEncoder setTexture:lookupTexture atIndex:0];
     MTLSize threadsPerThreadgroup = MTLSizeMake(16, 16, 1);
-    MTLSize threadgroups = MTLSizeMake(size.width / threadsPerThreadgroup.width, size.height / threadsPerThreadgroup.height, 1);
+    MTLSize threadgroups = MTLSizeMake(size / threadsPerThreadgroup.width, size / threadsPerThreadgroup.height, 1);
     [commandEncoder dispatchThreadgroups:threadgroups threadsPerThreadgroup:threadsPerThreadgroup];
     [commandEncoder endEncoding];
     _brdfLUT = lookupTexture;
