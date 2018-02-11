@@ -233,14 +233,16 @@
         -1, -1,  1,
          1, -1,  1,
     };
-    
+
+    simd_float4x4 viewProjectionMatrix = matrix_multiply(self.projectionMatrix, self.camera.viewMatrix);
+
     struct VertexUniforms {
         simd_float4x4 modelMatrix;
         simd_float4x4 modelViewProjectionMatrix;
     } vertexUniforms;
     
     vertexUniforms.modelMatrix = GLTFMatrixFromUniformScale(100);
-    vertexUniforms.modelViewProjectionMatrix = matrix_multiply(matrix_multiply(self.projectionMatrix, self.viewMatrix), vertexUniforms.modelMatrix);
+    vertexUniforms.modelViewProjectionMatrix = matrix_multiply(viewProjectionMatrix, vertexUniforms.modelMatrix);
     
     [renderEncoder setRenderPipelineState:self.skyboxPipelineState];
     [renderEncoder setFrontFacingWinding:MTLWindingCounterClockwise];
