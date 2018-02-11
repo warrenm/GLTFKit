@@ -132,7 +132,7 @@ Below is a checklist of glTF features and their current level of support.
 - [x] TANGENT
 - [x] TEXCOORD_0
 - [x] TEXCOORD_1
-- [ ] COLOR_0
+- [x] COLOR_0
 - [x] JOINTS_0
 - [x] WEIGHTS_0
 

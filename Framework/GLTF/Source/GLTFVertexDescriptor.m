@@ -16,8 +16,8 @@
 
 #import "GLTFVertexDescriptor.h"
 
-const NSInteger GLTFVertexDescriptorMaxAttributeCount = 8;
-const NSInteger GLTFVertexDescriptorMaxBufferLayoutCount = 8;
+const NSInteger GLTFVertexDescriptorMaxAttributeCount = 16;
+const NSInteger GLTFVertexDescriptorMaxBufferLayoutCount = 16;
 
 NSString *const GLTFAttributeSemanticPosition  = @"POSITION";
 NSString *const GLTFAttributeSemanticTangent   = @"TANGENT";
@@ -27,6 +27,8 @@ NSString *const GLTFAttributeSemanticTexCoord1 = @"TEXCOORD_1";
 NSString *const GLTFAttributeSemanticColor0    = @"COLOR_0";
 NSString *const GLTFAttributeSemanticJoints0   = @"JOINTS_0";
 NSString *const GLTFAttributeSemanticWeights0  = @"WEIGHTS_0";
+NSString *const GLTFAttributeSemanticRoughness = @"ROUGHNESS";
+NSString *const GLTFAttributeSemanticMetallic  = @"METALLIC";
 
 @implementation GLTFVertexAttribute
 

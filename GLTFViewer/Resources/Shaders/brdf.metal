@@ -32,6 +32,7 @@ static float2 Hammersley(uint i, uint N) {
     return float2(float(i) / float(N), RadicalInverse_VdC(i));
 }
 
+// http://blog.selfshadow.com/publications/s2013-shading-course/karis/s2013_pbs_epic_notes_v2.pdf
 static float GeometrySchlickGGX(float NdotV, float roughness) {
     float a = roughness;
     float k = (a * a) / 2.0;

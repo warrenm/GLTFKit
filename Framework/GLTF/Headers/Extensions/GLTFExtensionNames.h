@@ -18,4 +18,4 @@
 
 extern NSString *const GLTFExtensionKHRMaterialsPBRSpecularGlossiness;
 
-extern NSString *const GLTFExtensionUnboundPBRAttributes;
+extern NSString *const GLTFExtensionPBRAttributes;

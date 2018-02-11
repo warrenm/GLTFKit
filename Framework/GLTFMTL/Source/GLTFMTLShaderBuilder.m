@@ -116,6 +116,9 @@
     BOOL hasMetallicRoughnessMap = submesh.material.metallicRoughnessTexture != nil;
     BOOL hasSkinningData = submesh.accessorsForAttributes[GLTFAttributeSemanticJoints0] != nil &&
                            submesh.accessorsForAttributes[GLTFAttributeSemanticWeights0] != nil;
+    BOOL hasVertexColor = submesh.accessorsForAttributes[GLTFAttributeSemanticColor0] != nil;
+    BOOL hasVertexRoughness = submesh.accessorsForAttributes[GLTFAttributeSemanticRoughness] != nil;
+    BOOL hasVertexMetallic = submesh.accessorsForAttributes[GLTFAttributeSemanticMetallic] != nil;
     BOOL useAlphaTest = submesh.material.alphaMode == GLTFAlphaModeMask;
 
     NSMutableString *shaderFeatures = [NSMutableString string];
@@ -127,11 +130,14 @@
     [shaderFeatures appendFormat:@"#define HAS_TEXCOORD_1 %d\n", hasTexCoord1];
     [shaderFeatures appendFormat:@"#define HAS_NORMALS %d\n", hasNormals];
     [shaderFeatures appendFormat:@"#define HAS_TANGENTS %d\n", hasTangents];
+    [shaderFeatures appendFormat:@"#define HAS_VERTEX_COLOR %d\n", hasVertexColor];
     [shaderFeatures appendFormat:@"#define HAS_BASE_COLOR_MAP %d\n", hasBaseColorMap];
     [shaderFeatures appendFormat:@"#define HAS_NORMAL_MAP %d\n", hasNormalMap];
     [shaderFeatures appendFormat:@"#define HAS_METALLIC_ROUGHNESS_MAP %d\n", hasMetallicRoughnessMap];
     [shaderFeatures appendFormat:@"#define HAS_OCCLUSION_MAP %d\n", hasOcclusionMap];
     [shaderFeatures appendFormat:@"#define HAS_EMISSIVE_MAP %d\n", hasEmissiveMap];
+    [shaderFeatures appendFormat:@"#define HAS_VERTEX_ROUGHNESS %d\n", hasVertexRoughness];
+    [shaderFeatures appendFormat:@"#define HAS_VERTEX_METALLIC %d\n", hasVertexMetallic];
 
     [shaderFeatures appendFormat:@"#define baseColorTexCoord          texCoord%d\n", (int)submesh.material.baseColorTexCoord];
     [shaderFeatures appendFormat:@"#define normalTexCoord             texCoord%d\n", (int)submesh.material.normalTexCoord];
@@ -156,10 +162,16 @@
             [attribs addObject:[NSString stringWithFormat:@"    %@ texCoord0 [[attribute(%d)]];", GLTFMTLTypeNameForType(attribute.componentType, attribute.dimension, false), i]];
         } else if ([attribute.semantic isEqualToString:GLTFAttributeSemanticTexCoord1]) {
             [attribs addObject:[NSString stringWithFormat:@"    %@ texCoord1 [[attribute(%d)]];", GLTFMTLTypeNameForType(attribute.componentType, attribute.dimension, false), i]];
+        } else if ([attribute.semantic isEqualToString:GLTFAttributeSemanticColor0]) {
+            [attribs addObject:[NSString stringWithFormat:@"    %@ color     [[attribute(%d)]];", GLTFMTLTypeNameForType(attribute.componentType, attribute.dimension, false), i]];
         } else if ([attribute.semantic isEqualToString:GLTFAttributeSemanticJoints0]) {
             [attribs addObject:[NSString stringWithFormat:@"    %@ joints    [[attribute(%d)]];", GLTFMTLTypeNameForType(attribute.componentType, attribute.dimension, false), i]];
-        }else if ([attribute.semantic isEqualToString:GLTFAttributeSemanticWeights0]) {
+        } else if ([attribute.semantic isEqualToString:GLTFAttributeSemanticWeights0]) {
             [attribs addObject:[NSString stringWithFormat:@"    %@ weights   [[attribute(%d)]];", GLTFMTLTypeNameForType(attribute.componentType, attribute.dimension, false), i]];
+        } else if ([attribute.semantic isEqualToString:GLTFAttributeSemanticRoughness]) {
+            [attribs addObject:[NSString stringWithFormat:@"    %@ roughness [[attribute(%d)]];", GLTFMTLTypeNameForType(attribute.componentType, attribute.dimension, false), i]];
+        } else if ([attribute.semantic isEqualToString:GLTFAttributeSemanticMetallic]) {
+            [attribs addObject:[NSString stringWithFormat:@"    %@ metalness [[attribute(%d)]];", GLTFMTLTypeNameForType(attribute.componentType, attribute.dimension, false), i]];
         }
         
         ++i;

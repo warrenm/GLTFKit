@@ -24,4 +24,4 @@ NSString *const GLTFExtensionKHRDracoMeshCompression = @"KHR_draco_mesh_compress
 
 NSString *const GLTFExtensionCesiumRTC = @"CESIUM_RTC";
 
-NSString *const GLTFExtensionUnboundPBRAttributes = @"UNBOUND_pbr_attributes";
+NSString *const GLTFExtensionPBRAttributes = @"EXT_pbr_attributes";

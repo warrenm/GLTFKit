@@ -56,6 +56,7 @@
 @property (nonatomic, strong) GLTFMaterial *defaultMaterial;
 @property (nonatomic, strong) GLTFTextureSampler *defaultSampler;
 @property (nonatomic, assign) BOOL usesPBRSpecularGlossiness;
+@property (nonatomic, assign) BOOL usesEXTPBRAttributes;
 @end
 
 @implementation GLTFAsset
@@ -134,6 +135,8 @@
     for (NSString *extension in _extensionsUsed) {
         if ([extension isEqualToString:GLTFExtensionKHRMaterialsPBRSpecularGlossiness]) {
             _usesPBRSpecularGlossiness = YES;
+        } else if ([extension isEqualToString:GLTFExtensionPBRAttributes]) {
+            _usesEXTPBRAttributes = YES;
         } else {
             NSLog(@"WARNING: Unsupported extension \"%@\" used", extension);
         }
@@ -685,6 +688,11 @@
             NSNumber *metallicFactor = pbrValuesMap[@"metallicFactor"];
             if (metallicFactor != nil) {
                 material.metalnessFactor = metallicFactor.floatValue;
+            }
+
+            NSNumber *roughnessFactor = pbrValuesMap[@"roughnessFactor"];
+            if (roughnessFactor != nil) {
+                material.roughnessFactor = roughnessFactor.floatValue;
             }
 
             NSDictionary *metallicRoughnessTextureMap = pbrValuesMap[@"metallicRoughnessTexture"];

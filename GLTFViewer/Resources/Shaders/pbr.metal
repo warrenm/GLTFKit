@@ -35,6 +35,9 @@ constant int textureIndexBRDFLookup          = 7;
 #define USE_VERTEX_SKINNING 1
 #define HAS_TEXCOORD_0 1
 #define HAS_TEXCOORD_1 1
+#define HAS_VERTEX_COLOR 1
+#define HAS_VERTEX_ROUGHNESS 1
+#define HAS_VERTEX_METALLIC 1
 #define HAS_NORMALS 1
 #define HAS_TANGENTS 1
 #define HAS_BASE_COLOR_MAP 1
@@ -55,8 +58,11 @@ struct VertexIn {
     float4 tangent   [[attribute(2)]];
     float2 texCoord0 [[attribute(3)]];
     float2 texCoord1 [[attribute(4)]];
-    float4 weights   [[attribute(5)]];
-    ushort4 joints   [[attribute(6)]];
+    float4 color     [[attribute(5)]];
+    float4 weights   [[attribute(6)]];
+    ushort4 joints   [[attribute(7)]];
+    float roughness  [[attribute(8)]];
+    float metalness  [[attribute(9)]];
 };
 /*%end_replace_decls%*/
 
@@ -65,9 +71,12 @@ struct VertexOut {
     float3 worldPosition;
     float2 texCoord0;
     float2 texCoord1;
+    float4 color;
     float3 tangent;
     float3 bitangent;
     float3 normal;
+    float roughness;
+    float metalness;
 };
 
 struct VertexUniforms {
@@ -96,15 +105,14 @@ struct LightingParameters {
     float perceptualRoughness;
     float metalness;
     float3 baseColor;
-    float3 reflectance0;
-    float3 reflectance90;
+    float3 F0;
     float alphaRoughness;
 };
 
 vertex VertexOut vertex_main(VertexIn in [[stage_in]],
-                             constant VertexUniforms &uniforms [[buffer(8)]]
+                             constant VertexUniforms &uniforms [[buffer(16)]]
 #if USE_VERTEX_SKINNING
-                           , constant float4x4 *jointMatrices  [[buffer(9)]]
+                           , constant float4x4 *jointMatrices  [[buffer(17)]]
 #endif
 )
 {
@@ -145,6 +153,18 @@ vertex VertexOut vertex_main(VertexIn in [[stage_in]],
         #endif
     #endif
 
+    #if HAS_VERTEX_COLOR
+        out.color = in.color;
+    #endif
+    
+    #if HAS_VERTEX_ROUGHNESS
+        out.roughness = in.roughness;
+    #endif
+    
+    #if HAS_VERTEX_METALLIC
+        out.metalness = in.metalness;
+    #endif
+
     #if HAS_TEXCOORD_0
         out.texCoord0 = in.texCoord0;
     #endif
@@ -161,23 +181,24 @@ static float3 diffuse(LightingParameters pbrInputs)
     return pbrInputs.baseColor / M_PI_F;
 }
 
-static float3 fresnelReflectance(LightingParameters pbrInputs)
+static float3 FresnelReflectance(LightingParameters pbrInputs)
 {
-    return pbrInputs.reflectance0 + (pbrInputs.reflectance90 - pbrInputs.reflectance0) * pow(saturate(1.0 - pbrInputs.VdotH), 5.0);
+    return pbrInputs.F0 + (1 - pbrInputs.F0) * pow(saturate(1.0 - pbrInputs.VdotH), 5.0);
 }
 
 static float SmithG1(float NdotV, float r)
 {
-    float tanSquared = (1.0 - NdotV * NdotV) / max((NdotV * NdotV), 0.00001);
-    return 2.0 / (1.0 + sqrt(1.0 + r * r * tanSquared));
+    float k = pow(r + 1, 2) * 0.125;
+    float g = NdotV / ((NdotV * (1 - k)) + k);
+    return g;
 }
 
-static float geometricOcclusion(LightingParameters pbrInputs)
+static float SmithAttenuation(LightingParameters pbrInputs)
 {
     return SmithG1(pbrInputs.NdotL, pbrInputs.alphaRoughness) * SmithG1(pbrInputs.NdotV, pbrInputs.alphaRoughness);
 }
 
-static float ndf(LightingParameters pbrInputs)
+static float TrowbridgeReitzNDF(LightingParameters pbrInputs)
 {
     float roughnessSq = pbrInputs.alphaRoughness * pbrInputs.alphaRoughness;
     float f = (pbrInputs.NdotH * roughnessSq - pbrInputs.NdotH) * pbrInputs.NdotH + 1.0;
@@ -245,9 +266,9 @@ fragment float4 fragment_main(VertexOut in [[stage_in]],
     float3 l = normalize(uniforms.lightDirection);
     float3 h = normalize(l + v);
     float3 reflection = -normalize(reflect(v, n));
-    
-    float NdotL = max(0.001, saturate(dot(n, l)));
-    float NdotV = max(0.001, saturate(dot(n, v)));
+
+    float NdotL = clamp(dot(n, l), 0.001, 1.0);
+    float NdotV = clamp(dot(n, v), 0.001, 1.0);
     float NdotH = saturate(dot(n, h));
     float LdotH = saturate(dot(l, h));
     float VdotH = saturate(dot(v, h));
@@ -261,6 +282,14 @@ fragment float4 fragment_main(VertexOut in [[stage_in]],
         metallic = mrSample.b * metallic;
     #endif
     
+    #if HAS_VERTEX_ROUGHNESS
+        perceptualRoughness = in.roughness;
+    #endif
+        
+    #if HAS_VERTEX_METALLIC
+        metallic = in.metalness;
+    #endif
+
     perceptualRoughness = clamp(perceptualRoughness, minRoughness, 1.0);
     metallic = saturate(metallic);
     
@@ -269,6 +298,10 @@ fragment float4 fragment_main(VertexOut in [[stage_in]],
         baseColor = baseColorTexture.sample(baseColorSampler, in.baseColorTexCoord) * uniforms.baseColorFactor;
     #else
         baseColor = uniforms.baseColorFactor;
+    #endif
+    
+    #if HAS_VERTEX_COLOR
+        baseColor *= in.color;
     #endif
     
     float3 f0 = float3(0.04);
@@ -280,11 +313,7 @@ fragment float4 fragment_main(VertexOut in [[stage_in]],
     float3 color(0);
     
     #if USE_PBR
-        float reflectance = max(max(specularColor.r, specularColor.g), specularColor.b);
-        
-        float reflectance90 = saturate(reflectance * 25);
         float3 specularEnvironmentR0 = specularColor.rgb;
-        float3 specularEnvironmentR90 = float3(reflectance90);
     
         float alphaRoughness = perceptualRoughness * perceptualRoughness;
         
@@ -297,14 +326,13 @@ fragment float4 fragment_main(VertexOut in [[stage_in]],
             .perceptualRoughness = perceptualRoughness,
             .metalness = metallic,
             .baseColor = diffuseColor,
-            .reflectance0 = specularEnvironmentR0,
-            .reflectance90 = specularEnvironmentR90,
+            .F0 = specularEnvironmentR0,
             .alphaRoughness = alphaRoughness
         };
         
-        float3 F = fresnelReflectance(pbrInputs);
-        float G = geometricOcclusion(pbrInputs);
-        float D = ndf(pbrInputs);
+        float3 F = FresnelReflectance(pbrInputs);
+        float G = SmithAttenuation(pbrInputs);
+        float D = TrowbridgeReitzNDF(pbrInputs);
         
         float3 diffuseContrib = (1.0 - F) * diffuse(pbrInputs);
 
