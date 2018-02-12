@@ -33,7 +33,7 @@ typedef struct __attribute__((packed)) {
     GLTFVector4 columns[4];
 } GLTFMatrix4;
 
-typedef GLTFVector4 GLTFQuaternion;
+typedef simd_quatf GLTFQuaternion;
 
 typedef struct {
     simd_float3 minPoint;
@@ -55,13 +55,7 @@ extern GLTFBoundingSphere GLTFBoundingSphereFromBox(const GLTFBoundingBox b);
 
 extern void GLTFAxisAngleFromQuaternion(GLTFQuaternion q, simd_float3 *outAxis, float *outAngle);
 
-extern GLTFQuaternion GLTFQuaternionMultiply(GLTFQuaternion q, GLTFQuaternion r);
-
 extern GLTFQuaternion GLTFQuaternionFromEulerAngles(float pitch, float yaw, float roll);
-
-extern simd_float4x4 GLTFRotationMatrixFromQuaternion(GLTFQuaternion q);
-
-extern GLTFQuaternion GLTFQuaternionSlerp(GLTFQuaternion from, GLTFQuaternion to, float t);
 
 extern simd_float4x4 GLTFMatrixFromUniformScale(float s);
 

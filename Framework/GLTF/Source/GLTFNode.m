@@ -30,7 +30,7 @@
 - (instancetype)init {
     if ((self = [super init])) {
         _localTransform = matrix_identity_float4x4;
-        _rotationQuaternion = (GLTFQuaternion){ 0, 0, 0, 1 };
+        _rotationQuaternion = simd_quaternion(0.f, 0.f, 0.f, 1.f);
         _scale = vector3(1.0f, 1.0f, 1.0f);
         _translation = vector3(0.0f, 0.0f, 0.0f);
         _morphTargetWeights = @[];
@@ -77,7 +77,7 @@
     translationMatrix.columns[3][1] = _translation[1];
     translationMatrix.columns[3][2] = _translation[2];
 
-    simd_float4x4 rotationMatrix = GLTFRotationMatrixFromQuaternion(_rotationQuaternion);
+    simd_float4x4 rotationMatrix = simd_matrix4x4(_rotationQuaternion);
     
     simd_float4x4 scaleMatrix = matrix_identity_float4x4;
     scaleMatrix.columns[0][0] = _scale[0];

@@ -110,8 +110,8 @@ const float GLTFViewerFirstPersonCameraRotationScale = 0.0033;
 
     GLTFQuaternion pitchQuat = GLTFQuaternionFromEulerAngles(self.rotationAngles.x, 0, 0);
     GLTFQuaternion yawQuat = GLTFQuaternionFromEulerAngles(0, self.rotationAngles.y, 0);
-    GLTFQuaternion rotationQuat = GLTFQuaternionMultiply(yawQuat, pitchQuat);
-    simd_float4x4 rotation = GLTFRotationMatrixFromQuaternion(rotationQuat);
+    GLTFQuaternion rotationQuat = simd_mul(yawQuat, pitchQuat);
+    simd_float4x4 rotation = simd_matrix4x4(rotationQuat);
 
     simd_float3 forward = rotation.columns[2].xyz;
     simd_float3 right = rotation.columns[0].xyz;

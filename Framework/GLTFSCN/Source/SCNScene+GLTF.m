@@ -538,7 +538,7 @@ static SCNMatrix4 GLTFSCNMatrix4FromFloat4x4(GLTFMatrix4 m) {
     const GLTFQuaternion *quaternions = accessor.bufferView.buffer.contents + accessor.bufferView.offset + accessor.offset;
     NSInteger count = accessor.count;
     for (NSInteger i = 0; i < count; ++i) {
-        SCNVector4 quat = (SCNVector4){ quaternions[i].x, quaternions[i].y, quaternions[i].z, quaternions[i].w };
+        SCNVector4 quat = (SCNVector4){ quaternions[i].vector[0], quaternions[i].vector[1], quaternions[i].vector[2], quaternions[i].vector[3] };
         NSValue *value = [NSValue valueWithSCNVector4:quat];
         [values addObject:value];
     }

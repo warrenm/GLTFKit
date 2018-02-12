@@ -101,7 +101,7 @@
             
             GLTFQuaternion previousRotation = rotationValues[previousKeyFrame];
             GLTFQuaternion nextRotation = rotationValues[nextKeyFrame];
-            GLTFQuaternion interpRotation = GLTFQuaternionSlerp(previousRotation, nextRotation, frameProgress);
+            GLTFQuaternion interpRotation = simd_slerp(previousRotation, nextRotation, frameProgress);
 
             target.rotationQuaternion = interpRotation;
         } else if ([path isEqualToString:@"translation"]) {
