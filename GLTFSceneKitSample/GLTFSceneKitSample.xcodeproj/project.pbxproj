@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		834E0014203123A000DCB66E /* tropical_beach.hdr in Resources */ = {isa = PBXBuildFile; fileRef = 834E0013203123A000DCB66E /* tropical_beach.hdr */; };
 		836715F91FA9014E007ECCC9 /* GLTFSCNViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 836715F81FA9014E007ECCC9 /* GLTFSCNViewController.m */; };
 		83BD8A0D1FA82BCF002CF9B9 /* GLTFSCNDocument.m in Sources */ = {isa = PBXBuildFile; fileRef = 83BD8A0C1FA82BCF002CF9B9 /* GLTFSCNDocument.m */; };
 		83BD8A0F1FA82BCF002CF9B9 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 83BD8A0E1FA82BCF002CF9B9 /* Assets.xcassets */; };
@@ -16,8 +17,6 @@
 		83E99B601FA91063006E8004 /* GLTFSCN.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 83E99B621FA91063006E8004 /* GLTFSCN.framework */; };
 		83E99B651FA9106C006E8004 /* GLTF.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 83E99B611FA91063006E8004 /* GLTF.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		83E99B671FA9106C006E8004 /* GLTFSCN.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 83E99B621FA91063006E8004 /* GLTFSCN.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		83E99B6D1FA910DC006E8004 /* Ridgecrest_Road_Env.hdr in Resources */ = {isa = PBXBuildFile; fileRef = 83E99B6B1FA910DC006E8004 /* Ridgecrest_Road_Env.hdr */; };
-		83E99B6E1FA910DC006E8004 /* Ridgecrest_Road_Ref.hdr in Resources */ = {isa = PBXBuildFile; fileRef = 83E99B6C1FA910DC006E8004 /* Ridgecrest_Road_Ref.hdr */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -36,6 +35,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		834E0013203123A000DCB66E /* tropical_beach.hdr */ = {isa = PBXFileReference; lastKnownFileType = file; path = tropical_beach.hdr; sourceTree = "<group>"; };
 		836715F81FA9014E007ECCC9 /* GLTFSCNViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GLTFSCNViewController.m; sourceTree = "<group>"; };
 		83BD8A021FA82BCF002CF9B9 /* GLTFSceneKitSample.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GLTFSceneKitSample.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		83BD8A081FA82BCF002CF9B9 /* GLTFSCNViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GLTFSCNViewController.h; sourceTree = "<group>"; };
@@ -48,8 +48,6 @@
 		83E99B611FA91063006E8004 /* GLTF.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = GLTF.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		83E99B621FA91063006E8004 /* GLTFSCN.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = GLTFSCN.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		83E99B631FA91064006E8004 /* SceneKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SceneKit.framework; path = System/Library/Frameworks/SceneKit.framework; sourceTree = SDKROOT; };
-		83E99B6B1FA910DC006E8004 /* Ridgecrest_Road_Env.hdr */ = {isa = PBXFileReference; lastKnownFileType = file; path = Ridgecrest_Road_Env.hdr; sourceTree = "<group>"; };
-		83E99B6C1FA910DC006E8004 /* Ridgecrest_Road_Ref.hdr */ = {isa = PBXFileReference; lastKnownFileType = file; path = Ridgecrest_Road_Ref.hdr; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -127,8 +125,7 @@
 		83E99B6A1FA910B9006E8004 /* Environment */ = {
 			isa = PBXGroup;
 			children = (
-				83E99B6B1FA910DC006E8004 /* Ridgecrest_Road_Env.hdr */,
-				83E99B6C1FA910DC006E8004 /* Ridgecrest_Road_Ref.hdr */,
+				834E0013203123A000DCB66E /* tropical_beach.hdr */,
 			);
 			path = Environment;
 			sourceTree = "<group>";
@@ -197,8 +194,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				83E99B6E1FA910DC006E8004 /* Ridgecrest_Road_Ref.hdr in Resources */,
-				83E99B6D1FA910DC006E8004 /* Ridgecrest_Road_Env.hdr in Resources */,
+				834E0014203123A000DCB66E /* tropical_beach.hdr in Resources */,
 				83BD8A0F1FA82BCF002CF9B9 /* Assets.xcassets in Resources */,
 				83BD8A121FA82BCF002CF9B9 /* Main.storyboard in Resources */,
 			);

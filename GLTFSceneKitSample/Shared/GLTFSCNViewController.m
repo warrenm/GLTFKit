@@ -43,10 +43,10 @@
         [animation.target addAnimation:animation.animation forKey:nil];
     }
     
-    _scene.lightingEnvironment.contents = @"Ridgecrest_Road_Ref.hdr";
-    _scene.lightingEnvironment.intensity = 3.0;
+    _scene.lightingEnvironment.contents = @"tropical_beach.hdr";
+    _scene.lightingEnvironment.intensity = 1.0;
     
-    _scene.background.contents = @"Ridgecrest_Road_Ref.hdr";
+    _scene.background.contents = @"tropical_beach.hdr";
 
     SCNNode *cameraNode = [SCNNode node];
     cameraNode.camera = [SCNCamera camera];
