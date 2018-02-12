@@ -53,8 +53,6 @@ extern void GLTFBoundingBoxTransform(GLTFBoundingBox *b, simd_float4x4 transform
 
 extern GLTFBoundingSphere GLTFBoundingSphereFromBox(const GLTFBoundingBox b);
 
-extern void GLTFAxisAngleFromQuaternion(GLTFQuaternion q, simd_float3 *outAxis, float *outAngle);
-
 extern GLTFQuaternion GLTFQuaternionFromEulerAngles(float pitch, float yaw, float roll);
 
 extern simd_float4x4 GLTFMatrixFromUniformScale(float s);

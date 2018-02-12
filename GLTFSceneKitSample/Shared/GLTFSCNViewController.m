@@ -44,7 +44,7 @@
     }
     
     _scene.lightingEnvironment.contents = @"tropical_beach.hdr";
-    _scene.lightingEnvironment.intensity = 1.0;
+    _scene.lightingEnvironment.intensity = 2.0;
     
     _scene.background.contents = @"tropical_beach.hdr";
 

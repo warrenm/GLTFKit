@@ -80,11 +80,6 @@ GLTFBoundingSphere GLTFBoundingSphereFromBox(const GLTFBoundingBox b) {
     return s;
 }
 
-void GLTFAxisAngleFromQuaternion(GLTFQuaternion q, simd_float3 *outAxis, float *outAngle) {
-    *outAxis = simd_axis(q);
-    *outAngle = simd_angle(q);
-}
-
 GLTFQuaternion GLTFQuaternionFromEulerAngles(float pitch, float yaw, float roll) {
     float cx = cos(pitch / 2);
     float sx = sin(pitch / 2);
@@ -100,10 +95,6 @@ GLTFQuaternion GLTFQuaternionFromEulerAngles(float pitch, float yaw, float roll)
         cx*cy*cz - sx*sy*sz
     );
     return q;
-}
-
-GLTFQuaternion GLTFQuaternionSlerp(GLTFQuaternion from, GLTFQuaternion to, float t) {
-    return simd_slerp(from, to, t);
 }
 
 simd_float4x4 GLTFMatrixFromUniformScale(float s)
