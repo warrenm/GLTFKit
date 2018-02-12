@@ -176,7 +176,7 @@ vertex VertexOut vertex_main(VertexIn in [[stage_in]],
     return out;
 }
 
-static float3 diffuse(LightingParameters pbrInputs)
+static float3 LambertDiffuse(LightingParameters pbrInputs)
 {
     return pbrInputs.baseColor / M_PI_F;
 }
@@ -292,7 +292,7 @@ fragment float4 fragment_main(VertexOut in [[stage_in]],
 
     perceptualRoughness = clamp(perceptualRoughness, minRoughness, 1.0);
     metallic = saturate(metallic);
-    
+
     float4 baseColor;
     #if HAS_BASE_COLOR_MAP
         baseColor = baseColorTexture.sample(baseColorSampler, in.baseColorTexCoord) * uniforms.baseColorFactor;
@@ -334,7 +334,7 @@ fragment float4 fragment_main(VertexOut in [[stage_in]],
         float G = SmithAttenuation(pbrInputs);
         float D = TrowbridgeReitzNDF(pbrInputs);
         
-        float3 diffuseContrib = (1.0 - F) * diffuse(pbrInputs);
+        float3 diffuseContrib = (1.0 - F) * LambertDiffuse(pbrInputs);
 
         float3 specContrib = F * G * D / (4.0 * NdotL * NdotV);
         

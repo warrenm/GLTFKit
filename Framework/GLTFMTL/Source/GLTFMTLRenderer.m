@@ -23,12 +23,12 @@
 @import ImageIO;
 @import MetalKit;
 
-struct VertexUniforms {
+typedef struct {
     simd_float4x4 modelMatrix;
     simd_float4x4 modelViewProjectionMatrix;
-};
+} VertexUniforms;
 
-struct FragmentUniforms {
+typedef struct {
     simd_float3 lightDirection;
     simd_float3 lightColor;
     float normalScale;
@@ -38,7 +38,17 @@ struct FragmentUniforms {
     simd_float4 baseColorFactor;
     simd_float3 camera;
     float alphaCutoff;
-};
+} FragmentUniforms;
+
+@interface GLTFMTLRenderItem: NSObject
+@property (nonatomic, strong) GLTFNode *node;
+@property (nonatomic, strong) GLTFSubmesh *submesh;
+@property (nonatomic, assign) VertexUniforms vertexUniforms;
+@property (nonatomic, assign) FragmentUniforms fragmentUniforms;
+@end
+
+@implementation GLTFMTLRenderItem
+@end
 
 @interface GLTFMTLRenderer ()
 
@@ -55,6 +65,9 @@ struct FragmentUniforms {
 @property (nonatomic, strong) NSMutableDictionary<NSNumber *, id<MTLDepthStencilState>> *depthStencilStateMap;
 @property (nonatomic, strong) NSMutableDictionary<NSUUID *, id<MTLTexture>> *texturesForImageIdentifiers;
 @property (nonatomic, strong) NSMutableDictionary<GLTFTextureSampler *, id<MTLSamplerState>> *samplerStatesForSamplers;
+
+@property (nonatomic, strong) NSMutableArray<GLTFMTLRenderItem *> *opaqueRenderItems;
+@property (nonatomic, strong) NSMutableArray<GLTFMTLRenderItem *> *transparentRenderItems;
 
 @end
 
@@ -83,6 +96,9 @@ struct FragmentUniforms {
         _texturesForImageIdentifiers = [NSMutableDictionary dictionary];
         _pipelineStatesForSubmeshes = [NSMutableDictionary dictionary];
         _samplerStatesForSamplers = [NSMutableDictionary dictionary];
+        
+        _opaqueRenderItems = [NSMutableArray array];
+        _transparentRenderItems = [NSMutableArray array];
     }
     
     return self;
@@ -229,10 +245,16 @@ struct FragmentUniforms {
     }
     
     for (GLTFNode *rootNode in scene.nodes) {
-        [self renderNodeRecursive:rootNode
-                      modelMatrix:matrix_identity_float4x4
-             renderCommandEncoder:renderEncoder];
+        [self buildRenderListRecursive:rootNode modelMatrix:matrix_identity_float4x4];
     }
+    
+    NSMutableArray *renderList = [NSMutableArray arrayWithArray:self.opaqueRenderItems];
+    [renderList addObjectsFromArray:self.transparentRenderItems];
+    
+    [self drawRenderList:renderList commandEncoder:renderEncoder];
+    
+    [self.opaqueRenderItems removeAllObjects];
+    [self.transparentRenderItems removeAllObjects];
 }
 
 - (void)bindTexturesForMaterial:(GLTFMaterial *)material commandEncoder:(id<MTLRenderCommandEncoder>)renderEncoder {
@@ -295,44 +317,25 @@ struct FragmentUniforms {
     }
 }
 
-- (void)renderNodeRecursive:(GLTFNode *)node
-                modelMatrix:(simd_float4x4)modelMatrix
-       renderCommandEncoder:(id<MTLRenderCommandEncoder>)renderEncoder
+- (void)buildRenderListRecursive:(GLTFNode *)node
+                     modelMatrix:(simd_float4x4)modelMatrix
 {
     modelMatrix = matrix_multiply(modelMatrix, node.localTransform);
     
     GLTFMesh *mesh = node.mesh;
-    if (mesh)
-    {
-        [renderEncoder pushDebugGroup:mesh.name ?: @"(unnamed mesh)"];
-        
+    if (mesh) {
         for (GLTFSubmesh *submesh in mesh.submeshes) {
             GLTFMaterial *material = submesh.material;
-            
-            id<MTLRenderPipelineState> renderPipelineState = [self renderPipelineStateForSubmesh: submesh];
-            
-            [renderEncoder setRenderPipelineState:renderPipelineState];
-
-            NSDictionary *accessorsForAttributes = submesh.accessorsForAttributes;
-
-            GLTFAccessor *indexAccessor = submesh.indexAccessor;
-            BOOL useIndexBuffer = (indexAccessor != nil);
-            
-            // TODO: Check primitive type for unsupported types (tri fan, line loop), and modify draw calls as appropriate
-            MTLPrimitiveType primitiveType = GLTFMTLPrimitiveTypeForPrimitiveType(submesh.primitiveType);
-            
-            [self bindTexturesForMaterial:material commandEncoder: renderEncoder];
-
-            struct VertexUniforms vertexUniforms;
             
             simd_float3x3 viewAffine = matrix_invert(GLTFMatrixUpperLeft3x3(self.viewMatrix));
             simd_float3 cameraPos = self.viewMatrix.columns[3].xyz;
             simd_float3 cameraWorldPos = matrix_multiply(viewAffine, -cameraPos);
             
+            VertexUniforms vertexUniforms;
             vertexUniforms.modelMatrix = modelMatrix;
             vertexUniforms.modelViewProjectionMatrix = matrix_multiply(matrix_multiply(self.projectionMatrix, self.viewMatrix), modelMatrix);
             
-            struct FragmentUniforms fragmentUniforms;
+            FragmentUniforms fragmentUniforms;
             fragmentUniforms.lightDirection = (simd_float3){ 0, 0, -1 };
             fragmentUniforms.lightColor = (simd_float3) { 1, 1, 1 };
             fragmentUniforms.normalScale = material.normalTextureScale;
@@ -343,69 +346,100 @@ struct FragmentUniforms {
             fragmentUniforms.camera = cameraWorldPos;
             fragmentUniforms.alphaCutoff = material.alphaCutoff;
             
-            [renderEncoder setVertexBytes:&vertexUniforms length:sizeof(vertexUniforms) atIndex:GLTFVertexDescriptorMaxAttributeCount + 0];
+            GLTFMTLRenderItem *item = [GLTFMTLRenderItem new];
+            item.node = node;
+            item.submesh = submesh;
+            item.vertexUniforms = vertexUniforms;
+            item.fragmentUniforms = fragmentUniforms;
             
-            if (node.skin != nil && node.skin.jointNodes != nil && node.skin.jointNodes.count > 0) {
-                id<MTLBuffer> jointBuffer = [self dequeueReusableBufferOfLength: node.skin.jointNodes.count * sizeof(simd_float4x4)];
-                [self computeJointsForSubmesh:submesh inNode:node buffer:jointBuffer];
-                [renderEncoder setVertexBuffer:jointBuffer offset:0 atIndex:GLTFVertexDescriptorMaxAttributeCount + 1];
-            }
-            
-            [renderEncoder setFragmentBytes:&fragmentUniforms length: sizeof(fragmentUniforms) atIndex: 0];
-            
-            GLTFVertexDescriptor *vertexDescriptor = submesh.vertexDescriptor;
-            for (int i = 0; i < GLTFVertexDescriptorMaxAttributeCount; ++i) {
-                NSString *semantic = vertexDescriptor.attributes[i].semantic;
-                if (semantic == nil) { continue; }
-                GLTFAccessor *accessor = submesh.accessorsForAttributes[semantic];
-                
-                [renderEncoder setVertexBuffer:((GLTFMTLBuffer *)accessor.bufferView.buffer).buffer
-                                        offset:accessor.offset + accessor.bufferView.offset
-                                       atIndex:i];
-            }
-
-            // TODO: This is pretty clumsy. Need to actually defer translucent meshes till after all opaques are rendered.
-            if (material.alphaMode == GLTFAlphaModeBlend){
-                id<MTLDepthStencilState> depthStencilState = [self depthStencilStateForDepthWriteEnabled:NO
-                                                                                        depthTestEnabled:YES
-                                                                                         compareFunction:MTLCompareFunctionLess];
-                [renderEncoder setDepthStencilState:depthStencilState];
+            if (submesh.material.alphaMode == GLTFAlphaModeBlend) {
+                [self.transparentRenderItems addObject:item];
             } else {
-                id<MTLDepthStencilState> depthStencilState = [self depthStencilStateForDepthWriteEnabled:YES
-                                                                                        depthTestEnabled:YES
-                                                                                         compareFunction:MTLCompareFunctionLess];
-                [renderEncoder setDepthStencilState:depthStencilState];
-            }
-            
-            if (material.isDoubleSided) {
-                [renderEncoder setCullMode:MTLCullModeNone];
-            } else {
-                [renderEncoder setCullMode:MTLCullModeBack];
-            }
-            
-            if (useIndexBuffer) {
-                GLTFMTLBuffer *indexBuffer = (GLTFMTLBuffer *)indexAccessor.bufferView.buffer;
-                
-                MTLIndexType indexType = (indexAccessor.componentType == GLTFDataTypeUShort) ? MTLIndexTypeUInt16 : MTLIndexTypeUInt32;
-                
-                [renderEncoder drawIndexedPrimitives:primitiveType
-                                          indexCount:indexAccessor.count
-                                           indexType:indexType
-                                         indexBuffer:[indexBuffer buffer]
-                                   indexBufferOffset:indexAccessor.offset + indexAccessor.bufferView.offset];
-            } else {
-                GLTFAccessor *positionAccessor = accessorsForAttributes[GLTFAttributeSemanticPosition];
-                [renderEncoder drawPrimitives:primitiveType vertexStart:0 vertexCount:positionAccessor.count];
+                [self.opaqueRenderItems addObject:item];
             }
         }
-        
-        [renderEncoder popDebugGroup];
     }
     
     for (GLTFNode *childNode in node.children) {
-        [self renderNodeRecursive:childNode
-                      modelMatrix:modelMatrix
-             renderCommandEncoder:renderEncoder];
+        [self buildRenderListRecursive:childNode modelMatrix:modelMatrix];
+    }
+}
+
+- (void)drawRenderList:(NSArray<GLTFMTLRenderItem *> *)renderList commandEncoder:(id<MTLRenderCommandEncoder>)renderEncoder {
+    for (GLTFMTLRenderItem *item in renderList) {
+        GLTFNode *node = item.node;
+        GLTFSubmesh *submesh = item.submesh;
+        GLTFMaterial *material = submesh.material;
+        
+        id<MTLRenderPipelineState> renderPipelineState = [self renderPipelineStateForSubmesh:submesh];
+                
+        [renderEncoder setRenderPipelineState:renderPipelineState];
+                
+        NSDictionary *accessorsForAttributes = submesh.accessorsForAttributes;
+                
+        GLTFAccessor *indexAccessor = submesh.indexAccessor;
+        BOOL useIndexBuffer = (indexAccessor != nil);
+                
+        // TODO: Check primitive type for unsupported types (tri fan, line loop), and modify draw calls as appropriate
+        MTLPrimitiveType primitiveType = GLTFMTLPrimitiveTypeForPrimitiveType(submesh.primitiveType);
+                
+        [self bindTexturesForMaterial:material commandEncoder:renderEncoder];
+        
+        VertexUniforms vertexUniforms = item.vertexUniforms;
+        [renderEncoder setVertexBytes:&vertexUniforms length:sizeof(vertexUniforms) atIndex:GLTFVertexDescriptorMaxAttributeCount + 0];
+        
+        if (node.skin != nil && node.skin.jointNodes != nil && node.skin.jointNodes.count > 0) {
+            id<MTLBuffer> jointBuffer = [self dequeueReusableBufferOfLength: node.skin.jointNodes.count * sizeof(simd_float4x4)];
+            [self computeJointsForSubmesh:submesh inNode:node buffer:jointBuffer];
+            [renderEncoder setVertexBuffer:jointBuffer offset:0 atIndex:GLTFVertexDescriptorMaxAttributeCount + 1];
+        }
+        
+        FragmentUniforms fragmentUniforms = item.fragmentUniforms;
+        [renderEncoder setFragmentBytes:&fragmentUniforms length: sizeof(fragmentUniforms) atIndex: 0];
+                
+        GLTFVertexDescriptor *vertexDescriptor = submesh.vertexDescriptor;
+        for (int i = 0; i < GLTFVertexDescriptorMaxAttributeCount; ++i) {
+            NSString *semantic = vertexDescriptor.attributes[i].semantic;
+            if (semantic == nil) { continue; }
+            GLTFAccessor *accessor = submesh.accessorsForAttributes[semantic];
+            
+            [renderEncoder setVertexBuffer:((GLTFMTLBuffer *)accessor.bufferView.buffer).buffer
+                                    offset:accessor.offset + accessor.bufferView.offset
+                                   atIndex:i];
+        }
+        
+        if (material.alphaMode == GLTFAlphaModeBlend){
+            id<MTLDepthStencilState> depthStencilState = [self depthStencilStateForDepthWriteEnabled:YES
+                                                                                    depthTestEnabled:YES
+                                                                                     compareFunction:MTLCompareFunctionLess];
+            [renderEncoder setDepthStencilState:depthStencilState];
+        } else {
+            id<MTLDepthStencilState> depthStencilState = [self depthStencilStateForDepthWriteEnabled:YES
+                                                                                    depthTestEnabled:YES
+                                                                                     compareFunction:MTLCompareFunctionLess];
+            [renderEncoder setDepthStencilState:depthStencilState];
+        }
+        
+        if (material.isDoubleSided) {
+            [renderEncoder setCullMode:MTLCullModeNone];
+        } else {
+            [renderEncoder setCullMode:MTLCullModeBack];
+        }
+        
+        if (useIndexBuffer) {
+            GLTFMTLBuffer *indexBuffer = (GLTFMTLBuffer *)indexAccessor.bufferView.buffer;
+            
+            MTLIndexType indexType = (indexAccessor.componentType == GLTFDataTypeUShort) ? MTLIndexTypeUInt16 : MTLIndexTypeUInt32;
+            
+            [renderEncoder drawIndexedPrimitives:primitiveType
+                                      indexCount:indexAccessor.count
+                                       indexType:indexType
+                                     indexBuffer:[indexBuffer buffer]
+                               indexBufferOffset:indexAccessor.offset + indexAccessor.bufferView.offset];
+        } else {
+            GLTFAccessor *positionAccessor = accessorsForAttributes[GLTFAttributeSemanticPosition];
+            [renderEncoder drawPrimitives:primitiveType vertexStart:0 vertexCount:positionAccessor.count];
+        }
     }
 }
 
