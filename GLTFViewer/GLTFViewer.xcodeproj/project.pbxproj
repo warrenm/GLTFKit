@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		834168101F8D70210052E7FE /* GLTFViewerOrbitCamera.m in Sources */ = {isa = PBXBuildFile; fileRef = 8341680F1F8D70210052E7FE /* GLTFViewerOrbitCamera.m */; };
 		834168131F8D70730052E7FE /* GLTFViewerFirstPersonCamera.m in Sources */ = {isa = PBXBuildFile; fileRef = 834168121F8D70730052E7FE /* GLTFViewerFirstPersonCamera.m */; };
+		834E00152031267700DCB66E /* brdf.metal in Sources */ = {isa = PBXBuildFile; fileRef = 834E000A202A70B200DCB66E /* brdf.metal */; };
 		83850FC21F4A5E8F00F9A444 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 83850FBE1F4A5C5C00F9A444 /* main.m */; };
 		83850FC71F4A5F4D00F9A444 /* GLTFViewerViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 83850FC51F4A5F2600F9A444 /* GLTFViewerViewController.m */; };
 		83850FCA1F4A616E00F9A444 /* GLTFDocument.m in Sources */ = {isa = PBXBuildFile; fileRef = 83850FC91F4A616E00F9A444 /* GLTFDocument.m */; };
@@ -311,7 +312,7 @@
 			files = (
 				83A6C51B1F88208E0095A4DC /* GLTFViewerCamera.m in Sources */,
 				834168101F8D70210052E7FE /* GLTFViewerOrbitCamera.m in Sources */,
-				834E000B202A70B200DCB66E /* brdf.metal in Sources */,
+				834E00152031267700DCB66E /* brdf.metal in Sources */,
 				83850FC71F4A5F4D00F9A444 /* GLTFViewerViewController.m in Sources */,
 				83D32B291FA915D000703763 /* skybox.metal in Sources */,
 				83D32B2A1FA915D000703763 /* pbr.metal in Sources */,
