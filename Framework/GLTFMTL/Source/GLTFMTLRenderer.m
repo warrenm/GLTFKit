@@ -340,7 +340,7 @@ typedef struct {
             fragmentUniforms.lightColor = (simd_float3) { 1, 1, 1 };
             fragmentUniforms.normalScale = material.normalTextureScale;
             fragmentUniforms.emissiveFactor = material.emissiveFactor;
-            fragmentUniforms.occlusionStrength = 1;
+            fragmentUniforms.occlusionStrength = material.occlusionStrength;
             fragmentUniforms.metallicRoughnessValues = (simd_float2){ material.metalnessFactor, material.roughnessFactor };
             fragmentUniforms.baseColorFactor = material.baseColorFactor;
             fragmentUniforms.camera = cameraWorldPos;

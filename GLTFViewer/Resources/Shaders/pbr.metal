@@ -342,7 +342,7 @@ fragment float4 fragment_main(VertexOut in [[stage_in]],
     #endif
     
     #if USE_IBL
-        constexpr sampler linearSampler(coord::normalized, min_filter::linear, mag_filter::linear, mip_filter::linear, address::clamp_to_edge);
+        constexpr sampler linearSampler(coord::normalized, filter::linear, address::clamp_to_edge);
     
         float envIntensity = 1.0;
     

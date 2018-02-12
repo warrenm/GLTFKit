@@ -23,6 +23,7 @@
         _baseColorFactor = (simd_float4){ 1, 1, 1, 1 };
         _metalnessFactor = 1.0;
         _roughnessFactor = 1.0;
+        _occlusionStrength = 1.0;
         _emissiveFactor = (simd_float3) { 0.0, 0.0, 0.0 };
         _normalTextureScale = 1.0;
         _alphaMode = GLTFAlphaModeOpaque;

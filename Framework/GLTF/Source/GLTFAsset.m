@@ -772,6 +772,10 @@
             if (occlusionTexCoordValue != nil) {
                 material.occlusionTexCoord = occlusionTexCoordValue.integerValue;
             }
+            NSNumber *occlusionStrengthValue = occlusionTextureMap[@"strength"];
+            if (occlusionStrengthValue != nil) {
+                material.occlusionStrength = occlusionStrengthValue.integerValue;
+            }
         }
         
         material.name = properties[@"name"];

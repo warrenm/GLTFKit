@@ -34,6 +34,7 @@ typedef NS_ENUM(NSInteger, GLTFAlphaMode) {
 @property (nonatomic, assign) float metalnessFactor;
 @property (nonatomic, assign) float roughnessFactor;
 @property (nonatomic, assign) float normalTextureScale;
+@property (nonatomic, assign) float occlusionStrength;
 @property (nonatomic, assign) simd_float3 emissiveFactor;
 
 @property (nonatomic, assign) float glossinessFactor; // Only used by KHR_materials_pbrSpecularGlossiness extension
