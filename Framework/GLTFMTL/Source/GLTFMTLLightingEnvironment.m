@@ -24,12 +24,16 @@
 
 @implementation GLTFMTLLightingEnvironment
 
+@synthesize specularMipLevelCount=_specularMipLevelCount;
+
 - (instancetype)initWithDiffuseCubeURL:(NSURL *)diffuseCubeURL
                       specularCubeURLs:(NSArray<NSURL *> *)specularCubeURLs
                                 device:(id<MTLDevice>)device
                                  error:(NSError **)error
 {
     if ((self = [super init])) {
+        _intensity = 1;
+        
         NSError *internalError = nil;
         
         id<MTLCommandQueue> commandQueue = [device newCommandQueue];
@@ -119,6 +123,7 @@
             specularCubeSize = specularCubeSize / 2;
             ++specularMipLevel;
         }
+        _specularMipLevelCount = specularMipLevel;
         
         [blitEncoder endEncoding];
 
@@ -148,6 +153,10 @@
     [commandEncoder dispatchThreadgroups:threadgroups threadsPerThreadgroup:threadsPerThreadgroup];
     [commandEncoder endEncoding];
     _brdfLUT = lookupTexture;
+}
+
+- (int)specularMipLevelCount {
+    return _specularMipLevelCount;
 }
 
 @end

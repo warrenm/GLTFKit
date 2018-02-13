@@ -46,6 +46,7 @@ typedef struct {
     simd_float4 baseColorFactor;
     simd_float3 camera;
     float alphaCutoff;
+    float envIntensity;
     Light lights[GLTFMTLMaximumLightCount];
 } FragmentUniforms;
 
@@ -352,6 +353,7 @@ typedef struct {
             fragmentUniforms.baseColorFactor = material.baseColorFactor;
             fragmentUniforms.camera = cameraWorldPos;
             fragmentUniforms.alphaCutoff = material.alphaCutoff;
+            fragmentUniforms.envIntensity = self.lightingEnvironment.intensity;
             fragmentUniforms.lights[0].positionDirection = (simd_float4){ 0, 0, -1, 0 };
             fragmentUniforms.lights[0].color = (simd_float4){ 1, 1, 1, 1 };
             fragmentUniforms.lights[0].intensity = 1;

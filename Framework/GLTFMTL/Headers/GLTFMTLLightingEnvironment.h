@@ -28,6 +28,8 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, retain) id<MTLTexture> diffuseCube;
 @property (nonatomic, retain) id<MTLTexture> specularCube;
 @property (nonatomic, retain) id<MTLTexture> brdfLUT;
+@property (nonatomic, assign) float intensity;
+@property (nonatomic, readonly, assign) int specularMipLevelCount;
 
 - (instancetype)initWithDiffuseCubeURL:(NSURL *)diffuseCubeURL
                       specularCubeURLs:(NSArray<NSURL *> *)specularCubeURLs

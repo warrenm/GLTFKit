@@ -103,6 +103,7 @@
                                                                          specularCubeURLs:specularURLs
                                                                                    device:self.device
                                                                                     error:&error];
+    self.lightingEnvironment.intensity = 2.0;
     self.renderer.lightingEnvironment = self.lightingEnvironment;
 }
 
