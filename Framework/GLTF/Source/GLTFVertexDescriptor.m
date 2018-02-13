@@ -26,7 +26,9 @@ NSString *const GLTFAttributeSemanticTexCoord0 = @"TEXCOORD_0";
 NSString *const GLTFAttributeSemanticTexCoord1 = @"TEXCOORD_1";
 NSString *const GLTFAttributeSemanticColor0    = @"COLOR_0";
 NSString *const GLTFAttributeSemanticJoints0   = @"JOINTS_0";
+NSString *const GLTFAttributeSemanticJoints1   = @"JOINTS_1";
 NSString *const GLTFAttributeSemanticWeights0  = @"WEIGHTS_0";
+NSString *const GLTFAttributeSemanticWeights1  = @"WEIGHTS_1";
 NSString *const GLTFAttributeSemanticRoughness = @"ROUGHNESS";
 NSString *const GLTFAttributeSemanticMetallic  = @"METALLIC";
 

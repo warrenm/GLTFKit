@@ -33,6 +33,7 @@ constant int textureIndexBRDFLookup          = 7;
 #define USE_IBL 1
 #define USE_ALPHA_TEST 0
 #define USE_VERTEX_SKINNING 1
+#define USE_EXTENDED_VERTEX_SKINNING 1
 #define HAS_TEXCOORD_0 1
 #define HAS_TEXCOORD_1 1
 #define HAS_VERTEX_COLOR 1
@@ -53,6 +54,9 @@ constant int textureIndexBRDFLookup          = 7;
 #define emissiveTexCoord           texCoord0
 #define occlusionTexCoord          texCoord0
 
+#define joints joints0
+#define weights weights0
+
 struct VertexIn {
     float3 position  [[attribute(0)]];
     float3 normal    [[attribute(1)]];
@@ -60,10 +64,12 @@ struct VertexIn {
     float2 texCoord0 [[attribute(3)]];
     float2 texCoord1 [[attribute(4)]];
     float4 color     [[attribute(5)]];
-    float4 weights   [[attribute(6)]];
-    ushort4 joints   [[attribute(7)]];
-    float roughness  [[attribute(8)]];
-    float metalness  [[attribute(9)]];
+    float4 weights0  [[attribute(6)]];
+    float4 weights1  [[attribute(7)]];
+    ushort4 joints0  [[attribute(8)]];
+    ushort4 joints1  [[attribute(9)]];
+    float roughness  [[attribute(10)]];
+    float metalness  [[attribute(11)]];
 };
 /*%end_replace_decls%*/
 
@@ -130,13 +136,23 @@ vertex VertexOut vertex_main(VertexIn in [[stage_in]],
     float4x4 normalMatrix = uniforms.modelMatrix;
     
     #if USE_VERTEX_SKINNING
-        ushort4 jointIndices = ushort4(in.joints);
-        float4 jointWeights = float4(in.weights);
+        ushort4 jointIndices = ushort4(in.joints0);
+        float4 jointWeights = float4(in.weights0);
         
         float4x4 skinMatrix = jointWeights[0] * jointMatrices[jointIndices[0]] +
                               jointWeights[1] * jointMatrices[jointIndices[1]] +
                               jointWeights[2] * jointMatrices[jointIndices[2]] +
                               jointWeights[3] * jointMatrices[jointIndices[3]];
+
+        #if USE_EXTENDED_VERTEX_SKINNING
+            jointIndices = ushort4(in.joints1);
+            jointWeights = float4(in.weights1);
+
+            skinMatrix += jointWeights[0] * jointMatrices[jointIndices[0]] +
+                          jointWeights[1] * jointMatrices[jointIndices[1]] +
+                          jointWeights[2] * jointMatrices[jointIndices[2]] +
+                          jointWeights[3] * jointMatrices[jointIndices[3]];
+        #endif
         
         float4 skinnedPosition = skinMatrix * float4(in.position.xyz, 1);
         normalMatrix = skinMatrix * normalMatrix;

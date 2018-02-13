@@ -29,7 +29,9 @@ extern NSString *const GLTFAttributeSemanticTexCoord0;
 extern NSString *const GLTFAttributeSemanticTexCoord1;
 extern NSString *const GLTFAttributeSemanticColor0;
 extern NSString *const GLTFAttributeSemanticJoints0;
+extern NSString *const GLTFAttributeSemanticJoints1;
 extern NSString *const GLTFAttributeSemanticWeights0;
+extern NSString *const GLTFAttributeSemanticWeights1;
 extern NSString *const GLTFAttributeSemanticRoughness;
 extern NSString *const GLTFAttributeSemanticMetallic;
 
