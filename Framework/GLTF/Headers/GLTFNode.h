@@ -23,9 +23,11 @@ NS_ASSUME_NONNULL_BEGIN
 @import simd;
 
 @class GLTFCamera, GLTFSkin, GLTFMesh;
+@class GLTFKHRLight;
 
 @interface GLTFNode : GLTFObject <GLTFNodeVisitable>
 @property (nonatomic, weak) GLTFCamera * _Nullable camera;
+@property (nonatomic, weak) GLTFKHRLight * _Nullable light;
 @property (nonatomic, weak) GLTFNode * _Nullable parent;
 @property (nonatomic, copy) NSArray<GLTFNode *> *children;
 @property (nonatomic, weak) GLTFSkin * _Nullable skin;

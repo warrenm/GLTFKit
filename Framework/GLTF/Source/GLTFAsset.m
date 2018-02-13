@@ -24,6 +24,7 @@
 #import "GLTFCamera.h"
 #import "GLTFExtensionNames.h"
 #import "GLTFImage.h"
+#import "GLTFKHRLight.h"
 #import "GLTFMaterial.h"
 #import "GLTFMesh.h"
 #import "GLTFNode.h"
@@ -57,6 +58,7 @@
 @property (nonatomic, strong) GLTFTextureSampler *defaultSampler;
 @property (nonatomic, assign) BOOL usesPBRSpecularGlossiness;
 @property (nonatomic, assign) BOOL usesEXTPBRAttributes;
+@property (nonatomic, assign) BOOL usesKHRLights;
 @end
 
 @implementation GLTFAsset
@@ -120,6 +122,10 @@
     [self loadImages:rootObject[@"images"]];
     [self loadTextures:rootObject[@"textures"]];
     [self loadMaterials:rootObject[@"materials"]];
+    if (_usesKHRLights) {
+        NSArray *lightsProperties = rootObject[@"extensions"][@"KHR_lights"][@"lights"];
+        [self loadLights:lightsProperties];
+    }
     [self loadCameras:rootObject[@"cameras"]];
     [self loadSkins:rootObject[@"skins"]];
     [self loadMeshes:rootObject[@"meshes"]];
@@ -135,8 +141,10 @@
     for (NSString *extension in _extensionsUsed) {
         if ([extension isEqualToString:GLTFExtensionKHRMaterialsPBRSpecularGlossiness]) {
             _usesPBRSpecularGlossiness = YES;
-        } else if ([extension isEqualToString:GLTFExtensionPBRAttributes]) {
+        } else if ([extension isEqualToString:GLTFExtensionEXTPBRAttributes]) {
             _usesEXTPBRAttributes = YES;
+        } else if ([extension isEqualToString:GLTFExtensionKHRLights]) {
+            _usesKHRLights = YES;
         } else {
             NSLog(@"WARNING: Unsupported extension \"%@\" used", extension);
         }
@@ -479,70 +487,46 @@
     
     NSMutableArray *lights = [NSMutableArray arrayWithCapacity:lightsMap.count];
     [lightsMap enumerateObjectsUsingBlock:^(NSDictionary *properties, NSUInteger index, BOOL *stop) {
-//        GLTFKHRLight *light = [[GLTFKHRLight alloc] initWithIdentifier:identifier];
-//        NSString *lightTypeName = properties[@"type"];
-//        if ([lightTypeName isEqualToString:@"ambient"]) {
-//            light.type = GLTFKHRLightTypeAmbient;
-//        } else if ([lightTypeName isEqualToString:@"directional"]) {
-//            light.type = GLTFKHRLightTypeDirectional;
-//        } else if ([lightTypeName isEqualToString:@"point"]) {
-//            light.type = GLTFKHRLightTypePoint;
-//        } else if ([lightTypeName isEqualToString:@"spot"]) {
-//            light.type = GLTFKHRLightTypeSpot;
-//        }
-//        
-//        if ([lightTypeName length] > 0) {
-//            NSDictionary *lightProperties = properties[lightTypeName];
-//            
-//            NSArray *colorArray = lightProperties[@"color"];
-//            switch ([colorArray count]) {
-//                case 3: // This is out of spec, but it happens in the wild, so be graceful.
-//                    light.color = GLTFVectorFloat4FromArray([colorArray arrayByAddingObject:@(1)]);
-//                    break;
-//                case 4:
-//                    light.color = GLTFVectorFloat4FromArray(colorArray);
-//                    break;
-//            }
-//
-//            if (light.type == GLTFKHRLightTypeDirectional || light.type == GLTFKHRLightTypeSpot) {
-//                NSArray *directionArray = lightProperties[@"direction"];
-//                if ([directionArray count] == 4) {
-//                    light.direction = GLTFVectorFloat4FromArray(directionArray);
-//                }
-//            }
-//
-//            if (light.type == GLTFKHRLightTypePoint || light.type == GLTFKHRLightTypeSpot) {
-//                NSNumber *distanceValue = lightProperties[@"distance"];
-//                if (distanceValue) {
-//                    light.distance = [distanceValue floatValue];
-//                }
-//                NSNumber *constantAttenuationValue = lightProperties[@"constantAttenuation"];
-//                if (constantAttenuationValue) {
-//                    light.constantAttenuation = [constantAttenuationValue floatValue];
-//                }
-//                NSNumber *linearAttenuationValue = lightProperties[@"linearAttenuation"];
-//                if (linearAttenuationValue) {
-//                    light.linearAttenuation = [linearAttenuationValue floatValue];
-//                }
-//                NSNumber *quadraticAttenuationValue = lightProperties[@"quadraticAttenuation"];
-//                if (quadraticAttenuationValue) {
-//                    light.quadraticAttenuation = [quadraticAttenuationValue floatValue];
-//                }
-//            }
-//
-//            if (light.type == GLTFKHRLightTypeSpot) {
-//                NSNumber *falloffAngleValue = lightProperties[@"falloffAngle"];
-//                if (falloffAngleValue) {
-//                    light.falloffAngle = [falloffAngleValue floatValue];
-//                }
-//                NSNumber *falloffExponentValue = lightProperties[@"falloffExponent"];
-//                if (falloffExponentValue) {
-//                    light.falloffExponent = [falloffExponentValue floatValue];
-//                }
-//            }
-//        }
-//        
-//        lights[identifier] = light;
+        GLTFKHRLight *light = [GLTFKHRLight new];
+        NSString *lightTypeName = properties[@"type"];
+        if ([lightTypeName isEqualToString:@"ambient"]) {
+            light.type = GLTFKHRLightTypeAmbient;
+        } else if ([lightTypeName isEqualToString:@"directional"]) {
+            light.type = GLTFKHRLightTypeDirectional;
+        } else if ([lightTypeName isEqualToString:@"point"]) {
+            light.type = GLTFKHRLightTypePoint;
+        } else if ([lightTypeName isEqualToString:@"spot"]) {
+            light.type = GLTFKHRLightTypeSpot;
+        }
+        
+        NSArray *colorArray = properties[@"color"];
+        switch ([colorArray count]) {
+            case 3: // This is out of spec, but it happens in the wild, so be graceful.
+                light.color = GLTFVectorFloat4FromArray([colorArray arrayByAddingObject:@(1)]);
+                break;
+            case 4:
+                light.color = GLTFVectorFloat4FromArray(colorArray);
+                break;
+        }
+        
+        NSNumber *intensityValue = properties[@"intensity"];
+        if (intensityValue) {
+            light.intensity = [intensityValue floatValue];
+        }
+
+        if (light.type == GLTFKHRLightTypeSpot) {
+            NSDictionary *spotProperties = properties[@"spot"];
+            NSNumber *innerConeAngleValue = spotProperties[@"innerConeAngle"];
+            if (innerConeAngleValue) {
+                light.innerConeAngle = [innerConeAngleValue floatValue];
+            }
+            NSNumber *outerConeAngleValue = spotProperties[@"outerConeAngle"];
+            if (outerConeAngleValue) {
+                light.outerConeAngle = [outerConeAngleValue floatValue];
+            }
+        }
+        
+        [lights addObject:light];
     }];
     
     _lights = [lights copy];
@@ -889,6 +873,14 @@
         node.name = properties[@"name"];
         node.extensions = properties[@"extensions"];
         node.extras = properties[@"extras"];
+        
+        if (_usesKHRLights) {
+            NSDictionary *lightProperties = node.extensions[@"KHR_lights"];
+            NSNumber *lightIdentifierValue = lightProperties[@"light"];
+            if (lightIdentifierValue && lightIdentifierValue.integerValue < _lights.count) {
+                node.light = _lights[lightIdentifierValue.integerValue];
+            }
+        }
         
         [nodes addObject: node];
     }

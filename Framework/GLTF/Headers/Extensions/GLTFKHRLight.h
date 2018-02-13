@@ -29,20 +29,21 @@ typedef NS_ENUM(NSInteger, GLTFKHRLightType) {
 
 @property (nonatomic, assign) GLTFKHRLightType type;
 
+/// Color of light in a linear RGB color space
 @property (nonatomic, assign) simd_float4 color;
 
-@property (nonatomic, assign) simd_float4 direction;
+/// Brightness of light. Point and spot lights use luminous intensity in candela (lm/sr),
+/// while directional lights use illuminance in lux (lm/m^2).
+@property (nonatomic, assign) float intensity;
 
-/// Distance, in world units, over which the light affects objects in the scene.
-/// A value of zero indicates infinite distance.
-@property (nonatomic, assign) float distance;
+/// Angle, in radians, from the center of a spotlight to where falloff begins.
+/// Must be greater than or equal to 0, less than or equal to `outerConeAngle`,
+/// and less than pi / 2. Default value is 0.
+@property (nonatomic, assign) float innerConeAngle;
 
-// Attenuation properties only apply to point and spot lights
-@property (nonatomic, assign) float constantAttenuation;
-@property (nonatomic, assign) float linearAttenuation;
-@property (nonatomic, assign) float quadraticAttenuation;
-
-@property (nonatomic, assign) float falloffAngle;
-@property (nonatomic, assign) float falloffExponent;
+/// Angle, in radians, from the center of a spotlight to where falloff ends.
+/// Must be greater than or equal to 0, greater than or equal to `innerConeAngle`,
+/// and less than pi / 2. Default value is pi / 4.
+@property (nonatomic, assign) float outerConeAngle;
 
 @end

@@ -17,5 +17,5 @@
 @import Foundation;
 
 extern NSString *const GLTFExtensionKHRMaterialsPBRSpecularGlossiness;
-
-extern NSString *const GLTFExtensionPBRAttributes;
+extern NSString *const GLTFExtensionKHRLights;
+extern NSString *const GLTFExtensionEXTPBRAttributes;

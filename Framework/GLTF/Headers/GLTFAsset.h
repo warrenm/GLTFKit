@@ -22,6 +22,7 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @class GLTFScene, GLTFCamera, GLTFAnimation;
+@class GLTFKHRLight;
 @protocol GLTFBufferAllocator;
 
 @interface GLTFAsset : NSObject
@@ -30,6 +31,8 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, readonly) GLTFScene * _Nullable defaultScene;
 
 @property (nonatomic, readonly, copy) NSArray<GLTFAnimation *> *animations;
+
+@property (nonatomic, readonly, copy) NSArray<GLTFKHRLight *> *lights;
 
 @property (nonatomic, readonly, copy) NSArray<GLTFCamera *> *cameras;
 

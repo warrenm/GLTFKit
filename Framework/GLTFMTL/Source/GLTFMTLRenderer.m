@@ -28,9 +28,17 @@ typedef struct {
     simd_float4x4 modelViewProjectionMatrix;
 } VertexUniforms;
 
+
 typedef struct {
-    simd_float3 lightDirection;
-    simd_float3 lightColor;
+    simd_float4 positionDirection;
+    simd_float4 color;
+    float intensity;
+    float innerConeAngle;
+    float outerConeAngle;
+    float pad;
+} Light;
+
+typedef struct {
     float normalScale;
     simd_float3 emissiveFactor;
     float occlusionStrength;
@@ -38,6 +46,7 @@ typedef struct {
     simd_float4 baseColorFactor;
     simd_float3 camera;
     float alphaCutoff;
+    Light lights[GLTFMTLMaximumLightCount];
 } FragmentUniforms;
 
 @interface GLTFMTLRenderItem: NSObject
@@ -335,9 +344,7 @@ typedef struct {
             vertexUniforms.modelMatrix = modelMatrix;
             vertexUniforms.modelViewProjectionMatrix = matrix_multiply(matrix_multiply(self.projectionMatrix, self.viewMatrix), modelMatrix);
             
-            FragmentUniforms fragmentUniforms;
-            fragmentUniforms.lightDirection = (simd_float3){ 0, 0, -1 };
-            fragmentUniforms.lightColor = (simd_float3) { 1, 1, 1 };
+            FragmentUniforms fragmentUniforms = { 0 };
             fragmentUniforms.normalScale = material.normalTextureScale;
             fragmentUniforms.emissiveFactor = material.emissiveFactor;
             fragmentUniforms.occlusionStrength = material.occlusionStrength;
@@ -345,7 +352,10 @@ typedef struct {
             fragmentUniforms.baseColorFactor = material.baseColorFactor;
             fragmentUniforms.camera = cameraWorldPos;
             fragmentUniforms.alphaCutoff = material.alphaCutoff;
-            
+            fragmentUniforms.lights[0].positionDirection = (simd_float4){ 0, 0, -1, 0 };
+            fragmentUniforms.lights[0].color = (simd_float4){ 1, 1, 1, 1 };
+            fragmentUniforms.lights[0].intensity = 1;
+
             GLTFMTLRenderItem *item = [GLTFMTLRenderItem new];
             item.node = node;
             item.submesh = submesh;

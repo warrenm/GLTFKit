@@ -19,6 +19,8 @@
 @import Foundation;
 @import Metal;
 
+#define GLTFMTLMaximumLightCount 4
+
 NS_ASSUME_NONNULL_BEGIN
 
 @interface GLTFMTLLightingEnvironment : NSObject

@@ -138,6 +138,7 @@
     [shaderFeatures appendFormat:@"#define HAS_EMISSIVE_MAP %d\n", hasEmissiveMap];
     [shaderFeatures appendFormat:@"#define HAS_VERTEX_ROUGHNESS %d\n", hasVertexRoughness];
     [shaderFeatures appendFormat:@"#define HAS_VERTEX_METALLIC %d\n", hasVertexMetallic];
+    [shaderFeatures appendFormat:@"#define MAX_LIGHTS %d\n", GLTFMTLMaximumLightCount];
 
     [shaderFeatures appendFormat:@"#define baseColorTexCoord          texCoord%d\n", (int)submesh.material.baseColorTexCoord];
     [shaderFeatures appendFormat:@"#define normalTexCoord             texCoord%d\n", (int)submesh.material.normalTexCoord];

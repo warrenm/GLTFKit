@@ -17,11 +17,5 @@
 #import "GLTFExtensionNames.h"
 
 NSString *const GLTFExtensionKHRMaterialsPBRSpecularGlossiness = @"KHR_materials_pbrSpecularGlossiness";
-NSString *const GLTFExtensionKHRMaterialsCommon = @"KHR_materials_common";
-NSString *const GLTFExtensionKHRBinaryGLTF = @"KHR_binary_glTF";
 NSString *const GLTFExtensionKHRLights = @"KHR_lights";
-NSString *const GLTFExtensionKHRDracoMeshCompression = @"KHR_draco_mesh_compression";
-
-NSString *const GLTFExtensionCesiumRTC = @"CESIUM_RTC";
-
-NSString *const GLTFExtensionPBRAttributes = @"EXT_pbr_attributes";
+NSString *const GLTFExtensionEXTPBRAttributes = @"EXT_pbr_attributes";

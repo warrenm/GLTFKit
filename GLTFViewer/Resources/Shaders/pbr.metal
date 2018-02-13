@@ -45,6 +45,7 @@ constant int textureIndexBRDFLookup          = 7;
 #define HAS_METALLIC_ROUGHNESS_MAP 1
 #define HAS_OCCLUSION_MAP 1
 #define HAS_EMISSIVE_MAP 1
+#define MAX_LIGHTS 4
 
 #define baseColorTexCoord          texCoord0
 #define normalTexCoord             texCoord0
@@ -84,9 +85,16 @@ struct VertexUniforms {
     float4x4 modelViewProjectionMatrix;
 };
 
+struct Light {
+    float4 positionDirection;
+    float4 color;
+    float intensity;
+    float innerConeAngle;
+    float outerConeAngle;
+    float pad;
+};
+
 struct FragmentUniforms {
-    float3 lightDirection;
-    float3 lightColor;
     float normalScale;
     float3 emissiveFactor;
     float occlusionStrength;
@@ -94,6 +102,7 @@ struct FragmentUniforms {
     float4 baseColorFactor;
     float3 camera;
     float alphaCutoff;
+    Light lights[MAX_LIGHTS];
 };
 
 struct LightingParameters {
@@ -262,17 +271,6 @@ fragment float4 fragment_main(VertexOut in [[stage_in]],
         n = tbn[2].xyz;
     #endif
     
-    float3 v = normalize(uniforms.camera - in.worldPosition);
-    float3 l = normalize(uniforms.lightDirection);
-    float3 h = normalize(l + v);
-    float3 reflection = -normalize(reflect(v, n));
-
-    float NdotL = clamp(dot(n, l), 0.001, 1.0);
-    float NdotV = clamp(dot(n, v), 0.001, 1.0);
-    float NdotH = saturate(dot(n, h));
-    float LdotH = saturate(dot(l, h));
-    float VdotH = saturate(dot(v, h));
-    
     float perceptualRoughness = uniforms.metallicRoughnessValues.y;
     float metallic = uniforms.metallicRoughnessValues.x;
     
@@ -312,33 +310,49 @@ fragment float4 fragment_main(VertexOut in [[stage_in]],
     
     float3 color(0);
     
-    #if USE_PBR
-        float3 specularEnvironmentR0 = specularColor.rgb;
-    
-        float alphaRoughness = perceptualRoughness * perceptualRoughness;
-        
-        LightingParameters pbrInputs = {
-            .NdotL = NdotL,
-            .NdotV = NdotV,
-            .NdotH = NdotH,
-            .LdotH = LdotH,
-            .VdotH = VdotH,
-            .perceptualRoughness = perceptualRoughness,
-            .metalness = metallic,
-            .baseColor = diffuseColor,
-            .F0 = specularEnvironmentR0,
-            .alphaRoughness = alphaRoughness
-        };
-        
-        float3 F = FresnelReflectance(pbrInputs);
-        float G = SmithAttenuation(pbrInputs);
-        float D = TrowbridgeReitzNDF(pbrInputs);
-        
-        float3 diffuseContrib = (1.0 - F) * LambertDiffuse(pbrInputs);
+    float3 v = normalize(uniforms.camera - in.worldPosition);
+    float3 reflection = -normalize(reflect(v, n));
+    float NdotV = clamp(dot(n, v), 0.001, 1.0);
 
-        float3 specContrib = F * G * D / (4.0 * NdotL * NdotV);
-        
-        color = NdotL * uniforms.lightColor * (diffuseContrib + specContrib);
+    float3 specularEnvironmentR0 = specularColor.rgb;
+    
+    float alphaRoughness = perceptualRoughness * perceptualRoughness;
+
+    #if USE_PBR
+        for (int i = 0; i < MAX_LIGHTS; ++i) {
+            Light light = uniforms.lights[i];
+            
+            float3 l = normalize(light.positionDirection.xyz);
+            float3 h = normalize(l + v);
+
+            float NdotL = clamp(dot(n, l), 0.001, 1.0);
+            float NdotH = saturate(dot(n, h));
+            float LdotH = saturate(dot(l, h));
+            float VdotH = saturate(dot(v, h));
+
+            LightingParameters pbrInputs = {
+                .NdotL = NdotL,
+                .NdotV = NdotV,
+                .NdotH = NdotH,
+                .LdotH = LdotH,
+                .VdotH = VdotH,
+                .perceptualRoughness = perceptualRoughness,
+                .metalness = metallic,
+                .baseColor = diffuseColor,
+                .F0 = specularEnvironmentR0,
+                .alphaRoughness = alphaRoughness
+            };
+            
+            float3 F = FresnelReflectance(pbrInputs);
+            float G = SmithAttenuation(pbrInputs);
+            float D = TrowbridgeReitzNDF(pbrInputs);
+            
+            float3 diffuseContrib = NdotL * (1.0 - F) * LambertDiffuse(pbrInputs);
+
+            float3 specContrib = F * G * D / (4.0 * NdotL * NdotV);
+            
+            color += light.color.rgb * light.intensity * (diffuseContrib + specContrib);
+        }
     #endif
     
     #if USE_IBL

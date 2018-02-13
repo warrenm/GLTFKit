@@ -202,10 +202,8 @@ Below is a checklist of glTF features and their current level of support.
 #### Extensions
 - [ ] KHR_materials_pbrSpecularGlossiness
 - [ ] KHR_materials_common
-- [ ] KHR_technique_webgl (_No support planned_)
-- [ ] KHR_binary_glTF
-- [ ] CESIUM_RTC
-- [ ] WEB3D_quantized_attributes
+- [ ] KHR_lights
+- [x] EXT_pbr_attributes
 
 ### Conformance
 
