@@ -344,7 +344,10 @@ fragment float4 fragment_main(VertexOut in [[stage_in]],
                 specContrib = NdotL * D * F * G / (4.0 * NdotL * NdotV);
             }
 
-            float atten = (light.position.w == 0) ? 1 : (1 / max(powr(length(light.position.xyz - in.worldPosition), 2), 0.0001));
+            float atten = (light.position.w == 0) ? 1 : (1 / (1 + powr(length(light.position.xyz - in.worldPosition), 2)));
+
+            float relativeSpotAngle = acos(dot(-L, light.spotDirection.xyz));
+            atten *= (relativeSpotAngle <= light.outerConeAngle);
 
             color += light.color.rgb * light.intensity * atten * (diffuseContrib + specContrib);
         }

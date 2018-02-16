@@ -389,8 +389,13 @@ typedef struct {
                 }
                 fragmentUniforms.lights[lightIndex].color = light.color;
                 fragmentUniforms.lights[lightIndex].intensity = light.intensity;
-                fragmentUniforms.lights[lightIndex].innerConeAngle = light.innerConeAngle;
-                fragmentUniforms.lights[lightIndex].outerConeAngle = light.outerConeAngle;
+                if (light.type == GLTFKHRLightTypeSpot) {
+                    fragmentUniforms.lights[lightIndex].innerConeAngle = light.innerConeAngle;
+                    fragmentUniforms.lights[lightIndex].outerConeAngle = light.outerConeAngle;
+                } else {
+                    fragmentUniforms.lights[lightIndex].innerConeAngle = 0;
+                    fragmentUniforms.lights[lightIndex].outerConeAngle = M_PI;
+                }
                 fragmentUniforms.lights[lightIndex].spotDirection = lightNode.globalTransform.columns[2];
             }
 
