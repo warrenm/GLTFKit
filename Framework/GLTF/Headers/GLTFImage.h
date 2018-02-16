@@ -20,6 +20,8 @@
 @import Foundation;
 @import CoreGraphics;
 
+typedef __attribute__((NSObject)) CGImageRef GLTFStrongCGImageRef;
+
 NS_ASSUME_NONNULL_BEGIN
 
 @interface GLTFImage : GLTFObject
@@ -38,7 +40,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, copy) NSURL * _Nullable url;
 
 /// An image, if the URI was a decodable data-uri; otherwise nil
-@property (nonatomic, assign) CGImageRef _Nullable cgImage;
+@property (nonatomic, strong) GLTFStrongCGImageRef _Nullable cgImage;
 
 @end
 

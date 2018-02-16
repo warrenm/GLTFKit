@@ -15,6 +15,7 @@
 		837EEE461FA2B0C0004BA504 /* GLTFDefaultBufferAllocator.h in Headers */ = {isa = PBXBuildFile; fileRef = 837EEE441FA2B0C0004BA504 /* GLTFDefaultBufferAllocator.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		837EEE471FA2B0C0004BA504 /* GLTFVertexDescriptor.h in Headers */ = {isa = PBXBuildFile; fileRef = 837EEE451FA2B0C0004BA504 /* GLTFVertexDescriptor.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		837EEE491FA2B0DE004BA504 /* GLTFSkin.m in Sources */ = {isa = PBXBuildFile; fileRef = 837EEE481FA2B0DE004BA504 /* GLTFSkin.m */; };
+		8382500C2034E1A200D9811A /* GLTFKHRLight.h in Headers */ = {isa = PBXBuildFile; fileRef = 833192A32025916600B6C7E9 /* GLTFKHRLight.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		83C900931F981AEE003893A9 /* GLTFNodeVisitor.h in Headers */ = {isa = PBXBuildFile; fileRef = 83C900921F981AEE003893A9 /* GLTFNodeVisitor.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		83D6003B1F48C2FF00F71E0C /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 83D6003A1F48C2FF00F71E0C /* Accelerate.framework */; };
 		83D600B91F4A195400F71E0C /* GLTFBufferAllocator.h in Headers */ = {isa = PBXBuildFile; fileRef = 83D600B81F4A195400F71E0C /* GLTFBufferAllocator.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -238,6 +239,7 @@
 				83D6FF841F48BBFA00F71E0C /* GLTFCamera.h in Headers */,
 				83D6FF851F48BBFA00F71E0C /* GLTFEnums.h in Headers */,
 				83D6FF861F48BBFA00F71E0C /* GLTFImage.h in Headers */,
+				8382500C2034E1A200D9811A /* GLTFKHRLight.h in Headers */,
 				83D6FF871F48BBFA00F71E0C /* GLTFMaterial.h in Headers */,
 				83D6FF881F48BBFA00F71E0C /* GLTFMesh.h in Headers */,
 				83D6FF891F48BBFA00F71E0C /* GLTFNode.h in Headers */,

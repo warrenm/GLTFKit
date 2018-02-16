@@ -47,7 +47,7 @@ constant int textureIndexBRDFLookup          = 7;
 #define HAS_OCCLUSION_MAP 1
 #define HAS_EMISSIVE_MAP 1
 #define SPECULAR_ENV_MIP_LEVELS 6
-#define MAX_LIGHTS 4
+#define MAX_LIGHTS 3
 
 #define baseColorTexCoord          texCoord0
 #define normalTexCoord             texCoord0
@@ -93,12 +93,13 @@ struct VertexUniforms {
 };
 
 struct Light {
-    float4 positionDirection;
+    float4 position;
     float4 color;
     float intensity;
     float innerConeAngle;
     float outerConeAngle;
     float pad;
+    float4 spotDirection;
 };
 
 struct FragmentUniforms {
@@ -110,20 +111,8 @@ struct FragmentUniforms {
     float3 camera;
     float alphaCutoff;
     float envIntensity;
+    Light ambientLight;
     Light lights[MAX_LIGHTS];
-};
-
-struct LightingParameters {
-    float NdotL;
-    float NdotV;
-    float NdotH;
-    float LdotH;
-    float VdotH;
-    float perceptualRoughness;
-    float metalness;
-    float3 baseColor;
-    float3 F0;
-    float alphaRoughness;
 };
 
 vertex VertexOut vertex_main(VertexIn in [[stage_in]],
@@ -203,32 +192,28 @@ vertex VertexOut vertex_main(VertexIn in [[stage_in]],
     return out;
 }
 
-static float3 LambertDiffuse(LightingParameters pbrInputs)
+static float3 LambertDiffuse(float3 baseColor)
 {
-    return pbrInputs.baseColor / M_PI_F;
+    return baseColor / M_PI_F;
 }
 
-static float3 FresnelReflectance(LightingParameters pbrInputs)
+static float3 SchlickFresnel(float3 F0, float LdotH)
 {
-    return pbrInputs.F0 + (1 - pbrInputs.F0) * pow(saturate(1.0 - pbrInputs.VdotH), 5.0);
+    return F0 + (1 - F0) * pow(1.0 - LdotH, 5.0);
 }
 
-static float SmithG1(float NdotV, float r)
+static float SmithGeometric(float NdotL, float NdotV, float roughness)
 {
-    float k = pow(r + 1, 2) * 0.125;
-    float g = NdotV / ((NdotV * (1 - k)) + k);
-    return g;
+    float k = roughness * 0.5;
+    float Gl = NdotL / ((NdotL * (1 - k)) + k);
+    float Gv = NdotV / ((NdotV * (1 - k)) + k);
+    return Gl * Gv;
 }
 
-static float SmithAttenuation(LightingParameters pbrInputs)
+static float TrowbridgeReitzNDF(float NdotH, float roughness)
 {
-    return SmithG1(pbrInputs.NdotL, pbrInputs.alphaRoughness) * SmithG1(pbrInputs.NdotV, pbrInputs.alphaRoughness);
-}
-
-static float TrowbridgeReitzNDF(LightingParameters pbrInputs)
-{
-    float roughnessSq = pbrInputs.alphaRoughness * pbrInputs.alphaRoughness;
-    float f = (pbrInputs.NdotH * roughnessSq - pbrInputs.NdotH) * pbrInputs.NdotH + 1.0;
+    float roughnessSq = roughness * roughness;
+    float f = NdotH * (NdotH * roughnessSq - NdotH) + 1;
     return roughnessSq / (M_PI_F * f * f);
 }
 
@@ -281,12 +266,12 @@ fragment float4 fragment_main(VertexOut in [[stage_in]],
         tbn = float3x3(in.tangent, in.bitangent, in.normal);
     #endif
     
-    float3 n(0);
+    float3 N(0, 0, 1);
     #if HAS_NORMAL_MAP
-        n = normalTexture.sample(normalSampler, in.normalTexCoord).rgb;
-        n = normalize(tbn * ((2 * n - 1) * float3(uniforms.normalScale, uniforms.normalScale, 1)));
+        N = normalTexture.sample(normalSampler, in.normalTexCoord).rgb;
+        N = normalize(tbn * ((2 * N - 1) * float3(uniforms.normalScale, uniforms.normalScale, 1)));
     #else
-        n = tbn[2].xyz;
+        N = tbn[2].xyz;
     #endif
     
     float perceptualRoughness = uniforms.metallicRoughnessValues.y;
@@ -321,72 +306,64 @@ fragment float4 fragment_main(VertexOut in [[stage_in]],
     #endif
     
     float3 f0 = float3(0.04);
-
     float3 diffuseColor = mix(baseColor.rgb * (1 - f0), float3(0), metallic);
-
     float3 specularColor = mix(f0, baseColor.rgb, metallic);
-    
-    float3 color(0);
-    
-    float3 v = normalize(uniforms.camera - in.worldPosition);
-    float3 reflection = -normalize(reflect(v, n));
-    float NdotV = clamp(dot(n, v), 0.001, 1.0);
 
-    float3 specularEnvironmentR0 = specularColor.rgb;
-    
+    float3 F0 = specularColor.rgb;
+
     float alphaRoughness = perceptualRoughness * perceptualRoughness;
 
+    float3 V = normalize(uniforms.camera - in.worldPosition);
+    float NdotV = saturate(dot(N, V));
+    
+    float3 reflection = -normalize(reflect(V, N));
+
+    float3 color(0);
+
     #if USE_PBR
+        color += uniforms.ambientLight.color.rgb * uniforms.ambientLight.intensity * diffuseColor;
+
         for (int i = 0; i < MAX_LIGHTS; ++i) {
             Light light = uniforms.lights[i];
             
-            float3 l = normalize(light.positionDirection.xyz);
-            float3 h = normalize(l + v);
+            float3 L = normalize((light.position.w == 0) ? -light.position.xyz : (light.position.xyz - in.worldPosition));
+            float3 H = normalize(L + V);
 
-            float NdotL = clamp(dot(n, l), 0.001, 1.0);
-            float NdotH = saturate(dot(n, h));
-            float LdotH = saturate(dot(l, h));
-            float VdotH = saturate(dot(v, h));
+            float NdotL = saturate(dot(N, L));
+            float NdotH = saturate(dot(N, H));
+            float VdotH = saturate(dot(V, H));
+            
+            float3 F = SchlickFresnel(F0, VdotH);
+            float G = SmithGeometric(NdotL, NdotV, alphaRoughness);
+            float D = TrowbridgeReitzNDF(NdotH, alphaRoughness);
+            
+            float3 diffuseContrib(0);
+            float3 specContrib(0);
+            if (NdotL > 0) {
+                diffuseContrib = NdotL * LambertDiffuse(diffuseColor);
+                specContrib = NdotL * D * F * G / (4.0 * NdotL * NdotV);
+            }
 
-            LightingParameters pbrInputs = {
-                .NdotL = NdotL,
-                .NdotV = NdotV,
-                .NdotH = NdotH,
-                .LdotH = LdotH,
-                .VdotH = VdotH,
-                .perceptualRoughness = perceptualRoughness,
-                .metalness = metallic,
-                .baseColor = diffuseColor,
-                .F0 = specularEnvironmentR0,
-                .alphaRoughness = alphaRoughness
-            };
-            
-            float3 F = FresnelReflectance(pbrInputs);
-            float G = SmithAttenuation(pbrInputs);
-            float D = TrowbridgeReitzNDF(pbrInputs);
-            
-            float3 diffuseContrib = NdotL * (1.0 - F) * LambertDiffuse(pbrInputs);
+            float atten = (light.position.w == 0) ? 1 : (1 / max(powr(length(light.position.xyz - in.worldPosition), 2), 0.0001));
 
-            float3 specContrib = F * G * D / (4.0 * NdotL * NdotV);
-            
-            color += light.color.rgb * light.intensity * (diffuseContrib + specContrib);
+            color += light.color.rgb * light.intensity * atten * (diffuseContrib + specContrib);
         }
     #endif
-    
+
     #if USE_IBL
-        constexpr sampler linearSampler(coord::normalized, filter::linear, mip_filter::linear, address::clamp_to_edge);
+        constexpr sampler cubeSampler(coord::normalized, filter::linear, mip_filter::linear);
     
         float mipCount = SPECULAR_ENV_MIP_LEVELS;
         float lod = perceptualRoughness * mipCount;
-        float2 brdf = brdfLUT.sample(linearSampler, float2(NdotV, perceptualRoughness)).xy;
-        float3 diffuseLight = diffuseEnvTexture.sample(linearSampler, n).rgb;
+        float2 brdf = brdfLUT.sample(cubeSampler, float2(NdotV, perceptualRoughness)).xy;
+        float3 diffuseLight = diffuseEnvTexture.sample(cubeSampler, N).rgb;
         diffuseLight *= uniforms.envIntensity;
     
         float3 specularLight;
         if (mipCount > 1) {
-            specularLight = specularEnvTexture.sample(linearSampler, reflection, level(lod)).rgb;
+            specularLight = specularEnvTexture.sample(cubeSampler, reflection, level(lod)).rgb;
         } else {
-            specularLight = specularEnvTexture.sample(linearSampler, reflection).rgb;
+            specularLight = specularEnvTexture.sample(cubeSampler, reflection).rgb;
         }
         specularLight *= uniforms.envIntensity;
     
@@ -404,8 +381,8 @@ fragment float4 fragment_main(VertexOut in [[stage_in]],
     #endif
     
     #if HAS_EMISSIVE_MAP
-        float3 emissive = emissiveTexture.sample(emissiveSampler, in.emissiveTexCoord).rgb * uniforms.emissiveFactor;
-        color += emissive;
+        float3 emissive = emissiveTexture.sample(emissiveSampler, in.emissiveTexCoord).rgb;
+        color += emissive * uniforms.emissiveFactor;
     #else
         color += uniforms.emissiveFactor;
     #endif

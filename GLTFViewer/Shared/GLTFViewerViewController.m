@@ -335,7 +335,9 @@
     }
     
     [commandBuffer addCompletedHandler:^(id<MTLCommandBuffer> buffer) {
-        [self.renderer signalFrameCompletion];
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self.renderer signalFrameCompletion];
+        });
     }];
     
     [commandBuffer commit];

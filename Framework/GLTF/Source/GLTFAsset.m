@@ -123,7 +123,8 @@
     [self loadTextures:rootObject[@"textures"]];
     [self loadMaterials:rootObject[@"materials"]];
     if (_usesKHRLights) {
-        NSArray *lightsProperties = rootObject[@"extensions"][@"KHR_lights"][@"lights"];
+        NSDictionary *extensionProperties = rootObject[@"extensions"][GLTFExtensionKHRLights];
+        NSArray *lightsProperties = extensionProperties[@"lights"];
         [self loadLights:lightsProperties];
     }
     [self loadCameras:rootObject[@"cameras"]];
@@ -278,6 +279,9 @@
             if ([uri hasPrefix:@"data:application/octet-stream;base64,"]) {
                 NSString *dataSubstring = [uri substringFromIndex:[@"data:application/octet-stream;base64," length]];
                 data = [[NSData alloc] initWithBase64EncodedString:dataSubstring options:0];
+            } else {
+                NSLog(@"WARNING: Encountered URL-encoded buffer that did not have the expected MIME type or encoding. Skipping...");
+                continue;
             }
         } else if (uri.length > 0) {
             NSURL *fileURL = [[_url URLByDeletingLastPathComponent] URLByAppendingPathComponent:uri];
@@ -286,6 +290,9 @@
             NSAssert(data != nil, @"Unable to load data at URL %@; error %@", fileURL, error);
         } else if (_chunks.count > 1) {
             data = _chunks[1].data;
+        } else {
+            NSLog(@"WARNING: Encountered buffer which was not URL-encoded, nor a file reference, nor a GLB chunk reference. Skipping...");
+            continue;
         }
         
         id<GLTFBuffer> buffer = [_bufferAllocator newBufferWithData:data];
@@ -370,7 +377,9 @@
         NSString *uri = properties[@"uri"];
         
         if ([uri hasPrefix:@"data:image/"]) {
-            image.cgImage = [GLTFImage newImageForDataURI:uri];
+            CGImageRef cgImage = [GLTFImage newImageForDataURI:uri];
+            image.cgImage = cgImage;
+            CGImageRelease(cgImage);
         } else if (uri.length > 0) {
             NSURL *resourceURL = [self.url URLByDeletingLastPathComponent];
             image.url = [resourceURL URLByAppendingPathComponent:uri];
@@ -510,18 +519,18 @@
         }
         
         NSNumber *intensityValue = properties[@"intensity"];
-        if (intensityValue) {
+        if (intensityValue != nil) {
             light.intensity = [intensityValue floatValue];
         }
 
         if (light.type == GLTFKHRLightTypeSpot) {
             NSDictionary *spotProperties = properties[@"spot"];
             NSNumber *innerConeAngleValue = spotProperties[@"innerConeAngle"];
-            if (innerConeAngleValue) {
+            if (innerConeAngleValue != nil) {
                 light.innerConeAngle = [innerConeAngleValue floatValue];
             }
             NSNumber *outerConeAngleValue = spotProperties[@"outerConeAngle"];
-            if (outerConeAngleValue) {
+            if (outerConeAngleValue != nil) {
                 light.outerConeAngle = [outerConeAngleValue floatValue];
             }
         }
@@ -875,7 +884,7 @@
         node.extras = properties[@"extras"];
         
         if (_usesKHRLights) {
-            NSDictionary *lightProperties = node.extensions[@"KHR_lights"];
+            NSDictionary *lightProperties = node.extensions[GLTFExtensionKHRLights];
             NSNumber *lightIdentifierValue = lightProperties[@"light"];
             if (lightIdentifierValue && lightIdentifierValue.integerValue < _lights.count) {
                 node.light = _lights[lightIdentifierValue.integerValue];
@@ -1052,6 +1061,14 @@
         scene.name = properties[@"name"];
         scene.extensions = properties[@"extensions"];
         scene.extras = properties[@"extras"];
+        
+        if (_usesKHRLights) {
+            NSDictionary *lightProperties = scene.extensions[GLTFExtensionKHRLights];
+            NSNumber *lightIdentifierValue = lightProperties[@"light"];
+            if (lightIdentifierValue != nil && lightIdentifierValue.integerValue < _lights.count) {
+                scene.ambientLight = _lights[lightIdentifierValue.integerValue];
+            }
+        }
 
         [scenes addObject:scene];
     }

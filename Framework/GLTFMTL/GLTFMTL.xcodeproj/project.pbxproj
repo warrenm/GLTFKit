@@ -91,9 +91,9 @@
 			children = (
 				83D6FFC71F48BDE700F71E0C /* GLTFMTLBufferAllocator.h */,
 				839945C91F641E9000642E68 /* GLTFMTLLightingEnvironment.h */,
+				83D6FFCA1F48BDE700F71E0C /* GLTFMTLRenderer.h */,
 				83D6FFC81F48BDE700F71E0C /* GLTFMTLShaderBuilder.h */,
 				83AF30CA1FC4DB4D00053BED /* GLTFMTLTextureLoader.h */,
-				83D6FFCA1F48BDE700F71E0C /* GLTFMTLRenderer.h */,
 				83D6FFC91F48BDE700F71E0C /* GLTFMTLUtilities.h */,
 			);
 			path = Headers;
@@ -104,10 +104,10 @@
 			children = (
 				83D6FFCC1F48BDE700F71E0C /* GLTFMTLBufferAllocator.m */,
 				839945CA1F641E9000642E68 /* GLTFMTLLightingEnvironment.m */,
+				83D6FFCF1F48BDE700F71E0C /* GLTFMTLRenderer.m */,
 				83D6FFCD1F48BDE700F71E0C /* GLTFMTLShaderBuilder.m */,
 				83AF30CB1FC4DB4D00053BED /* GLTFMTLTextureLoader.m */,
 				83D6FFCE1F48BDE700F71E0C /* GLTFMTLUtilities.m */,
-				83D6FFCF1F48BDE700F71E0C /* GLTFMTLRenderer.m */,
 			);
 			path = Source;
 			sourceTree = "<group>";

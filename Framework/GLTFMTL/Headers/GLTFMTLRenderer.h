@@ -20,7 +20,6 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-#define GLTFMTLRendererDynamicConstantsBufferSize (1024 * 1024)
 #define GLTFMTLRendererMaxInflightFrames 3
 
 @class GLTFMTLLightingEnvironment;

@@ -33,7 +33,7 @@
     NSParameterAssert(submesh.vertexDescriptor);
     
     NSError *error = nil;
-    NSString *shaderSource = [self shaderSourceForMaterial:submesh.material];
+    NSString *shaderSource = [self shaderSource];
     
     shaderSource = [self rewriteSource:shaderSource forSubmesh:submesh lightingEnvironment:lightingEnvironment];
     
@@ -90,7 +90,7 @@
     return pipeline;
 }
 
-- (NSString *)shaderSourceForMaterial:(GLTFMaterial *)material {
+- (NSString *)shaderSource {
     NSError *error = nil;
     NSURL *shaderURL = [[NSBundle mainBundle] URLForResource:@"pbr" withExtension:@"metal"];
     if (shaderURL == nil) {
@@ -117,7 +117,7 @@
     BOOL hasSkinningData = submesh.accessorsForAttributes[GLTFAttributeSemanticJoints0] != nil &&
                            submesh.accessorsForAttributes[GLTFAttributeSemanticWeights0] != nil;
     BOOL hasExtendedSkinning = submesh.accessorsForAttributes[GLTFAttributeSemanticJoints1] != nil &&
-                           submesh.accessorsForAttributes[GLTFAttributeSemanticWeights1] != nil;
+                               submesh.accessorsForAttributes[GLTFAttributeSemanticWeights1] != nil;
     BOOL hasVertexColor = submesh.accessorsForAttributes[GLTFAttributeSemanticColor0] != nil;
     BOOL hasVertexRoughness = submesh.accessorsForAttributes[GLTFAttributeSemanticRoughness] != nil;
     BOOL hasVertexMetallic = submesh.accessorsForAttributes[GLTFAttributeSemanticMetallic] != nil;
@@ -156,7 +156,7 @@
     NSMutableArray *attribs = [NSMutableArray array];
     int i = 0;
     for (GLTFVertexAttribute *attribute in submesh.vertexDescriptor.attributes) {
-        if (attribute.componentType == 0) { continue; }
+        if (attribute.componentType == GLTFBaseTypeUnknown) { continue; }
         if ([attribute.semantic isEqualToString:GLTFAttributeSemanticPosition]) {
             [attribs addObject:[NSString stringWithFormat:@"    %@ position  [[attribute(%d)]];", GLTFMTLTypeNameForType(attribute.componentType, attribute.dimension, false), i]];
         } else if ([attribute.semantic isEqualToString:GLTFAttributeSemanticNormal]) {

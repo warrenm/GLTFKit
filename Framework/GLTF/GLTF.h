@@ -40,6 +40,7 @@ FOUNDATION_EXPORT const unsigned char GLTFVersionString[];
 #import <GLTF/GLTFEnums.h>
 #import <GLTF/GLTFExtensionNames.h>
 #import <GLTF/GLTFImage.h>
+#import <GLTF/GLTFKHRLight.h>
 #import <GLTF/GLTFMaterial.h>
 #import <GLTF/GLTFMesh.h>
 #import <GLTF/GLTFNode.h>

@@ -28,14 +28,14 @@ typedef struct {
     simd_float4x4 modelViewProjectionMatrix;
 } VertexUniforms;
 
-
 typedef struct {
-    simd_float4 positionDirection;
+    simd_float4 position;
     simd_float4 color;
     float intensity;
     float innerConeAngle;
     float outerConeAngle;
     float pad;
+    simd_float4 spotDirection;
 } Light;
 
 typedef struct {
@@ -47,6 +47,7 @@ typedef struct {
     simd_float3 camera;
     float alphaCutoff;
     float envIntensity;
+    Light ambientLight;
     Light lights[GLTFMTLMaximumLightCount];
 } FragmentUniforms;
 
@@ -78,6 +79,8 @@ typedef struct {
 
 @property (nonatomic, strong) NSMutableArray<GLTFMTLRenderItem *> *opaqueRenderItems;
 @property (nonatomic, strong) NSMutableArray<GLTFMTLRenderItem *> *transparentRenderItems;
+@property (nonatomic, strong) NSMutableArray<GLTFNode *> *currentLightNodes;
+@property (nonatomic, weak) GLTFKHRLight *ambientLight;
 
 @end
 
@@ -90,7 +93,7 @@ typedef struct {
         _commandQueue = [_device newCommandQueue];
         
         _viewMatrix = matrix_identity_float4x4;
-        _projectionMatrix = GLTFPerspectiveProjectionMatrixAspectFovRH(M_PI / 4, self.drawableSize.width / self.drawableSize.height, 0.1, 100);
+        _projectionMatrix = matrix_identity_float4x4;
 
         _drawableSize = CGSizeMake(1, 1);
         _colorPixelFormat = MTLPixelFormatBGRA8Unorm;
@@ -109,6 +112,7 @@ typedef struct {
         
         _opaqueRenderItems = [NSMutableArray array];
         _transparentRenderItems = [NSMutableArray array];
+        _currentLightNodes = [NSMutableArray array];
     }
     
     return self;
@@ -254,7 +258,10 @@ typedef struct {
         [self signalFrameCompletion];
     }
     
+    self.ambientLight = scene.ambientLight;
+
     for (GLTFNode *rootNode in scene.nodes) {
+        [self buildLightListRecursive:rootNode];
         [self buildRenderListRecursive:rootNode modelMatrix:matrix_identity_float4x4];
     }
     
@@ -265,6 +272,7 @@ typedef struct {
     
     [self.opaqueRenderItems removeAllObjects];
     [self.transparentRenderItems removeAllObjects];
+    [self.currentLightNodes removeAllObjects];
 }
 
 - (void)bindTexturesForMaterial:(GLTFMaterial *)material commandEncoder:(id<MTLRenderCommandEncoder>)renderEncoder {
@@ -327,11 +335,21 @@ typedef struct {
     }
 }
 
+- (void)buildLightListRecursive:(GLTFNode *)node {
+    if (node.light != nil) {
+        [self.currentLightNodes addObject:node];
+    }
+
+    for (GLTFNode *childNode in node.children) {
+        [self buildLightListRecursive:childNode];
+    }
+}
+
 - (void)buildRenderListRecursive:(GLTFNode *)node
                      modelMatrix:(simd_float4x4)modelMatrix
 {
     modelMatrix = matrix_multiply(modelMatrix, node.localTransform);
-    
+
     GLTFMesh *mesh = node.mesh;
     if (mesh) {
         for (GLTFSubmesh *submesh in mesh.submeshes) {
@@ -354,9 +372,27 @@ typedef struct {
             fragmentUniforms.camera = cameraWorldPos;
             fragmentUniforms.alphaCutoff = material.alphaCutoff;
             fragmentUniforms.envIntensity = self.lightingEnvironment.intensity;
-            fragmentUniforms.lights[0].positionDirection = (simd_float4){ 0, 0, -1, 0 };
-            fragmentUniforms.lights[0].color = (simd_float4){ 1, 1, 1, 1 };
-            fragmentUniforms.lights[0].intensity = 1;
+            
+            if (self.ambientLight != nil) {
+                fragmentUniforms.ambientLight.color = self.ambientLight.color;
+                fragmentUniforms.ambientLight.intensity = self.ambientLight.intensity;
+            }
+
+            // TODO: Make this more efficient. Iterating the light list for every submesh is pretty silly.
+            for (int lightIndex = 0; lightIndex < self.currentLightNodes.count; ++lightIndex) {
+                GLTFNode *lightNode = self.currentLightNodes[lightIndex];
+                GLTFKHRLight *light = lightNode.light;
+                if (light.type == GLTFKHRLightTypeDirectional) {
+                    fragmentUniforms.lights[lightIndex].position = lightNode.globalTransform.columns[2];
+                } else {
+                    fragmentUniforms.lights[lightIndex].position = lightNode.globalTransform.columns[3];
+                }
+                fragmentUniforms.lights[lightIndex].color = light.color;
+                fragmentUniforms.lights[lightIndex].intensity = light.intensity;
+                fragmentUniforms.lights[lightIndex].innerConeAngle = light.innerConeAngle;
+                fragmentUniforms.lights[lightIndex].outerConeAngle = light.outerConeAngle;
+                fragmentUniforms.lights[lightIndex].spotDirection = lightNode.globalTransform.columns[2];
+            }
 
             GLTFMTLRenderItem *item = [GLTFMTLRenderItem new];
             item.node = node;

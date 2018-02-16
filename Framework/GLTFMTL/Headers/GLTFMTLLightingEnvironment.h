@@ -19,7 +19,7 @@
 @import Foundation;
 @import Metal;
 
-#define GLTFMTLMaximumLightCount 4
+#define GLTFMTLMaximumLightCount 3
 
 NS_ASSUME_NONNULL_BEGIN
 

@@ -21,9 +21,11 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @class GLTFNode;
+@class GLTFKHRLight;
 
 @interface GLTFScene : GLTFObject <GLTFNodeVisitable>
 @property (nonatomic, copy) NSArray<GLTFNode *> *nodes;
+@property (nonatomic, weak) GLTFKHRLight *ambientLight;
 @property (nonatomic, readonly, assign) GLTFBoundingBox approximateBounds;
 @end
 
