@@ -168,7 +168,7 @@ Below is a checklist of glTF features and their current level of support.
 	- [x] Opaque alpha mode
 	- [x] Mask alpha mode
 	- [ ] Blend alpha mode
-- [ ] Double-sided material
+- [x] Double-sided materials
 
 #### Samplers
 - [x] Wrap mode
@@ -202,7 +202,7 @@ Below is a checklist of glTF features and their current level of support.
 #### Extensions
 - [ ] KHR_materials_pbrSpecularGlossiness
 - [ ] KHR_materials_common
-- [ ] KHR_lights
+- [x] KHR_lights
 - [x] EXT_pbr_attributes
 
 ### Conformance
