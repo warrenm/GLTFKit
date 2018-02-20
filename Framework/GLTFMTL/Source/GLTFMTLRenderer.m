@@ -262,6 +262,9 @@ typedef struct {
 
     for (GLTFNode *rootNode in scene.nodes) {
         [self buildLightListRecursive:rootNode];
+    }
+    
+    for (GLTFNode *rootNode in scene.nodes) {
         [self buildRenderListRecursive:rootNode modelMatrix:matrix_identity_float4x4];
     }
     

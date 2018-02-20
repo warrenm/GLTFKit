@@ -101,19 +101,22 @@
 
 - (NSString *)rewriteSource:(NSString *)source
                  forSubmesh:(GLTFSubmesh *)submesh
-        lightingEnvironment:(GLTFMTLLightingEnvironment *)lightingEnvironment {
+        lightingEnvironment:(GLTFMTLLightingEnvironment *)lightingEnvironment
+{
+    GLTFMaterial *material = submesh.material;
     
     BOOL usePBR = YES;
     BOOL useIBL = lightingEnvironment != nil;
+    BOOL useDoubleSided = material.isDoubleSided;
     BOOL hasTexCoord0 = submesh.accessorsForAttributes[GLTFAttributeSemanticTexCoord0] != nil;
     BOOL hasTexCoord1 = submesh.accessorsForAttributes[GLTFAttributeSemanticTexCoord1] != nil;
     BOOL hasNormals = submesh.accessorsForAttributes[GLTFAttributeSemanticNormal] != nil;
     BOOL hasTangents = submesh.accessorsForAttributes[GLTFAttributeSemanticTangent] != nil;
-    BOOL hasBaseColorMap = submesh.material.baseColorTexture != nil;
-    BOOL hasOcclusionMap = submesh.material.occlusionTexture != nil;
-    BOOL hasEmissiveMap = submesh.material.emissiveTexture != nil;
-    BOOL hasNormalMap = submesh.material.normalTexture != nil;
-    BOOL hasMetallicRoughnessMap = submesh.material.metallicRoughnessTexture != nil;
+    BOOL hasBaseColorMap = material.baseColorTexture != nil;
+    BOOL hasOcclusionMap = material.occlusionTexture != nil;
+    BOOL hasEmissiveMap = material.emissiveTexture != nil;
+    BOOL hasNormalMap = material.normalTexture != nil;
+    BOOL hasMetallicRoughnessMap = material.metallicRoughnessTexture != nil;
     BOOL hasSkinningData = submesh.accessorsForAttributes[GLTFAttributeSemanticJoints0] != nil &&
                            submesh.accessorsForAttributes[GLTFAttributeSemanticWeights0] != nil;
     BOOL hasExtendedSkinning = submesh.accessorsForAttributes[GLTFAttributeSemanticJoints1] != nil &&
@@ -121,14 +124,15 @@
     BOOL hasVertexColor = submesh.accessorsForAttributes[GLTFAttributeSemanticColor0] != nil;
     BOOL hasVertexRoughness = submesh.accessorsForAttributes[GLTFAttributeSemanticRoughness] != nil;
     BOOL hasVertexMetallic = submesh.accessorsForAttributes[GLTFAttributeSemanticMetallic] != nil;
-    BOOL useAlphaTest = submesh.material.alphaMode == GLTFAlphaModeMask;
+    BOOL useAlphaTest = material.alphaMode == GLTFAlphaModeMask;
 
     NSMutableString *shaderFeatures = [NSMutableString string];
     [shaderFeatures appendFormat:@"#define USE_PBR %d\n", usePBR];
-    [shaderFeatures appendFormat:@"#define USE_IBL %d\n", useIBL];
+    [shaderFeatures appendFormat:@"#define USE_IBL %d\n", useIBL && NO];
     [shaderFeatures appendFormat:@"#define USE_ALPHA_TEST %d\n", useAlphaTest];
     [shaderFeatures appendFormat:@"#define USE_VERTEX_SKINNING %d\n", hasSkinningData];
     [shaderFeatures appendFormat:@"#define USE_EXTENDED_VERTEX_SKINNING %d\n", hasExtendedSkinning];
+    [shaderFeatures appendFormat:@"#define USE_DOUBLE_SIDED_MATERIAL %d\n", useDoubleSided];
     [shaderFeatures appendFormat:@"#define HAS_TEXCOORD_0 %d\n", hasTexCoord0];
     [shaderFeatures appendFormat:@"#define HAS_TEXCOORD_1 %d\n", hasTexCoord1];
     [shaderFeatures appendFormat:@"#define HAS_NORMALS %d\n", hasNormals];
@@ -144,11 +148,11 @@
     [shaderFeatures appendFormat:@"#define SPECULAR_ENV_MIP_LEVELS %d\n", lightingEnvironment.specularMipLevelCount];
     [shaderFeatures appendFormat:@"#define MAX_LIGHTS %d\n\n", GLTFMTLMaximumLightCount];
 
-    [shaderFeatures appendFormat:@"#define baseColorTexCoord          texCoord%d\n", (int)submesh.material.baseColorTexCoord];
-    [shaderFeatures appendFormat:@"#define normalTexCoord             texCoord%d\n", (int)submesh.material.normalTexCoord];
-    [shaderFeatures appendFormat:@"#define metallicRoughnessTexCoord  texCoord%d\n", (int)submesh.material.metallicRoughnessTexCoord];
-    [shaderFeatures appendFormat:@"#define emissiveTexCoord           texCoord%d\n", (int)submesh.material.emissiveTexCoord];
-    [shaderFeatures appendFormat:@"#define occlusionTexCoord          texCoord%d\n\n", (int)submesh.material.occlusionTexCoord];
+    [shaderFeatures appendFormat:@"#define baseColorTexCoord          texCoord%d\n", (int)material.baseColorTexCoord];
+    [shaderFeatures appendFormat:@"#define normalTexCoord             texCoord%d\n", (int)material.normalTexCoord];
+    [shaderFeatures appendFormat:@"#define metallicRoughnessTexCoord  texCoord%d\n", (int)material.metallicRoughnessTexCoord];
+    [shaderFeatures appendFormat:@"#define emissiveTexCoord           texCoord%d\n", (int)material.emissiveTexCoord];
+    [shaderFeatures appendFormat:@"#define occlusionTexCoord          texCoord%d\n\n", (int)material.occlusionTexCoord];
 
     NSString *preamble = @"struct VertexIn {\n";
     NSString *epilogue = @"\n};";

@@ -34,6 +34,7 @@ constant int textureIndexBRDFLookup          = 7;
 #define USE_ALPHA_TEST 0
 #define USE_VERTEX_SKINNING 1
 #define USE_EXTENDED_VERTEX_SKINNING 1
+#define USE_DOUBLE_SIDED_MATERIAL 1
 #define HAS_TEXCOORD_0 1
 #define HAS_TEXCOORD_1 1
 #define HAS_VERTEX_COLOR 1
@@ -243,7 +244,8 @@ fragment float4 fragment_main(VertexOut in [[stage_in]],
                               texturecube<float, access::sample> specularEnvTexture [[texture(textureIndexSpecularEnvironment)]],
                               texture2d<float, access::sample> brdfLUT [[texture(textureIndexBRDFLookup)]],
 #endif
-                              constant FragmentUniforms &uniforms [[buffer(0)]])
+                              constant FragmentUniforms &uniforms [[buffer(0)]],
+                              bool frontFacing [[front_facing]])
 {
     float3x3 tbn;
     #if !HAS_TANGENTS
@@ -272,6 +274,10 @@ fragment float4 fragment_main(VertexOut in [[stage_in]],
         N = normalize(tbn * ((2 * N - 1) * float3(uniforms.normalScale, uniforms.normalScale, 1)));
     #else
         N = tbn[2].xyz;
+    #endif
+    
+    #if USE_DOUBLE_SIDED_MATERIAL
+        N *= frontFacing ? 1 : -1;
     #endif
     
     float perceptualRoughness = uniforms.metallicRoughnessValues.y;
@@ -346,8 +352,10 @@ fragment float4 fragment_main(VertexOut in [[stage_in]],
 
             float atten = (light.position.w == 0) ? 1 : (1 / (1 + powr(length(light.position.xyz - in.worldPosition), 2)));
 
-            float relativeSpotAngle = acos(dot(-L, light.spotDirection.xyz));
-            atten *= (relativeSpotAngle <= light.outerConeAngle);
+            float relativeSpotAngle = acos(dot(-L, normalize(light.spotDirection.xyz)));
+            float spotAttenParam = 1 - clamp((relativeSpotAngle - light.innerConeAngle) / max(0.001, light.outerConeAngle - light.innerConeAngle), 0.0, 1.0);
+            float spotAtten = spotAttenParam * spotAttenParam * (3 - 2 * spotAttenParam);
+            atten *= spotAtten;
 
             color += light.color.rgb * light.intensity * atten * (diffuseContrib + specContrib);
         }
