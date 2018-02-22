@@ -71,8 +71,6 @@ typedef struct {
 
 @property (nonatomic, strong) dispatch_semaphore_t frameBoundarySemaphore;
 
-@property (nonatomic, strong) NSMutableArray *constantsBuffers;
-
 @property (nonatomic, strong) NSMutableDictionary<NSUUID *, id<MTLRenderPipelineState>> *pipelineStatesForSubmeshes;
 @property (nonatomic, strong) NSMutableDictionary<NSNumber *, id<MTLDepthStencilState>> *depthStencilStateMap;
 @property (nonatomic, strong) NSMutableDictionary<NSUUID *, id<MTLTexture>> *texturesForImageIdentifiers;
@@ -81,6 +79,9 @@ typedef struct {
 @property (nonatomic, strong) NSMutableArray<GLTFMTLRenderItem *> *opaqueRenderItems;
 @property (nonatomic, strong) NSMutableArray<GLTFMTLRenderItem *> *transparentRenderItems;
 @property (nonatomic, strong) NSMutableArray<GLTFNode *> *currentLightNodes;
+@property (nonatomic, strong) NSMutableArray<id<MTLBuffer>> *deferredReusableBuffers;
+@property (nonatomic, strong) NSMutableArray<id<MTLBuffer>> *bufferPool;
+
 @property (nonatomic, weak) GLTFKHRLight *ambientLight;
 
 @end
@@ -101,8 +102,6 @@ typedef struct {
         _depthStencilPixelFormat = MTLPixelFormatDepth32Float_Stencil8;
 
         _textureLoader = [[GLTFMTLTextureLoader alloc] initWithDevice:_device];
-        
-        _constantsBuffers = [NSMutableArray array];
 
         _frameBoundarySemaphore = dispatch_semaphore_create(GLTFMTLRendererMaxInflightFrames);
         
@@ -114,14 +113,39 @@ typedef struct {
         _opaqueRenderItems = [NSMutableArray array];
         _transparentRenderItems = [NSMutableArray array];
         _currentLightNodes = [NSMutableArray array];
+        _deferredReusableBuffers = [NSMutableArray array];
+        _bufferPool = [NSMutableArray array];
     }
     
     return self;
 }
 
+- (void)dealloc {
+    // This is gross. It's necessary because we may have pending frame completions that
+    // we don't actually care about, but which are waiting, and would thus cause a crash
+    // if we don't artificially spin the semaphore down to zero before it's released.
+    while (dispatch_semaphore_signal(_frameBoundarySemaphore) != 0) { }
+}
+
+- (void)enqueueReusableBuffer:(id<MTLBuffer>)buffer {
+    [self.bufferPool addObject:buffer];
+}
+
 - (id<MTLBuffer>)dequeueReusableBufferOfLength:(size_t)length {
-    id <MTLBuffer> buffer = [self.device newBufferWithLength:length options:MTLResourceStorageModeShared];
-    return buffer;
+    int indexToReuse = -1;
+    for (int i = 0; i < self.bufferPool.count; ++i) {
+        if (self.bufferPool[i].length >= length) {
+            indexToReuse = i;
+        }
+    }
+    
+    if (indexToReuse >= 0) {
+        id <MTLBuffer> buffer = self.bufferPool[indexToReuse];
+        [self.bufferPool removeObjectAtIndex:indexToReuse];
+        return buffer;
+    } else {
+        return [self.device newBufferWithLength:length options:MTLResourceStorageModeShared];
+    }
 }
 
 - (id<MTLTexture>)textureForImage:(GLTFImage *)image {
@@ -245,9 +269,19 @@ typedef struct {
     
     [self drawRenderList:renderList commandEncoder:renderEncoder];
     
+    NSArray *copiedDeferredReusableBuffers = [self.deferredReusableBuffers copy];
+    [commandBuffer addScheduledHandler:^(id<MTLCommandBuffer> commandBuffer) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            for (id<MTLBuffer> buffer in copiedDeferredReusableBuffers) {
+                [self enqueueReusableBuffer:buffer];
+            }
+        });
+    }];
+    
     [self.opaqueRenderItems removeAllObjects];
     [self.transparentRenderItems removeAllObjects];
     [self.currentLightNodes removeAllObjects];
+    [self.deferredReusableBuffers removeAllObjects];
 }
 
 - (void)bindTexturesForMaterial:(GLTFMaterial *)material commandEncoder:(id<MTLRenderCommandEncoder>)renderEncoder {
@@ -420,6 +454,7 @@ typedef struct {
             id<MTLBuffer> jointBuffer = [self dequeueReusableBufferOfLength: node.skin.jointNodes.count * sizeof(simd_float4x4)];
             [self computeJointsForSubmesh:submesh inNode:node buffer:jointBuffer];
             [renderEncoder setVertexBuffer:jointBuffer offset:0 atIndex:GLTFVertexDescriptorMaxAttributeCount + 1];
+            [self.deferredReusableBuffers addObject:jointBuffer];
         }
         
         FragmentUniforms fragmentUniforms = item.fragmentUniforms;
