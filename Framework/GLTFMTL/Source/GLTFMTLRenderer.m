@@ -19,6 +19,7 @@
 #import "GLTFMTLUtilities.h"
 #import "GLTFMTLBufferAllocator.h"
 #import "GLTFMTLLightingEnvironment.h"
+#import "GLTFMTLTextureLoader.h"
 
 @import ImageIO;
 @import MetalKit;
@@ -66,7 +67,7 @@ typedef struct {
 @property (nonatomic, strong) id<MTLDevice> device;
 @property (nonatomic, strong) id<MTLCommandQueue> commandQueue;
 
-@property (nonatomic, strong) MTKTextureLoader *textureLoader;
+@property (nonatomic, strong) GLTFMTLTextureLoader *textureLoader;
 
 @property (nonatomic, strong) dispatch_semaphore_t frameBoundarySemaphore;
 
@@ -99,7 +100,7 @@ typedef struct {
         _colorPixelFormat = MTLPixelFormatBGRA8Unorm;
         _depthStencilPixelFormat = MTLPixelFormatDepth32Float_Stencil8;
 
-        _textureLoader = [[MTKTextureLoader alloc] initWithDevice:_device];
+        _textureLoader = [[GLTFMTLTextureLoader alloc] initWithDevice:_device];
         
         _constantsBuffers = [NSMutableArray array];
 
@@ -132,47 +133,18 @@ typedef struct {
         return texture;
     }
     
-    id options = @{ MTKTextureLoaderOptionOrigin : MTKTextureLoaderOriginTopLeft,
-                    MTKTextureLoaderOptionSRGB : @(NO) };
-    
     NSError *error = nil;
     if (image.cgImage != NULL) {
-        texture = [self.textureLoader newTextureWithCGImage:image.cgImage options:options error:&error];
+        texture = [self.textureLoader newTextureWithCGImage:image.cgImage options:nil error:&error];
+        texture.label = image.name;
     } else if (image.url != nil) {
-        CGImageSourceRef imageSource = CGImageSourceCreateWithURL((__bridge CFURLRef)image.url, nil);
-        CGImageRef cgImage = CGImageSourceCreateImageAtIndex(imageSource, 0, nil);
-        
-        CGColorSpaceRef sourceColorSpace = CGImageGetColorSpace(cgImage);
-        
-        CGColorSpaceModel sourceColorModel = CGColorSpaceGetModel(sourceColorSpace);
-        
-        if (sourceColorModel != kCGColorSpaceModelRGB) {
-            // TODO: Remove this once the indexed image decode bug in MetalKit is fixed.
-            size_t width = CGImageGetWidth(cgImage);
-            size_t height = CGImageGetHeight(cgImage);
-            size_t bpc = 8;
-            size_t Bpr = width * 4;
-            CGColorSpaceRef colorSpace = CGColorSpaceCreateWithName(kCGColorSpaceSRGB);
-            CGContextRef context = CGBitmapContextCreate(nil, width, height, bpc, Bpr, colorSpace, kCGImageAlphaPremultipliedLast);
-            CGContextDrawImage(context, CGRectMake(0, 0, width, height), cgImage);
-            CGImageRelease(cgImage);
-            cgImage = CGBitmapContextCreateImage(context);
-            CGContextRelease(context);
-        }
-        
-        texture = [self.textureLoader newTextureWithCGImage:cgImage options:options error:&error];
-        texture.label = image.url.lastPathComponent;
-        
-        CGImageRelease(cgImage);
-        if (imageSource != NULL) {
-            CFRelease(imageSource);
-        }
+        texture = [self.textureLoader newTextureWithContentsOfURL:image.url options:nil error:&error];
+        texture.label = image.name ?: image.url.lastPathComponent;
     } else if (image.bufferView != nil) {
         GLTFBufferView *bufferView = image.bufferView;
         NSData *data = [NSData dataWithBytesNoCopy:bufferView.buffer.contents + bufferView.offset length:bufferView.length freeWhenDone:NO];
-        CGImageRef cgImage = [GLTFImage newImageForData:data mimeType: image.mimeType];
-        texture = [self.textureLoader newTextureWithCGImage:cgImage options:options error:&error];
-        CGImageRelease(cgImage);
+        texture = [self.textureLoader newTextureWithData:data options:nil error:&error];
+        texture.label = image.name;
     }
     
     if (!texture) {

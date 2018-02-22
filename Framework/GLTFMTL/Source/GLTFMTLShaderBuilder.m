@@ -128,7 +128,7 @@
 
     NSMutableString *shaderFeatures = [NSMutableString string];
     [shaderFeatures appendFormat:@"#define USE_PBR %d\n", usePBR];
-    [shaderFeatures appendFormat:@"#define USE_IBL %d\n", useIBL && NO];
+    [shaderFeatures appendFormat:@"#define USE_IBL %d\n", useIBL];
     [shaderFeatures appendFormat:@"#define USE_ALPHA_TEST %d\n", useAlphaTest];
     [shaderFeatures appendFormat:@"#define USE_VERTEX_SKINNING %d\n", hasSkinningData];
     [shaderFeatures appendFormat:@"#define USE_EXTENDED_VERTEX_SKINNING %d\n", hasExtendedSkinning];

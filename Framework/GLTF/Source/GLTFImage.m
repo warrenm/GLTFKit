@@ -42,7 +42,7 @@
             NSArray *mediaTypeAndToken = [mediaTypeAndTokenString componentsSeparatedByString:@";"];
             if (mediaTypeAndToken.count > 0) {
                 NSString *mediaType = mediaTypeAndToken.firstObject;
-                NSString *encodedImageData = [uriData substringFromIndex:prefixEnd];
+                NSString *encodedImageData = [uriData substringFromIndex:firstComma + 1];
                 NSData *imageData = [[NSData alloc] initWithBase64EncodedString:encodedImageData
                                                                         options:NSDataBase64DecodingIgnoreUnknownCharacters];
                 return [self newImageForData:imageData mimeType:mediaType];
@@ -50,10 +50,6 @@
         }
     }
     return NULL;
-}
-
-- (void)dealloc {
-    CGImageRelease(_cgImage);
 }
 
 @end
