@@ -101,12 +101,13 @@ The included GLTFSCN framework can be used to easily transform glTF assets into 
 
 To get the collection of scenes contained in a glTF asset, use the `SCNScene` class extension method `+[SCNScene scenesFromGLTFAsset:options:]`. This method returns an array of scenes because there is no SceneKit type that represents a collection of scenes.
 
-Here is an example of how to load a GLTF asset, convert it to a collection of SceneKit scenes, and access the first scene:
+Here is an example of how to load a GLTF asset, convert it to a collection of SceneKit scenes, and access the default scene:
 
 ```obj-c
 id<GLTFBufferAllocator> bufferAllocator = [[GLTFDefaultBufferAllocator alloc] init];
 GLTFAsset *asset = [[GLTFAsset alloc] initWithURL:url bufferAllocator:bufferAllocator];
-SCNScene *scene = [[SCNScene scenesFromGLTFAsset:asset options:nil] firstObject];
+GLTFSCNAsset *scnAsset = [SCNScene assetFromGLTFAsset:asset options:@{}];
+SCNScene *scene = scnAsset.defaultScene;
 ```
 
 Note the use of the `GLTFDefaultBufferAllocator` type. This is a buffer allocator that allocates regular memory rather than GPU-accessible memory. If you want to use an asset with both Metal and SceneKit, you should use the `GLTFMTLBufferAllocator` (as illustrated above) instead.
@@ -150,9 +151,9 @@ Below is a checklist of glTF features and their current level of support.
 - [x] Base-64 encoded images
 - [x] PNG
 - [x] JPEG
-- [ ] TIFF
+- [x] TIFF
 - [ ] OpenEXR
-- [ ] Radiance
+- [x] Radiance
 
 #### Materials
 - [x] Base color factor
@@ -164,16 +165,16 @@ Below is a checklist of glTF features and their current level of support.
 - [x] Occlusion map
 - [x] Emissive map
 - [ ] Normal texture scale
-- [ ] Alpha mode
+- [x] Alpha mode
 	- [x] Opaque alpha mode
 	- [x] Mask alpha mode
-	- [ ] Blend alpha mode
+	- [x] Blend alpha mode
 - [x] Double-sided materials
 
 #### Samplers
 - [x] Wrap mode
 - [x] Minification/magnification filters
-- [ ] Mipmaps
+- [x] Mipmaps
 
 #### Cameras
 - [x] Perspective cameras
@@ -211,11 +212,11 @@ This implementation is known to be **non-conforming** to the glTF 2.0 specificat
 
 ## Contributing
 
-This project is not currently accepting pull requests, since the project structure and API are subject to change rapidly.
+Pull requests are gladly accepted, but will be audited strictly in order to maintain code style. If you have any concerns about contributing, please raise an issue on Github so we can talk about it.
 
 ## License
 
-	 Copyright (c) 2017 Warren Moore. All rights reserved.
+	 Copyright (c) 2018 Warren Moore. All rights reserved.
 	
 	 Permission to use, copy, modify, and distribute this software for any
 	 purpose with or without fee is hereby granted, provided that the above
