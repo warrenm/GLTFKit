@@ -17,6 +17,7 @@
 #import "GLTFViewerViewController.h"
 #import "GLTFViewerOrbitCamera.h"
 #import "GLTFViewerFirstPersonCamera.h"
+#import "HIToolboxEvents.h"
 
 @interface GLTFViewerViewController ()
 @property (nonatomic, weak) MTKView *metalView;
@@ -53,7 +54,6 @@
     [self setupMetal];
     [self setupView];
     [self setupRenderer];
-    [self loadLightingEnvironment];
     [self loadSkyboxPipeline];
     
     NSTrackingAreaOptions trackingOptions = NSTrackingMouseMoved | NSTrackingActiveInActiveApp | NSTrackingInVisibleRect;
@@ -90,12 +90,12 @@
     self.renderer.depthStencilPixelFormat = self.metalView.depthStencilPixelFormat;
 }
 
-- (void)loadLightingEnvironment {
-    NSError *error = nil;
-    NSURL *environmentURL = [[NSBundle mainBundle] URLForResource:@"tropical_beach" withExtension:@"hdr"];
-    self.lightingEnvironment = [[GLTFMTLLightingEnvironment alloc] initWithContentsOfURL:environmentURL device:self.device error:&error];
-    self.lightingEnvironment.intensity = 1.0;
-    self.renderer.lightingEnvironment = self.lightingEnvironment;
+- (void)setLightingEnvironment:(GLTFMTLLightingEnvironment *)lightingEnvironment {
+    self.renderer.lightingEnvironment = lightingEnvironment;
+}
+
+- (GLTFMTLLightingEnvironment *)lightingEnvironment {
+    return self.renderer.lightingEnvironment;
 }
 
 - (void)loadSkyboxPipeline {
@@ -262,7 +262,7 @@
     [renderEncoder setVertexBytes:vertexData length:sizeof(float) * 36 * 3 atIndex:0];
     [renderEncoder setVertexBytes:&vertexUniforms length:sizeof(vertexUniforms) atIndex:1];
     [renderEncoder setFragmentBytes:&environmentIntensity length:sizeof(environmentIntensity) atIndex:0];
-    [renderEncoder setFragmentTexture:self.lightingEnvironment.environmentCube atIndex:0];
+    [renderEncoder setFragmentTexture:self.lightingEnvironment.specularCube atIndex:0];
     [renderEncoder drawPrimitives:MTLPrimitiveTypeTriangle vertexStart:0 vertexCount:36];
     [renderEncoder setCullMode:MTLCullModeNone];
 }
@@ -295,10 +295,10 @@
     [self.camera keyDown:event];
     
     switch (event.keyCode) {
-        case 29:
+        case kVK_ANSI_0:
             self.camera = [GLTFViewerFirstPersonCamera new];
             break;
-        case 18:
+        case kVK_ANSI_1:
             self.camera = [GLTFViewerOrbitCamera new];
             break;
         default:

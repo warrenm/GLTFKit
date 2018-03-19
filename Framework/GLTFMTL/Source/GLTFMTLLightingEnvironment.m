@@ -54,11 +54,19 @@
 
         id<MTLCommandBuffer> commandBuffer = [_commandQueue commandBuffer];
         [self _generateEnvironmentCubeMapWithSize:512 fromEquirectTexture:equirectTexture commandBuffer:commandBuffer];
+        [commandBuffer commit];
+
+        commandBuffer = [_commandQueue commandBuffer];
         [self _generateIrradianceCubeMapWithSize:64 fromRadianceCubeMap:_environmentCube commandBuffer:commandBuffer];
+        [commandBuffer commit];
+
+        commandBuffer = [_commandQueue commandBuffer];
         [self _generateSpecularCubeMapWithSize:256 roughnessLevels:9 fromRadianceCubeMap:_environmentCube commandBuffer:commandBuffer];
+        [commandBuffer commit];
+
+        commandBuffer = [_commandQueue commandBuffer];
         [self _generateBRDFLookupWithSize:128 commandBuffer:commandBuffer];
         [commandBuffer commit];
-        [commandBuffer waitUntilCompleted];
     }
     
     return self;

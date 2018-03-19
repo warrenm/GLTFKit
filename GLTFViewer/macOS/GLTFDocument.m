@@ -23,23 +23,55 @@
 
 @property (nonatomic, strong) GLTFViewerViewController *viewerController;
 
-@property (nonatomic, strong) id<MTLDevice> device;
-@property (nonatomic, strong) id<GLTFBufferAllocator> bufferAllocator;
+@property (class, nonatomic, readonly, strong) id<MTLDevice> device;
+@property (class, nonatomic, readonly, strong) id<GLTFBufferAllocator> bufferAllocator;
+@property (class, nonatomic, readonly, strong) GLTFMTLLightingEnvironment *lightingEnvironment;
 @end
 
 @implementation GLTFDocument
 
++ (id<MTLDevice>)device {
+    static id<MTLDevice> _device = nil;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        _device = MTLCreateSystemDefaultDevice();
+    });
+    return _device;
+}
+
++ (id<GLTFBufferAllocator>)bufferAllocator {
+    static id<GLTFBufferAllocator> _bufferAllocator = nil;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        _bufferAllocator = [[GLTFMTLBufferAllocator alloc] initWithDevice:GLTFDocument.device];
+    });
+    return _bufferAllocator;
+}
+
++ (GLTFMTLLightingEnvironment *)lightingEnvironment {
+    static GLTFMTLLightingEnvironment *_lightingEnvironment = nil;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        NSError *error = nil;
+        NSURL *environmentURL = [[NSBundle mainBundle] URLForResource:@"tropical_beach" withExtension:@"hdr"];
+        _lightingEnvironment = [[GLTFMTLLightingEnvironment alloc] initWithContentsOfURL:environmentURL
+                                                                                  device:GLTFDocument.device
+                                                                                   error:&error];
+        _lightingEnvironment.intensity = 1.0;
+    });
+    return _lightingEnvironment;
+}
+
 - (void)makeWindowControllers {
-    _device = MTLCreateSystemDefaultDevice();
-    
     NSRect contentsRect = NSMakeRect(0, 0, 800, 600);
     NSWindowStyleMask styleMask = NSWindowStyleMaskTitled | NSWindowStyleMaskClosable | NSWindowStyleMaskMiniaturizable | NSWindowStyleMaskResizable;
     NSWindow *window = [[NSWindow alloc] initWithContentRect:contentsRect styleMask:styleMask backing:NSBackingStoreBuffered defer:NO];
     
     GLTFViewerViewController *viewController = [[GLTFViewerViewController alloc] init];
-    MTKView *mtkView = [[MTKView alloc] initWithFrame:contentsRect device:self.device];
+    MTKView *mtkView = [[MTKView alloc] initWithFrame:contentsRect device:GLTFDocument.device];
     viewController.view = mtkView;
     viewController.asset = self.asset;
+    viewController.lightingEnvironment = [GLTFDocument lightingEnvironment];
     
     NSWindowController *windowController = [[NSWindowController alloc] initWithWindow:window];
     windowController.contentViewController = viewController;
@@ -66,9 +98,7 @@
 }
 
 - (BOOL)readFromURL:(NSURL *)url ofType:(NSString *)typeName error:(NSError **)outError {
-    self.device = MTLCreateSystemDefaultDevice();
-    self.bufferAllocator = [[GLTFMTLBufferAllocator alloc] initWithDevice:self.device];
-    self.asset = [[GLTFAsset alloc] initWithURL:url bufferAllocator:self.bufferAllocator];
+    self.asset = [[GLTFAsset alloc] initWithURL:url bufferAllocator:GLTFDocument.bufferAllocator];
     NSLog(@"INFO: Total live buffer allocation size after document load is %0.2f MB", ([GLTFMTLBufferAllocator liveAllocationSize] / (float)1e6));
 
     self.displayName = [url lastPathComponent];
