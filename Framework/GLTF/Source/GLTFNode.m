@@ -21,6 +21,7 @@
 
 @interface GLTFNode ()
 @property (nonatomic, assign, getter=localTransformIsDirty) BOOL localTransformDirty;
+@property (nonatomic, strong) NSMutableArray *mutableChildren;
 @end
 
 @implementation GLTFNode
@@ -36,6 +37,31 @@
         _morphTargetWeights = @[];
     }
     return self;
+}
+
+- (void)setChildren:(NSArray<GLTFNode *> *)children {
+    _mutableChildren = [children mutableCopy];
+}
+
+- (NSArray<GLTFNode *> *)children {
+    return [_mutableChildren copy];
+}
+
+- (void)addChildNode:(GLTFNode *)node {
+    if (node.parent) {
+        [node removeFromParent];
+    }
+    node.parent = self;
+    [self.mutableChildren addObject:node];
+}
+
+- (void)removeFromParent {
+    [self.parent _removeChildNode:self];
+}
+
+- (void)_removeChildNode:(GLTFNode *)child {
+    [self.mutableChildren removeObject:child];
+    child.parent = nil;
 }
 
 - (void)setScale:(simd_float3)scale {

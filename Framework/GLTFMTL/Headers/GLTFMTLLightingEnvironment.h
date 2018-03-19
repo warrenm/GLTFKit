@@ -19,22 +19,18 @@
 @import Foundation;
 @import Metal;
 
-#define GLTFMTLMaximumLightCount 3
-
 NS_ASSUME_NONNULL_BEGIN
 
 @interface GLTFMTLLightingEnvironment : NSObject
 
+@property (nonatomic, retain) id<MTLTexture> environmentCube;
 @property (nonatomic, retain) id<MTLTexture> diffuseCube;
 @property (nonatomic, retain) id<MTLTexture> specularCube;
 @property (nonatomic, retain) id<MTLTexture> brdfLUT;
 @property (nonatomic, assign) float intensity;
 @property (nonatomic, readonly, assign) int specularMipLevelCount;
 
-- (instancetype)initWithDiffuseCubeURL:(NSURL *)diffuseCubeURL
-                      specularCubeURLs:(NSArray<NSURL *> *)specularCubeURLs
-                                device:(id<MTLDevice>)device
-                                 error:(NSError **)error;
+- (instancetype)initWithContentsOfURL:(NSURL *)environmentURL device:(id<MTLDevice>)device error:(NSError **)error;
 
 @end
 

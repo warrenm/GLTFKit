@@ -18,6 +18,8 @@
 
 @import Metal;
 
+#define GLTFMTLMaximumLightCount 3
+
 NS_ASSUME_NONNULL_BEGIN
 
 @class GLTFMTLLightingEnvironment;

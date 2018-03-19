@@ -15,26 +15,70 @@
 //
 
 #import "GLTFMTLTextureLoader.h"
-@import MetalKit;
+#import "stb_image.h"
+@import Accelerate;
 
 NSString *const GLTFMTLTextureLoaderOptionGenerateMipmaps = @"GLTFMTLTextureLoaderOptionGenerateMipmaps";
 NSString *const GLTFMTLTextureLoaderOptionUsageFlags = @"GLTFMTLTextureLoaderOptionUsageFlags";
 
-static inline void storeAsF16(float value, uint16_t *pointer) { *(__fp16 *)pointer = value; }
+__fp16 *GLTFMTLConvertImageToRGBA16F(CGImageRef image)
+{
+    size_t width = CGImageGetWidth(image);
+    size_t height = CGImageGetHeight(image);
 
-static void ConvertRGBF32ToRGBAF16(float *src, uint16_t *dst, size_t pixelCount) {
-    for (int i = 0; i < pixelCount; ++i) {
-        storeAsF16(src[i * 3 + 0], dst + (i * 4) + 0);
-        storeAsF16(src[i * 3 + 1], dst + (i * 4) + 1);
-        storeAsF16(src[i * 3 + 2], dst + (i * 4) + 2);
-        storeAsF16(1.0, dst + (i * 4) + 3);
-    }
+    __fp16 *dstPixels = malloc(sizeof(__fp16) * 4 * width * height);
+    vImage_Buffer dstBuffer = {
+        .data = dstPixels,
+        .height = height,
+        .width = width,
+        .rowBytes = sizeof(__fp16) * 4 * width
+    };
+
+    vImage_CGImageFormat srcFormat = {
+        .bitsPerComponent = (uint32_t)CGImageGetBitsPerComponent(image),
+        .bitsPerPixel = (uint32_t)CGImageGetBitsPerPixel(image),
+        .colorSpace = CGImageGetColorSpace(image),
+        .bitmapInfo = CGImageGetBitmapInfo(image)
+    };
+
+    vImage_CGImageFormat dstFormat = {
+        .bitsPerComponent = sizeof(__fp16) * 8,
+        .bitsPerPixel = sizeof(__fp16) * 8 * 4,
+        .colorSpace = CGImageGetColorSpace(image),
+        .bitmapInfo = kCGBitmapByteOrder16Little | kCGBitmapFloatComponents | kCGImageAlphaPremultipliedLast
+    };
+
+    vImage_Error error = kvImageNoError;
+    CGFloat background[] = { 0, 0, 0, 1 };
+    vImageConverterRef converter = vImageConverter_CreateWithCGImageFormat(&srcFormat,
+                                                                           &dstFormat,
+                                                                           background,
+                                                                           kvImageNoFlags,
+                                                                           &error);
+
+    CGDataProviderRef dataProvider = CGImageGetDataProvider(image);
+    CFDataRef srcData = CGDataProviderCopyData(dataProvider);
+
+    const void *srcPixels = CFDataGetBytePtr(srcData);
+
+    vImage_Buffer srcBuffer = {
+        .data = (void *)srcPixels,
+        .height = height,
+        .width = width,
+        .rowBytes = sizeof(float) * 3 * width
+    };
+
+    vImageConvert_AnyToAny(converter, &srcBuffer, &dstBuffer, NULL, kvImageNoFlags);
+
+    vImageConverter_Release(converter);
+    CFRelease(srcData);
+
+    return dstPixels;
 }
 
 @interface GLTFMTLTextureLoader ()
 @property (nonatomic, strong) id<MTLDevice> device;
 @property (nonatomic, strong) id<MTLCommandQueue> commandQueue;
-@property (nonatomic, strong) MTKTextureLoader *internalLoader;
 @end
 
 @implementation GLTFMTLTextureLoader
@@ -43,7 +87,6 @@ static void ConvertRGBF32ToRGBAF16(float *src, uint16_t *dst, size_t pixelCount)
     if ((self = [super init])) {
         _device = device;
         _commandQueue = [device newCommandQueue];
-        _internalLoader = [[MTKTextureLoader alloc] initWithDevice:device];
     }
     return self;
 }
@@ -63,93 +106,50 @@ static void ConvertRGBF32ToRGBAF16(float *src, uint16_t *dst, size_t pixelCount)
         return nil;
     }
     
-    NSDictionary *sourceOptions = @{ (__bridge NSString *)kCGImageSourceShouldCache : @YES,
-                                     (__bridge NSString *)kCGImageSourceShouldAllowFloat : @YES };
+    int width = 0;
+    int height = 0;
+    int fileChannels = 4;
+    int targetChannels = 4;
+    unsigned char *bytes = stbi_load_from_memory(data.bytes, (int)data.length, &width, &height, &fileChannels, targetChannels);
     
-    CGImageSourceRef imageSource = CGImageSourceCreateWithData((__bridge CFDataRef)data, NULL);
-
-    CGImageRef image = CGImageSourceCreateImageAtIndex(imageSource, 0, (__bridge CFDictionaryRef)sourceOptions);
-
-    id<MTLTexture> texture = [self newTextureWithCGImage:image options:options error:error];
-    
-    CGImageRelease(image);
-    if (imageSource != NULL) {
-        CFRelease(imageSource);
-    }
-    
-    return texture;
-}
-
-- (id<MTLTexture> _Nullable)newTextureWithCGImage:(CGImageRef)image options:(NSDictionary * _Nullable)options error:(NSError **)error {
-    if (image == NULL) {
-        return nil;
-    }
+    MTLPixelFormat pixelFormat = MTLPixelFormatRGBA8Unorm;
     
     NSNumber *mipmapOption = options[GLTFMTLTextureLoaderOptionGenerateMipmaps];
     BOOL mipmapped = (mipmapOption != nil) ? mipmapOption.boolValue : NO;
-    
-    size_t bpc = CGImageGetBitsPerComponent(image);
-    size_t bpp = CGImageGetBitsPerPixel(image);
-    CGBitmapInfo bitmapInfo = CGImageGetBitmapInfo(image);
-    MTLPixelFormat pixelFormat = MTLPixelFormatRGBA8Unorm;
-    if ((bitmapInfo & kCGBitmapFloatComponents) != 0) {
-        pixelFormat = MTLPixelFormatRGBA16Float;
-    }
-    
-    size_t width = CGImageGetWidth(image);
-    size_t height = CGImageGetHeight(image);
+
     MTLTextureDescriptor *descriptor = [MTLTextureDescriptor texture2DDescriptorWithPixelFormat:pixelFormat
                                                                                           width:width
                                                                                          height:height
                                                                                       mipmapped:mipmapped];
+
+    id<MTLTexture> texture = [self newTextureWithBytes:bytes descriptor:descriptor options:options error:error];
     
+    stbi_image_free(bytes);
+
+    return texture;
+}
+
+- (id<MTLTexture> _Nullable)newTextureWithBytes:(unsigned char *)bytes
+                                     descriptor:(MTLTextureDescriptor *)descriptor
+                                        options:(NSDictionary * _Nullable)options
+                                          error:(NSError **)error
+{
     NSNumber *usageOption = options[GLTFMTLTextureLoaderOptionUsageFlags];
     descriptor.usage = (usageOption != nil) ? usageOption.integerValue : MTLTextureUsageShaderRead;
     
     id<MTLTexture> texture = [self.device newTextureWithDescriptor:descriptor];
     
-    if (pixelFormat == MTLPixelFormatRGBA16Float) {
-        NSAssert(bpc == 32 && bpp == 96, @"GLTFMTLTextureLoader can currently only handle floating-point images with bpc == 32 and bpp == 96");
+    [texture replaceRegion:MTLRegionMake2D(0, 0, texture.width, texture.height)
+               mipmapLevel:0
+                 withBytes:bytes
+               bytesPerRow:sizeof(unsigned char) * 4 * texture.width];
 
-        CGDataProviderRef dataProvider = CGImageGetDataProvider(image);
-        NSData *srcData = (__bridge NSData *)CGDataProviderCopyData(dataProvider);
-        float *srcPixels = (float *)srcData.bytes;
-        uint16_t *dstPixels = malloc(sizeof(uint16_t) * 4 * width * height);
-
-        ConvertRGBF32ToRGBAF16(srcPixels, dstPixels, width * height);
-
-        [texture replaceRegion:MTLRegionMake2D(0, 0, width, height)
-                   mipmapLevel:0
-                     withBytes:dstPixels
-                   bytesPerRow:sizeof(uint16_t) * 4 * width];
-        free(dstPixels);
-        CFRelease((__bridge CFDataRef)srcData);
-    } else {
-        CGColorSpaceRef sourceColorSpace = CGImageGetColorSpace(image);
-        CGColorSpaceModel sourceColorModel = CGColorSpaceGetModel(sourceColorSpace);
-        if (sourceColorModel != kCGColorSpaceModelRGB) {
-            // TODO: Remove this once the indexed image decode bug in MetalKit is fixed.
-            CGColorSpaceRef colorSpace = CGColorSpaceCreateWithName(kCGColorSpaceSRGB);
-            size_t Bpr = width * 4;
-            CGContextRef context = CGBitmapContextCreate(nil, width, height, bpc, Bpr, colorSpace, kCGImageAlphaPremultipliedLast);
-            CGContextDrawImage(context, CGRectMake(0, 0, width, height), image);
-            image = CGBitmapContextCreateImage(context);
-            CGContextRelease(context);
-        }
-        
-        NSDictionary *loaderOptions = @{ MTKTextureLoaderOptionOrigin : MTKTextureLoaderOriginTopLeft,
-                                         MTKTextureLoaderOptionSRGB : @(NO),
-                                         MTKTextureLoaderOptionGenerateMipmaps : @(mipmapped) };
-        texture = [self.internalLoader newTextureWithCGImage:image options:loaderOptions error:error];
-    }
-    
-    if (texture != nil && mipmapped) {
+    if (texture != nil && (texture.mipmapLevelCount > 1)) {
         id<MTLCommandBuffer> commandBuffer = [self.commandQueue commandBuffer];
         id<MTLBlitCommandEncoder> commandEncoder = [commandBuffer blitCommandEncoder];
         [commandEncoder generateMipmapsForTexture:texture];
         [commandEncoder endEncoding];
         [commandBuffer commit];
-//        [commandBuffer waitUntilCompleted];
     }
     
     return texture;

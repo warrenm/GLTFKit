@@ -17,7 +17,27 @@
 #import "GLTFScene.h"
 #import "GLTFNode.h"
 
+@interface GLTFScene ()
+@property (nonatomic, strong) NSMutableArray *mutableNodes;
+@end
+
 @implementation GLTFScene
+
+- (void)setNodes:(NSArray<GLTFNode *> *)nodes {
+    _mutableNodes = [nodes mutableCopy];
+}
+
+- (NSArray<GLTFNode *> *)nodes {
+    return [_mutableNodes copy];
+}
+
+- (void)addNode:(GLTFNode *)node {
+    if (node.parent) {
+        [node removeFromParent];
+    }
+    
+    [_mutableNodes addObject:node];
+}
 
 - (GLTFBoundingBox)approximateBounds {
     GLTFBoundingBox sceneBounds = { 0 };

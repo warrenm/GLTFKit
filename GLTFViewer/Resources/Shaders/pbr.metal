@@ -370,7 +370,7 @@ fragment float4 fragment_main(VertexOut in [[stage_in]],
         float3 diffuseLight = diffuseEnvTexture.sample(cubeSampler, N).rgb;
         diffuseLight *= uniforms.envIntensity;
     
-        float3 specularLight;
+        float3 specularLight(0);
         if (mipCount > 1) {
             specularLight = specularEnvTexture.sample(cubeSampler, reflection, level(lod)).rgb;
         } else {
@@ -403,6 +403,6 @@ fragment float4 fragment_main(VertexOut in [[stage_in]],
             discard_fragment();
         }
     #endif
-    
+
     return float4(color, baseColor.a);
 }

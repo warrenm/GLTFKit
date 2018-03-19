@@ -10,6 +10,7 @@
 		834168101F8D70210052E7FE /* GLTFViewerOrbitCamera.m in Sources */ = {isa = PBXBuildFile; fileRef = 8341680F1F8D70210052E7FE /* GLTFViewerOrbitCamera.m */; };
 		834168131F8D70730052E7FE /* GLTFViewerFirstPersonCamera.m in Sources */ = {isa = PBXBuildFile; fileRef = 834168121F8D70730052E7FE /* GLTFViewerFirstPersonCamera.m */; };
 		834E00152031267700DCB66E /* brdf.metal in Sources */ = {isa = PBXBuildFile; fileRef = 834E000A202A70B200DCB66E /* brdf.metal */; };
+		83637A692043B94F0093C117 /* tropical_beach.hdr in Resources */ = {isa = PBXBuildFile; fileRef = 83637A612043B9230093C117 /* tropical_beach.hdr */; };
 		83850FC21F4A5E8F00F9A444 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 83850FBE1F4A5C5C00F9A444 /* main.m */; };
 		83850FC71F4A5F4D00F9A444 /* GLTFViewerViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 83850FC51F4A5F2600F9A444 /* GLTFViewerViewController.m */; };
 		83850FCA1F4A616E00F9A444 /* GLTFDocument.m in Sources */ = {isa = PBXBuildFile; fileRef = 83850FC91F4A616E00F9A444 /* GLTFDocument.m */; };
@@ -20,13 +21,6 @@
 		83A6C51B1F88208E0095A4DC /* GLTFViewerCamera.m in Sources */ = {isa = PBXBuildFile; fileRef = 83A6C51A1F88208E0095A4DC /* GLTFViewerCamera.m */; };
 		83D32B291FA915D000703763 /* skybox.metal in Sources */ = {isa = PBXBuildFile; fileRef = 83D32B1E1FA915D000703763 /* skybox.metal */; };
 		83D32B2A1FA915D000703763 /* pbr.metal in Sources */ = {isa = PBXBuildFile; fileRef = 83D32B1F1FA915D000703763 /* pbr.metal */; };
-		83D32B2B1FA915D000703763 /* output_pmrem_1.png in Resources */ = {isa = PBXBuildFile; fileRef = 83D32B211FA915D000703763 /* output_pmrem_1.png */; };
-		83D32B2C1FA915D000703763 /* output_pmrem_0.png in Resources */ = {isa = PBXBuildFile; fileRef = 83D32B221FA915D000703763 /* output_pmrem_0.png */; };
-		83D32B2D1FA915D000703763 /* output_pmrem_2.png in Resources */ = {isa = PBXBuildFile; fileRef = 83D32B231FA915D000703763 /* output_pmrem_2.png */; };
-		83D32B2E1FA915D000703763 /* output_pmrem_3.png in Resources */ = {isa = PBXBuildFile; fileRef = 83D32B241FA915D000703763 /* output_pmrem_3.png */; };
-		83D32B2F1FA915D000703763 /* output_pmrem_4.png in Resources */ = {isa = PBXBuildFile; fileRef = 83D32B251FA915D000703763 /* output_pmrem_4.png */; };
-		83D32B301FA915D000703763 /* output_pmrem_5.png in Resources */ = {isa = PBXBuildFile; fileRef = 83D32B261FA915D000703763 /* output_pmrem_5.png */; };
-		83D32B311FA915D000703763 /* output_iem.png in Resources */ = {isa = PBXBuildFile; fileRef = 83D32B271FA915D000703763 /* output_iem.png */; };
 		83D32B341FA917E200703763 /* pbr.metal in CopyFiles */ = {isa = PBXBuildFile; fileRef = 83D32B1F1FA915D000703763 /* pbr.metal */; };
 		83DBFDA71FA51F3400722FA8 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 83850FBA1F4A5C5C00F9A444 /* Assets.xcassets */; };
 /* End PBXBuildFile section */
@@ -62,6 +56,7 @@
 		834168111F8D70730052E7FE /* GLTFViewerFirstPersonCamera.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = GLTFViewerFirstPersonCamera.h; path = Shared/GLTFViewerFirstPersonCamera.h; sourceTree = "<group>"; };
 		834168121F8D70730052E7FE /* GLTFViewerFirstPersonCamera.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = GLTFViewerFirstPersonCamera.m; path = Shared/GLTFViewerFirstPersonCamera.m; sourceTree = "<group>"; };
 		834E000A202A70B200DCB66E /* brdf.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = brdf.metal; sourceTree = "<group>"; };
+		83637A612043B9230093C117 /* tropical_beach.hdr */ = {isa = PBXFileReference; lastKnownFileType = file; path = tropical_beach.hdr; sourceTree = "<group>"; };
 		837EEE511FA2B48F004BA504 /* GLTFSCN.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = GLTFSCN.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		83850FB01F4A403800F9A444 /* GLTF.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = GLTF.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		83850FB31F4A403800F9A444 /* GLTFMTL.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = GLTFMTL.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -78,13 +73,6 @@
 		83A6C51C1F882DA40095A4DC /* HIToolboxEvents.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = HIToolboxEvents.h; path = Shared/HIToolboxEvents.h; sourceTree = "<group>"; };
 		83D32B1E1FA915D000703763 /* skybox.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = skybox.metal; sourceTree = "<group>"; };
 		83D32B1F1FA915D000703763 /* pbr.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = pbr.metal; sourceTree = "<group>"; };
-		83D32B211FA915D000703763 /* output_pmrem_1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = output_pmrem_1.png; sourceTree = "<group>"; };
-		83D32B221FA915D000703763 /* output_pmrem_0.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = output_pmrem_0.png; sourceTree = "<group>"; };
-		83D32B231FA915D000703763 /* output_pmrem_2.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = output_pmrem_2.png; sourceTree = "<group>"; };
-		83D32B241FA915D000703763 /* output_pmrem_3.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = output_pmrem_3.png; sourceTree = "<group>"; };
-		83D32B251FA915D000703763 /* output_pmrem_4.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = output_pmrem_4.png; sourceTree = "<group>"; };
-		83D32B261FA915D000703763 /* output_pmrem_5.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = output_pmrem_5.png; sourceTree = "<group>"; };
-		83D32B271FA915D000703763 /* output_iem.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = output_iem.png; sourceTree = "<group>"; };
 		83D600011F48BECB00F71E0C /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		83D6000A1F48BECB00F71E0C /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		83D6000C1F48BECB00F71E0C /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -118,6 +106,15 @@
 			name = Cameras;
 			sourceTree = "<group>";
 		};
+		83637A5E2043B9230093C117 /* Environment */ = {
+			isa = PBXGroup;
+			children = (
+				83637A612043B9230093C117 /* tropical_beach.hdr */,
+			);
+			name = Environment;
+			path = ../../Resources/Environment;
+			sourceTree = "<group>";
+		};
 		83850FB91F4A5C5C00F9A444 /* macOS */ = {
 			isa = PBXGroup;
 			children = (
@@ -142,8 +139,8 @@
 		83D32B1C1FA915D000703763 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				83637A5E2043B9230093C117 /* Environment */,
 				83D32B1D1FA915D000703763 /* Shaders */,
-				83D32B201FA915D000703763 /* Environment */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -156,20 +153,6 @@
 				834E000A202A70B200DCB66E /* brdf.metal */,
 			);
 			path = Shaders;
-			sourceTree = "<group>";
-		};
-		83D32B201FA915D000703763 /* Environment */ = {
-			isa = PBXGroup;
-			children = (
-				83D32B211FA915D000703763 /* output_pmrem_1.png */,
-				83D32B221FA915D000703763 /* output_pmrem_0.png */,
-				83D32B231FA915D000703763 /* output_pmrem_2.png */,
-				83D32B241FA915D000703763 /* output_pmrem_3.png */,
-				83D32B251FA915D000703763 /* output_pmrem_4.png */,
-				83D32B261FA915D000703763 /* output_pmrem_5.png */,
-				83D32B271FA915D000703763 /* output_iem.png */,
-			);
-			path = Environment;
 			sourceTree = "<group>";
 		};
 		83D600151F48BED700F71E0C /* Shared */ = {
@@ -291,15 +274,9 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				83D32B2D1FA915D000703763 /* output_pmrem_2.png in Resources */,
+				83637A692043B94F0093C117 /* tropical_beach.hdr in Resources */,
 				83DBFDA71FA51F3400722FA8 /* Assets.xcassets in Resources */,
-				83D32B2E1FA915D000703763 /* output_pmrem_3.png in Resources */,
 				83850FF71F4A715D00F9A444 /* Main.storyboard in Resources */,
-				83D32B2F1FA915D000703763 /* output_pmrem_4.png in Resources */,
-				83D32B301FA915D000703763 /* output_pmrem_5.png in Resources */,
-				83D32B311FA915D000703763 /* output_iem.png in Resources */,
-				83D32B2C1FA915D000703763 /* output_pmrem_0.png in Resources */,
-				83D32B2B1FA915D000703763 /* output_pmrem_1.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

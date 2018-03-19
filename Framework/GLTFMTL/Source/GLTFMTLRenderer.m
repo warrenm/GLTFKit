@@ -157,17 +157,20 @@ typedef struct {
         return texture;
     }
     
+    NSDictionary *options = @{ GLTFMTLTextureLoaderOptionGenerateMipmaps : @YES };
+    
     NSError *error = nil;
-    if (image.cgImage != NULL) {
-        texture = [self.textureLoader newTextureWithCGImage:image.cgImage options:nil error:&error];
+    if (image.imageData != nil) {
+        //texture = [self.textureLoader newTextureWithCGImage:image.cgImage options:options error:&error];
+        texture = [self.textureLoader newTextureWithData:image.imageData options:options error:&error];
         texture.label = image.name;
     } else if (image.url != nil) {
-        texture = [self.textureLoader newTextureWithContentsOfURL:image.url options:nil error:&error];
+        texture = [self.textureLoader newTextureWithContentsOfURL:image.url options:options error:&error];
         texture.label = image.name ?: image.url.lastPathComponent;
     } else if (image.bufferView != nil) {
         GLTFBufferView *bufferView = image.bufferView;
         NSData *data = [NSData dataWithBytesNoCopy:bufferView.buffer.contents + bufferView.offset length:bufferView.length freeWhenDone:NO];
-        texture = [self.textureLoader newTextureWithData:data options:nil error:&error];
+        texture = [self.textureLoader newTextureWithData:data options:options error:&error];
         texture.label = image.name;
     }
     
@@ -436,7 +439,9 @@ typedef struct {
         id<MTLRenderPipelineState> renderPipelineState = [self renderPipelineStateForSubmesh:submesh];
                 
         [renderEncoder setRenderPipelineState:renderPipelineState];
-                
+        
+        [renderEncoder setFrontFacingWinding:MTLWindingCounterClockwise];
+
         NSDictionary *accessorsForAttributes = submesh.accessorsForAttributes;
                 
         GLTFAccessor *indexAccessor = submesh.indexAccessor;
@@ -444,7 +449,7 @@ typedef struct {
                 
         // TODO: Check primitive type for unsupported types (tri fan, line loop), and modify draw calls as appropriate
         MTLPrimitiveType primitiveType = GLTFMTLPrimitiveTypeForPrimitiveType(submesh.primitiveType);
-                
+        
         [self bindTexturesForMaterial:material commandEncoder:renderEncoder];
         
         VertexUniforms vertexUniforms = item.vertexUniforms;

@@ -27,14 +27,14 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface GLTFAsset : NSObject
 
-@property (nonatomic, readonly, copy) NSArray<GLTFScene *> *scenes;
+@property (nonatomic, readonly, strong) NSArray<GLTFScene *> *scenes;
 @property (nonatomic, readonly) GLTFScene * _Nullable defaultScene;
 
-@property (nonatomic, readonly, copy) NSArray<GLTFAnimation *> *animations;
+@property (nonatomic, readonly, strong) NSArray<GLTFAnimation *> *animations;
 
-@property (nonatomic, readonly, copy) NSArray<GLTFKHRLight *> *lights;
+@property (nonatomic, readonly, strong) NSArray<GLTFKHRLight *> *lights;
 
-@property (nonatomic, readonly, copy) NSArray<GLTFCamera *> *cameras;
+@property (nonatomic, readonly, strong) NSArray<GLTFCamera *> *cameras;
 
 @property (nonatomic, copy) NSString * _Nullable generator;
 @property (nonatomic, copy) NSString * _Nullable copyright;
@@ -43,6 +43,10 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, copy) NSArray<NSString *> *extensionsUsed;
 
 - (instancetype)initWithURL:(NSURL *)url bufferAllocator:(id<GLTFBufferAllocator>)bufferAllocator;
+
+- (void)addLight:(GLTFKHRLight *)light;
+
+- (void)addCamera:(GLTFCamera *)camera;
 
 @end
 

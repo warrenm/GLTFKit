@@ -27,7 +27,6 @@ extern NSString *const GLTFMTLTextureLoaderOptionUsageFlags;
 - (instancetype)initWithDevice:(id<MTLDevice>)device;
 - (id<MTLTexture> _Nullable)newTextureWithContentsOfURL:(NSURL *)url options:(NSDictionary * _Nullable)options error:(NSError **)error;
 - (id<MTLTexture> _Nullable)newTextureWithData:(NSData *)data options:(NSDictionary * _Nullable)options error:(NSError **)error;
-- (id<MTLTexture> _Nullable)newTextureWithCGImage:(CGImageRef)image options:(NSDictionary * _Nullable)options error:(NSError **)error;
 @end
 
 NS_ASSUME_NONNULL_END

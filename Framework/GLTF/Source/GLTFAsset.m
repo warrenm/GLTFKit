@@ -49,9 +49,10 @@
 @property (nonatomic, copy) NSArray *textures;
 @property (nonatomic, copy) NSArray *meshes;
 @property (nonatomic, copy) NSArray *materials;
-@property (nonatomic, copy) NSArray *lights;
+@property (nonatomic, strong) NSMutableArray *lights;
+@property (nonatomic, strong) NSMutableArray *cameras;
 @property (nonatomic, copy) NSArray *nodes;
-@property (nonatomic, copy) NSArray *animations;
+@property (nonatomic, strong) NSArray *animations;
 @property (nonatomic, copy) NSArray<GLTFSkin *> *skins;
 @property (nonatomic, copy) NSArray<GLTFBinaryChunk *> *chunks;
 @property (nonatomic, strong) GLTFMaterial *defaultMaterial;
@@ -79,6 +80,34 @@
     return self;
 }
 
+- (void)addLight:(GLTFKHRLight *)light {
+    [_lights addObject:light];
+}
+
+- (void)addCamera:(GLTFCamera *)camera {
+    [_cameras addObject:camera];
+}
+
+- (NSData *)imageDataForDataURI:(NSString *)uriData {
+    NSString *prefix = @"data:";
+    if ([uriData hasPrefix:prefix]) {
+        NSInteger prefixEnd = prefix.length;
+        NSInteger firstComma = [uriData rangeOfString:@","].location;
+        if (firstComma != NSNotFound) {
+            NSString *mediaTypeAndTokenString = [uriData substringWithRange:NSMakeRange(prefixEnd, firstComma - prefixEnd)];
+            NSArray *mediaTypeAndToken = [mediaTypeAndTokenString componentsSeparatedByString:@";"];
+            if (mediaTypeAndToken.count > 0) {
+                NSString *encodedImageData = [uriData substringFromIndex:firstComma + 1];
+                NSData *imageData = [[NSData alloc] initWithBase64EncodedString:encodedImageData
+                                                                        options:NSDataBase64DecodingIgnoreUnknownCharacters];
+                return imageData;
+            }
+        }
+    }
+    return nil;
+}
+
+
 - (BOOL)loadWithError:(NSError **)errorOrNil {
     NSData *assetData = [NSData dataWithContentsOfURL:_url];
 
@@ -104,6 +133,10 @@
     _defaultSampler =  [GLTFTextureSampler new];
     
     _defaultMaterial = [GLTFMaterial new];
+    
+    _lights = [NSMutableArray array];
+    
+    _cameras = [NSMutableArray array];
     
     // Since we aren't streaming, we have the properties for all objects in memory
     // and we can load in the order that makes the least work for us, i.e. by
@@ -141,6 +174,7 @@
 - (void)toggleExtensionFeatureFlags {
     for (NSString *extension in _extensionsUsed) {
         if ([extension isEqualToString:GLTFExtensionKHRMaterialsPBRSpecularGlossiness]) {
+            NSLog(@"WARNING: Extension \"%@\" is not fully supported", extension);
             _usesPBRSpecularGlossiness = YES;
         } else if ([extension isEqualToString:GLTFExtensionEXTPBRAttributes]) {
             _usesEXTPBRAttributes = YES;
@@ -377,9 +411,7 @@
         NSString *uri = properties[@"uri"];
         
         if ([uri hasPrefix:@"data:image/"]) {
-            CGImageRef cgImage = [GLTFImage newImageForDataURI:uri];
-            image.cgImage = cgImage;
-            CGImageRelease(cgImage);
+            image.imageData = [self imageDataForDataURI:uri];
         } else if (uri.length > 0) {
             NSURL *resourceURL = [self.url URLByDeletingLastPathComponent];
             image.url = [resourceURL URLByAppendingPathComponent:uri];
@@ -445,11 +477,11 @@
 
 - (BOOL)loadCameras:(NSArray *)camerasMap {
     if (camerasMap.count == 0) {
-        _cameras = @[];
+        _cameras = [NSMutableArray array];
         return YES;
     }
     
-    NSMutableArray *cameras = [NSMutableArray arrayWithCapacity:camerasMap.count];
+    _cameras = [NSMutableArray arrayWithCapacity:camerasMap.count];
     for (NSDictionary *properties in camerasMap) {
         GLTFCamera *camera = [[GLTFCamera alloc] init];
         
@@ -482,19 +514,18 @@
         
         [camera buildProjectionMatrix];
         
-        [cameras addObject: camera];
+        [_cameras addObject: camera];
     }
     
-    _cameras = [cameras copy];
     return YES;
 }
 
 - (BOOL)loadLights:(NSArray *)lightsMap {
     if (lightsMap.count == 0) {
-        _lights = @[];
+        return YES;
     }
     
-    NSMutableArray *lights = [NSMutableArray arrayWithCapacity:lightsMap.count];
+    _lights = [NSMutableArray arrayWithCapacity:lightsMap.count];
     [lightsMap enumerateObjectsUsingBlock:^(NSDictionary *properties, NSUInteger index, BOOL *stop) {
         GLTFKHRLight *light = [GLTFKHRLight new];
         NSString *lightTypeName = properties[@"type"];
@@ -535,10 +566,9 @@
             }
         }
         
-        [lights addObject:light];
+        [_lights addObject:light];
     }];
-    
-    _lights = [lights copy];
+
     return YES;
 }
 

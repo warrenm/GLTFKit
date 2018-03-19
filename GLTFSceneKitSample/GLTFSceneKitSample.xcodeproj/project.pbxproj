@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		834E0014203123A000DCB66E /* tropical_beach.hdr in Resources */ = {isa = PBXBuildFile; fileRef = 834E0013203123A000DCB66E /* tropical_beach.hdr */; };
+		835756082043E3BF00CE345A /* tropical_beach.hdr in Resources */ = {isa = PBXBuildFile; fileRef = 835756062043E3B600CE345A /* tropical_beach.hdr */; };
 		836715F91FA9014E007ECCC9 /* GLTFSCNViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 836715F81FA9014E007ECCC9 /* GLTFSCNViewController.m */; };
 		83BD8A0D1FA82BCF002CF9B9 /* GLTFSCNDocument.m in Sources */ = {isa = PBXBuildFile; fileRef = 83BD8A0C1FA82BCF002CF9B9 /* GLTFSCNDocument.m */; };
 		83BD8A0F1FA82BCF002CF9B9 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 83BD8A0E1FA82BCF002CF9B9 /* Assets.xcassets */; };
@@ -35,7 +35,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		834E0013203123A000DCB66E /* tropical_beach.hdr */ = {isa = PBXFileReference; lastKnownFileType = file; path = tropical_beach.hdr; sourceTree = "<group>"; };
+		835756062043E3B600CE345A /* tropical_beach.hdr */ = {isa = PBXFileReference; lastKnownFileType = file; path = tropical_beach.hdr; sourceTree = "<group>"; };
 		836715F81FA9014E007ECCC9 /* GLTFSCNViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GLTFSCNViewController.m; sourceTree = "<group>"; };
 		83BD8A021FA82BCF002CF9B9 /* GLTFSceneKitSample.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GLTFSceneKitSample.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		83BD8A081FA82BCF002CF9B9 /* GLTFSCNViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GLTFSCNViewController.h; sourceTree = "<group>"; };
@@ -63,11 +63,28 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		835756022043E3A100CE345A /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				835756032043E3B600CE345A /* Environment */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		835756032043E3B600CE345A /* Environment */ = {
+			isa = PBXGroup;
+			children = (
+				835756062043E3B600CE345A /* tropical_beach.hdr */,
+			);
+			name = Environment;
+			path = ../../Resources/Environment;
+			sourceTree = "<group>";
+		};
 		83BD89F91FA82BCF002CF9B9 = {
 			isa = PBXGroup;
 			children = (
+				835756022043E3A100CE345A /* Resources */,
 				83D32B1B1FA9150100703763 /* Shared */,
-				83E99B691FA910B4006E8004 /* Resources */,
 				83BD8A041FA82BCF002CF9B9 /* macOS */,
 				83BD8A031FA82BCF002CF9B9 /* Products */,
 				83E99B5E1FA91063006E8004 /* Frameworks */,
@@ -112,22 +129,6 @@
 				83E99B621FA91063006E8004 /* GLTFSCN.framework */,
 			);
 			name = Frameworks;
-			sourceTree = "<group>";
-		};
-		83E99B691FA910B4006E8004 /* Resources */ = {
-			isa = PBXGroup;
-			children = (
-				83E99B6A1FA910B9006E8004 /* Environment */,
-			);
-			path = Resources;
-			sourceTree = "<group>";
-		};
-		83E99B6A1FA910B9006E8004 /* Environment */ = {
-			isa = PBXGroup;
-			children = (
-				834E0013203123A000DCB66E /* tropical_beach.hdr */,
-			);
-			path = Environment;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -194,7 +195,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				834E0014203123A000DCB66E /* tropical_beach.hdr in Resources */,
+				835756082043E3BF00CE345A /* tropical_beach.hdr in Resources */,
 				83BD8A0F1FA82BCF002CF9B9 /* Assets.xcassets in Resources */,
 				83BD8A121FA82BCF002CF9B9 /* Main.storyboard in Resources */,
 			);

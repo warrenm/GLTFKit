@@ -40,6 +40,10 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, assign) simd_float4x4 localTransform;
 @property (nonatomic, readonly, assign) simd_float4x4 globalTransform;
 @property (nonatomic, readonly, assign) GLTFBoundingBox approximateBounds; // axis-aligned; in local coordinates
+
+- (void)addChildNode:(GLTFNode *)node;
+- (void)removeFromParent;
+
 @end
 
 NS_ASSUME_NONNULL_END

@@ -15,120 +15,48 @@
 //
 
 #import "GLTFMTLLightingEnvironment.h"
+#import "GLTFMTLTextureLoader.h"
 
 @import MetalKit;
 
 @interface GLTFMTLLightingEnvironment ()
+@property (nonatomic, strong) id<MTLDevice> device;
+@property (nonatomic, strong) id<MTLLibrary> library;
+@property (nonatomic, strong) id<MTLCommandQueue> commandQueue;
 @property (nonatomic, strong) id<MTLComputePipelineState> brdfComputePipeline;
+@property (nonatomic, strong) id<MTLComputePipelineState> equirectToCubePipeline;
+@property (nonatomic, strong) id<MTLComputePipelineState> irradiancePipeline;
+@property (nonatomic, strong) id<MTLComputePipelineState> specularPipeline;
+@property (nonatomic, strong) GLTFMTLTextureLoader *textureLoader;
 @end
 
 @implementation GLTFMTLLightingEnvironment
 
 @synthesize specularMipLevelCount=_specularMipLevelCount;
 
-- (instancetype)initWithDiffuseCubeURL:(NSURL *)diffuseCubeURL
-                      specularCubeURLs:(NSArray<NSURL *> *)specularCubeURLs
-                                device:(id<MTLDevice>)device
-                                 error:(NSError **)error
+- (instancetype)initWithContentsOfURL:(NSURL *)environmentURL device:(id<MTLDevice>)device error:(NSError **)error
 {
+    NSParameterAssert(device != nil);
+    
     if ((self = [super init])) {
         _intensity = 1;
+        _device = device;
+        _commandQueue = [device newCommandQueue];
+        _library = [device newDefaultLibrary];
+        _textureLoader = [[GLTFMTLTextureLoader alloc] initWithDevice:device];
         
-        NSError *internalError = nil;
+        NSDictionary *options = @{ };
+        id<MTLTexture> equirectTexture = [_textureLoader newTextureWithContentsOfURL:environmentURL options:options error:error];
         
-        id<MTLCommandQueue> commandQueue = [device newCommandQueue];
-        
-        id<MTLLibrary> library = [device newDefaultLibrary];
-        id<MTLFunction> brdfFunction = [library newFunctionWithName:@"integrate_brdf"];
-        _brdfComputePipeline = [device newComputePipelineStateWithFunction:brdfFunction error:&internalError];
-        if (_brdfComputePipeline == nil) {
-            if (error) {
-                *error = internalError;
-            }
+        if (![self _buildPipelineStatesWithError:error]) {
             return nil;
         }
-        
-        MTKTextureLoader *textureLoader = [[MTKTextureLoader alloc] initWithDevice:device];
-        
-        id<MTLCommandBuffer> commandBuffer = [commandQueue commandBuffer];
-        id<MTLBlitCommandEncoder> blitEncoder = [commandBuffer blitCommandEncoder];
-        
-        id options = @{ MTKTextureLoaderOptionOrigin : MTKTextureLoaderOriginTopLeft,
-                        MTKTextureLoaderOptionSRGB : @(NO)
-                      };
 
-        id<MTLTexture> diffuseStrip = [textureLoader newTextureWithContentsOfURL:diffuseCubeURL options:options error:&internalError];
-        if (diffuseStrip == nil) {
-            if (error != nil) {
-                *error = internalError;
-            }
-            return nil;
-        }
-        
-        int diffuseCubeSize = (int)[diffuseStrip width];
-        
-        MTLTextureDescriptor *cubeDescriptor = [MTLTextureDescriptor textureCubeDescriptorWithPixelFormat:MTLPixelFormatBGRA8Unorm
-                                                                                                     size:diffuseCubeSize
-                                                                                                mipmapped:NO];
-        
-        _diffuseCube = [device newTextureWithDescriptor:cubeDescriptor];
-        
-        for (int i = 0; i < 6; ++i) {
-            [blitEncoder copyFromTexture:diffuseStrip
-                             sourceSlice:0
-                             sourceLevel:0
-                            sourceOrigin:MTLOriginMake(0, i * diffuseCubeSize, 0)
-                              sourceSize:MTLSizeMake(diffuseCubeSize, diffuseCubeSize, 1)
-                               toTexture:_diffuseCube
-                        destinationSlice:i
-                        destinationLevel:0
-                       destinationOrigin:MTLOriginMake(0, 0, 0)];
-        }
-        
-        int specularMipLevel = 0;
-        int specularCubeSize = 0;
-        for (int i = 0; i < specularCubeURLs.count; ++i) {
-            id<MTLTexture> specularStrip = [textureLoader newTextureWithContentsOfURL:specularCubeURLs[i]
-                                                                              options:options
-                                                                                error:&internalError];
-            
-            if (specularStrip == nil) {
-                if (error != nil) {
-                    *error = internalError;
-                }
-                return nil;
-            }
-            
-            if (specularCubeSize == 0) {
-                specularCubeSize = (int)[specularStrip width];
-                MTLTextureDescriptor *cubeDescriptor = [MTLTextureDescriptor textureCubeDescriptorWithPixelFormat:MTLPixelFormatBGRA8Unorm
-                                                                                                             size:specularCubeSize
-                                                                                                        mipmapped:YES];
-                cubeDescriptor.mipmapLevelCount = [specularCubeURLs count];
-                _specularCube = [device newTextureWithDescriptor:cubeDescriptor];
-            }
-            
-            for (int i = 0; i < 6; ++i) {
-                [blitEncoder copyFromTexture:specularStrip
-                                 sourceSlice:0
-                                 sourceLevel:0
-                                sourceOrigin:MTLOriginMake(0, i * specularCubeSize, 0)
-                                  sourceSize:MTLSizeMake(specularCubeSize, specularCubeSize, 1)
-                                   toTexture:_specularCube
-                            destinationSlice:i
-                            destinationLevel:specularMipLevel
-                           destinationOrigin:MTLOriginMake(0, 0, 0)];
-            }
-            
-            specularCubeSize = specularCubeSize / 2;
-            ++specularMipLevel;
-        }
-        _specularMipLevelCount = specularMipLevel;
-        
-        [blitEncoder endEncoding];
-
-        [self generateBRDFLookupWithSize:128 commandBuffer:commandBuffer device:device];
-
+        id<MTLCommandBuffer> commandBuffer = [_commandQueue commandBuffer];
+        [self _generateEnvironmentCubeMapWithSize:512 fromEquirectTexture:equirectTexture commandBuffer:commandBuffer];
+        [self _generateIrradianceCubeMapWithSize:64 fromRadianceCubeMap:_environmentCube commandBuffer:commandBuffer];
+        [self _generateSpecularCubeMapWithSize:256 roughnessLevels:9 fromRadianceCubeMap:_environmentCube commandBuffer:commandBuffer];
+        [self _generateBRDFLookupWithSize:128 commandBuffer:commandBuffer];
         [commandBuffer commit];
         [commandBuffer waitUntilCompleted];
     }
@@ -136,14 +64,125 @@
     return self;
 }
 
-- (void)generateBRDFLookupWithSize:(int)size commandBuffer:(id<MTLCommandBuffer>)commandBuffer device:(id<MTLDevice>)device {
+- (BOOL)_buildPipelineStatesWithError:(NSError **)error {
+    id<MTLFunction> brdfFunction = [_library newFunctionWithName:@"integrate_brdf"];
+    _brdfComputePipeline = [_device newComputePipelineStateWithFunction:brdfFunction error:error];
+    if (_brdfComputePipeline == nil) {
+        return NO;
+    }
     
+    id<MTLFunction> equirectFunction = [_library newFunctionWithName:@"equirect_to_cube"];
+    _equirectToCubePipeline = [_device newComputePipelineStateWithFunction:equirectFunction error:error];
+    if (_equirectToCubePipeline == nil) {
+        return NO;
+    }
+
+    id<MTLFunction> irradianceFunction = [_library newFunctionWithName:@"compute_irradiance"];
+    _irradiancePipeline = [_device newComputePipelineStateWithFunction:irradianceFunction error:error];
+    if (_irradiancePipeline == nil) {
+        return NO;
+    }
+    
+    id<MTLFunction> specularFunction = [_library newFunctionWithName:@"compute_prefiltered_specular"];
+    _specularPipeline = [_device newComputePipelineStateWithFunction:specularFunction error:error];
+    if (_specularPipeline == nil) {
+        return NO;
+    }
+
+    return YES;
+}
+
+- (void)_generateEnvironmentCubeMapWithSize:(int)size
+                        fromEquirectTexture:(id<MTLTexture>)equirectTexture
+                              commandBuffer:(id<MTLCommandBuffer>)commandBuffer
+{
+    MTLTextureDescriptor *textureDesc = [MTLTextureDescriptor textureCubeDescriptorWithPixelFormat:MTLPixelFormatRGBA16Float
+                                                                                              size:size
+                                                                                         mipmapped:YES];
+    textureDesc.usage = MTLTextureUsageShaderRead | MTLTextureUsageShaderWrite;
+    id <MTLTexture> cubeTexture = [_device newTextureWithDescriptor:textureDesc];
+    
+    id<MTLComputeCommandEncoder> commandEncoder = [commandBuffer computeCommandEncoder];
+    [commandEncoder setComputePipelineState:_equirectToCubePipeline];
+    [commandEncoder setTexture:equirectTexture atIndex:0];
+    [commandEncoder setTexture:cubeTexture atIndex:1];
+    MTLSize threadsPerThreadgroup = MTLSizeMake(16, 16, 1);
+    MTLSize threadgroups = MTLSizeMake(size / threadsPerThreadgroup.width, size / threadsPerThreadgroup.height, 6);
+    [commandEncoder dispatchThreadgroups:threadgroups threadsPerThreadgroup:threadsPerThreadgroup];
+    [commandEncoder endEncoding];
+    
+    id<MTLBlitCommandEncoder> blitEncoder = [commandBuffer blitCommandEncoder];
+    [blitEncoder generateMipmapsForTexture:cubeTexture];
+    [blitEncoder endEncoding];
+
+    _environmentCube = cubeTexture;
+}
+
+- (void)_generateIrradianceCubeMapWithSize:(int)size
+                       fromRadianceCubeMap:(id<MTLTexture>)environmentCube
+                             commandBuffer:(id<MTLCommandBuffer>)commandBuffer
+{
+    MTLTextureDescriptor *textureDesc = [MTLTextureDescriptor textureCubeDescriptorWithPixelFormat:MTLPixelFormatRGBA16Float
+                                                                                              size:size
+                                                                                         mipmapped:NO];
+    textureDesc.usage = MTLTextureUsageShaderRead | MTLTextureUsageShaderWrite;
+    id <MTLTexture> diffuseCube = [_device newTextureWithDescriptor:textureDesc];
+    
+    id<MTLComputeCommandEncoder> commandEncoder = [commandBuffer computeCommandEncoder];
+    [commandEncoder setComputePipelineState:_irradiancePipeline];
+    [commandEncoder setTexture:environmentCube atIndex:0];
+    [commandEncoder setTexture:diffuseCube atIndex:1];
+    MTLSize threadsPerThreadgroup = MTLSizeMake(16, 16, 1);
+    MTLSize threadgroups = MTLSizeMake(size / threadsPerThreadgroup.width, size / threadsPerThreadgroup.height, 6);
+    [commandEncoder dispatchThreadgroups:threadgroups threadsPerThreadgroup:threadsPerThreadgroup];
+    [commandEncoder endEncoding];
+    
+    _diffuseCube = diffuseCube;
+}
+
+- (void)_generateSpecularCubeMapWithSize:(int)size
+                         roughnessLevels:(int)roughnessLevels
+                     fromRadianceCubeMap:(id<MTLTexture>)environmentCube
+                           commandBuffer:(id<MTLCommandBuffer>)commandBuffer
+{
+    MTLTextureDescriptor *textureDesc = [MTLTextureDescriptor textureCubeDescriptorWithPixelFormat:MTLPixelFormatRGBA16Float
+                                                                                              size:size
+                                                                                         mipmapped:YES];
+    textureDesc.usage = MTLTextureUsageShaderRead | MTLTextureUsageShaderWrite;
+    id <MTLTexture> specularCube = [_device newTextureWithDescriptor:textureDesc];
+
+    id<MTLComputeCommandEncoder> commandEncoder = [commandBuffer computeCommandEncoder];
+    [commandEncoder setComputePipelineState:_specularPipeline];
+    [commandEncoder setTexture:environmentCube atIndex:0];
+    
+    int mipSize = size;
+    for (int lod = 0; lod < roughnessLevels; ++lod) {
+        float roughness = lod / (float)(roughnessLevels - 1);
+        [commandEncoder setBytes:&roughness length:sizeof(float) atIndex:0];
+        id<MTLTexture> specularCubeView = [specularCube newTextureViewWithPixelFormat:MTLPixelFormatRGBA16Float
+                                                                          textureType:MTLTextureTypeCube
+                                                                               levels:NSMakeRange(lod, 1)
+                                                                               slices:NSMakeRange(0, 6)];
+        [commandEncoder setTexture:specularCubeView atIndex:1];
+        MTLSize threadsPerThreadgroup = MTLSizeMake(MIN(mipSize, 16), MIN(mipSize, 16), 1);
+        MTLSize threadgroups = MTLSizeMake(size / threadsPerThreadgroup.width, size / threadsPerThreadgroup.height, 6);
+        [commandEncoder dispatchThreadgroups:threadgroups threadsPerThreadgroup:threadsPerThreadgroup];
+        mipSize = mipSize / 2;
+    }
+    
+    [commandEncoder endEncoding];
+
+    _specularCube = specularCube;
+    _specularMipLevelCount = roughnessLevels;
+}
+
+- (void)_generateBRDFLookupWithSize:(int)size commandBuffer:(id<MTLCommandBuffer>)commandBuffer {
     MTLTextureDescriptor *textureDesc = [MTLTextureDescriptor texture2DDescriptorWithPixelFormat:MTLPixelFormatRG16Float
                                                                                            width:size
                                                                                           height:size
                                                                                        mipmapped:NO];
     textureDesc.usage = MTLTextureUsageShaderRead | MTLTextureUsageShaderWrite;
-    id <MTLTexture> lookupTexture = [device newTextureWithDescriptor:textureDesc];
+    id <MTLTexture> lookupTexture = [_device newTextureWithDescriptor:textureDesc];
     
     id<MTLComputeCommandEncoder> commandEncoder = [commandBuffer computeCommandEncoder];
     [commandEncoder setComputePipelineState:_brdfComputePipeline];
@@ -152,6 +191,7 @@
     MTLSize threadgroups = MTLSizeMake(size / threadsPerThreadgroup.width, size / threadsPerThreadgroup.height, 1);
     [commandEncoder dispatchThreadgroups:threadgroups threadsPerThreadgroup:threadsPerThreadgroup];
     [commandEncoder endEncoding];
+    
     _brdfLUT = lookupTexture;
 }
 

@@ -456,9 +456,12 @@ static SCNMatrix4 GLTFSCNMatrix4FromFloat4x4(GLTFMatrix4 m) {
 
     if (originalImage == NULL) {
         // We got unlucky, so we need to load and cache the original
-        if (image.cgImage != nil) {
-            originalImage = image.cgImage;
-            CGImageRetain(originalImage);
+        if (image.imageData != nil) {
+            CGImageSourceRef imageSource = CGImageSourceCreateWithData((__bridge CFDataRef)image.imageData, nil);
+            originalImage = CGImageSourceCreateImageAtIndex(imageSource, 0, nil);
+            if (imageSource) {
+                CFRelease(imageSource);
+            }
         } else if (image.url != nil) {
             CGImageSourceRef imageSource = CGImageSourceCreateWithURL((__bridge CFURLRef)image.url, nil);
             originalImage = CGImageSourceCreateImageAtIndex(imageSource, 0, nil);

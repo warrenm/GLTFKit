@@ -75,8 +75,9 @@
     self.metalView.delegate = self;
     self.metalView.device = self.device;
     
-    self.metalView.sampleCount = 1;
-    self.metalView.clearColor = MTLClearColorMake(0.5, 0.5, 0.5, 1.0);
+    self.metalView.sampleCount = 4;
+    self.metalView.clearColor = MTLClearColorMake(0.25, 0.25, 0.25, 1.0);
+    self.metalView.colorPixelFormat = MTLPixelFormatBGRA8Unorm;
     self.metalView.depthStencilPixelFormat = MTLPixelFormatDepth32Float_Stencil8;
     
     self.camera = [GLTFViewerOrbitCamera new];
@@ -91,19 +92,9 @@
 
 - (void)loadLightingEnvironment {
     NSError *error = nil;
-    NSURL *diffuseURL = [[NSBundle mainBundle] URLForResource:@"output_iem" withExtension:@"png"];
-    NSMutableArray *specularURLs = [NSMutableArray array];
-    [specularURLs addObject:[[NSBundle mainBundle] URLForResource:@"output_pmrem_0" withExtension:@"png"]];
-    [specularURLs addObject:[[NSBundle mainBundle] URLForResource:@"output_pmrem_1" withExtension:@"png"]];
-    [specularURLs addObject:[[NSBundle mainBundle] URLForResource:@"output_pmrem_2" withExtension:@"png"]];
-    [specularURLs addObject:[[NSBundle mainBundle] URLForResource:@"output_pmrem_3" withExtension:@"png"]];
-    [specularURLs addObject:[[NSBundle mainBundle] URLForResource:@"output_pmrem_4" withExtension:@"png"]];
-    [specularURLs addObject:[[NSBundle mainBundle] URLForResource:@"output_pmrem_5" withExtension:@"png"]];
-    self.lightingEnvironment = [[GLTFMTLLightingEnvironment alloc] initWithDiffuseCubeURL:diffuseURL
-                                                                         specularCubeURLs:specularURLs
-                                                                                   device:self.device
-                                                                                    error:&error];
-    self.lightingEnvironment.intensity = 2.0;
+    NSURL *environmentURL = [[NSBundle mainBundle] URLForResource:@"tropical_beach" withExtension:@"hdr"];
+    self.lightingEnvironment = [[GLTFMTLLightingEnvironment alloc] initWithContentsOfURL:environmentURL device:self.device error:&error];
+    self.lightingEnvironment.intensity = 1.0;
     self.renderer.lightingEnvironment = self.lightingEnvironment;
 }
 
@@ -114,6 +105,7 @@
     MTLRenderPipelineDescriptor *descriptor = [MTLRenderPipelineDescriptor new];
     descriptor.vertexFunction = [library newFunctionWithName:@"skybox_vertex_main"];
     descriptor.fragmentFunction = [library newFunctionWithName:@"skybox_fragment_main"];
+    descriptor.sampleCount = self.metalView.sampleCount;
     descriptor.colorAttachments[0].pixelFormat = self.metalView.colorPixelFormat;
     descriptor.depthAttachmentPixelFormat = self.metalView.depthStencilPixelFormat;
     descriptor.stencilAttachmentPixelFormat = self.metalView.depthStencilPixelFormat;
@@ -144,6 +136,23 @@
     _asset = asset;
     [self computeRegularizationMatrix];
     [self computeTransforms];
+    [self addDefaultLights];
+}
+
+- (void)addDefaultLights {
+    GLTFNode *lightNode = [[GLTFNode alloc] init];
+    lightNode.translation = (simd_float3){ 0, 0, 1 };
+    lightNode.rotationQuaternion = simd_quaternion(1.0f, 0, 0, 0);
+    GLTFKHRLight *light = [[GLTFKHRLight alloc] init];
+    lightNode.light = light;
+    [self.asset.defaultScene addNode:lightNode];
+    [self.asset addLight:light];
+    
+    GLTFKHRLight *ambientLight = [[GLTFKHRLight alloc] init];
+    ambientLight.type = GLTFKHRLightTypeAmbient;
+    ambientLight.intensity = 0.1;
+    [self.asset addLight:ambientLight];
+    self.asset.defaultScene.ambientLight = ambientLight;
 }
 
 - (void)computeRegularizationMatrix {
@@ -245,12 +254,15 @@
     vertexUniforms.modelMatrix = GLTFMatrixFromUniformScale(100);
     vertexUniforms.modelViewProjectionMatrix = matrix_multiply(viewProjectionMatrix, vertexUniforms.modelMatrix);
     
+    float environmentIntensity = self.lightingEnvironment.intensity;
+    
     [renderEncoder setRenderPipelineState:self.skyboxPipelineState];
     [renderEncoder setFrontFacingWinding:MTLWindingCounterClockwise];
     [renderEncoder setCullMode:MTLCullModeBack];
     [renderEncoder setVertexBytes:vertexData length:sizeof(float) * 36 * 3 atIndex:0];
     [renderEncoder setVertexBytes:&vertexUniforms length:sizeof(vertexUniforms) atIndex:1];
-    [renderEncoder setFragmentTexture:self.lightingEnvironment.specularCube atIndex:0];
+    [renderEncoder setFragmentBytes:&environmentIntensity length:sizeof(environmentIntensity) atIndex:0];
+    [renderEncoder setFragmentTexture:self.lightingEnvironment.environmentCube atIndex:0];
     [renderEncoder drawPrimitives:MTLPrimitiveTypeTriangle vertexStart:0 vertexCount:36];
     [renderEncoder setCullMode:MTLCullModeNone];
 }
@@ -319,9 +331,11 @@
     {
         id <MTLRenderCommandEncoder> renderEncoder = [commandBuffer renderCommandEncoderWithDescriptor:renderPassDescriptor];
         
-        [renderEncoder pushDebugGroup:@"Draw Backdrop"];
-        [self drawSkyboxWithCommandEncoder:renderEncoder];
-        [renderEncoder popDebugGroup];
+        if (self.lightingEnvironment != nil) {
+            [renderEncoder pushDebugGroup:@"Draw Backdrop"];
+            [self drawSkyboxWithCommandEncoder:renderEncoder];
+            [renderEncoder popDebugGroup];
+        }
         
         [renderEncoder pushDebugGroup:@"Draw glTF Scene"];
         [self.renderer renderScene:self.asset.defaultScene

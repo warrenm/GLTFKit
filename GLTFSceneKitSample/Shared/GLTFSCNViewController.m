@@ -33,6 +33,7 @@
     self.scnView.allowsCameraControl = YES;
     
     id<MTLCommandQueue> commandQueue = self.scnView.commandQueue;
+    // Setting the command queue's label to something other than "com.apple.SceneKit" allows us to capture it for debugging purposes.
     commandQueue.label = @"gltf.scenekit";
 }
 

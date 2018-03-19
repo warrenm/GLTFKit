@@ -18,17 +18,10 @@
 #import "GLTFBufferView.h"
 
 @import Foundation;
-@import CoreGraphics;
-
-typedef __attribute__((NSObject)) CGImageRef GLTFStrongCGImageRef;
 
 NS_ASSUME_NONNULL_BEGIN
 
 @interface GLTFImage : GLTFObject
-
-+ (_Nullable CGImageRef)newImageForData:(NSData *)data mimeType:(NSString *)mimeType;
-
-+ (_Nullable CGImageRef)newImageForDataURI:(NSString *)uriData;
 
 /// A reference to a buffer view containing image data, if url is nil
 @property (nonatomic, strong) GLTFBufferView * _Nullable bufferView;
@@ -39,8 +32,8 @@ NS_ASSUME_NONNULL_BEGIN
 /// A file URL, if the URI was not a decodable data-uri; otherwise nil
 @property (nonatomic, copy) NSURL * _Nullable url;
 
-/// An image, if the URI was a decodable data-uri; otherwise nil
-@property (nonatomic, strong) GLTFStrongCGImageRef _Nullable cgImage;
+/// A data object containing the data encoded in the image's data-uri, if present; otherwise nil
+@property (nonatomic, strong) NSData *imageData;
 
 @end
 
