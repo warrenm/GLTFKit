@@ -16,6 +16,8 @@
 
 #import "GLTFImage.h"
 
+@import CoreGraphics;
+
 @implementation GLTFImage
 
 + (CGImageRef)newImageForData:(NSData *)data mimeType:(NSString *)mimeType {
