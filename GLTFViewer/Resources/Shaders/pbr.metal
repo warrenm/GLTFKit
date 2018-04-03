@@ -171,7 +171,11 @@ vertex VertexOut vertex_main(VertexIn in [[stage_in]],
     #endif
 
     #if HAS_VERTEX_COLOR
-        out.color = in.color;
+        #if VERTEX_COLOR_IS_RGB
+            out.color = float4(in.color, 1);
+        #else
+            out.color = in.color;
+        #endif
     #endif
     
     #if HAS_VERTEX_ROUGHNESS

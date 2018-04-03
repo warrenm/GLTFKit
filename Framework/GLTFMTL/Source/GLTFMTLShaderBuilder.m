@@ -123,6 +123,7 @@
     BOOL hasExtendedSkinning = submesh.accessorsForAttributes[GLTFAttributeSemanticJoints1] != nil &&
                                submesh.accessorsForAttributes[GLTFAttributeSemanticWeights1] != nil;
     BOOL hasVertexColor = submesh.accessorsForAttributes[GLTFAttributeSemanticColor0] != nil;
+    BOOL vertexColorIsRGB = submesh.accessorsForAttributes[GLTFAttributeSemanticColor0].dimension == GLTFDataDimensionVector3;
     BOOL hasVertexRoughness = submesh.accessorsForAttributes[GLTFAttributeSemanticRoughness] != nil;
     BOOL hasVertexMetallic = submesh.accessorsForAttributes[GLTFAttributeSemanticMetallic] != nil;
     BOOL useAlphaTest = material.alphaMode == GLTFAlphaModeMask;
@@ -139,6 +140,7 @@
     [shaderFeatures appendFormat:@"#define HAS_NORMALS %d\n", hasNormals];
     [shaderFeatures appendFormat:@"#define HAS_TANGENTS %d\n", hasTangents];
     [shaderFeatures appendFormat:@"#define HAS_VERTEX_COLOR %d\n", hasVertexColor];
+    [shaderFeatures appendFormat:@"#define VERTEX_COLOR_IS_RGB %d\n", vertexColorIsRGB];
     [shaderFeatures appendFormat:@"#define HAS_BASE_COLOR_MAP %d\n", hasBaseColorMap];
     [shaderFeatures appendFormat:@"#define HAS_NORMAL_MAP %d\n", hasNormalMap];
     [shaderFeatures appendFormat:@"#define HAS_METALLIC_ROUGHNESS_MAP %d\n", hasMetallicRoughnessMap];
