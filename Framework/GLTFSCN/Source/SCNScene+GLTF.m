@@ -468,6 +468,14 @@ static SCNMatrix4 GLTFSCNMatrix4FromFloat4x4(GLTFMatrix4 m) {
             if (imageSource) {
                 CFRelease(imageSource);
             }
+        } else if (image.bufferView != nil) {
+            GLTFBufferView *bufferView = image.bufferView;
+            NSData *imageData = [NSData dataWithBytes:bufferView.buffer.contents + bufferView.offset length:bufferView.length];
+            CGImageSourceRef imageSource = CGImageSourceCreateWithData((__bridge CFDataRef)imageData, nil);
+            originalImage = CGImageSourceCreateImageAtIndex(imageSource, 0, nil);
+            if (imageSource) {
+                CFRelease(imageSource);
+            }
         }
         
         self.cgImagesForImagesAndChannels[unmaskedIdentifier] = (__bridge id)originalImage;
