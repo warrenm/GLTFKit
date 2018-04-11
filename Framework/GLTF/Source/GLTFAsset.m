@@ -359,15 +359,15 @@
         bufferView.offset = [properties[@"byteOffset"] integerValue];
         bufferView.target = [properties[@"target"] integerValue];
 
-        if ((bufferView.buffer != nil) && (bufferView.offset % 16 != 0)) {
-            NSLog(@"WARNING: Buffer view %d had misaligned offset of %d. Creating auxilliary buffer of length %d and continuing...",
-                  (int)index, (int)bufferView.offset, (int)bufferView.length);
-            id<GLTFBuffer> alignedBuffer = [_bufferAllocator newBufferWithLength:bufferView.length];
-            _buffers = [_buffers arrayByAddingObject:alignedBuffer];
-            memcpy([alignedBuffer contents], bufferView.buffer.contents + bufferView.offset, bufferView.length);
-            bufferView.buffer = alignedBuffer;
-            bufferView.offset = 0;
-        }
+//        if ((bufferView.buffer != nil) && (bufferView.offset % 16 != 0)) {
+//            NSLog(@"WARNING: Buffer view %d had misaligned offset of %d. Creating auxilliary buffer of length %d and continuing...",
+//                  (int)index, (int)bufferView.offset, (int)bufferView.length);
+//            id<GLTFBuffer> alignedBuffer = [_bufferAllocator newBufferWithLength:bufferView.length];
+//            _buffers = [_buffers arrayByAddingObject:alignedBuffer];
+//            memcpy([alignedBuffer contents], bufferView.buffer.contents + bufferView.offset, bufferView.length);
+//            bufferView.buffer = alignedBuffer;
+//            bufferView.offset = 0;
+//        }
         
         [bufferViews addObject: bufferView];
     }];
