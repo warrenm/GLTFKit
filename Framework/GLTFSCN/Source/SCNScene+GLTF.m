@@ -181,7 +181,11 @@ static SCNMatrix4 GLTFSCNMatrix4FromFloat4x4(GLTFMatrix4 m) {
         // generate camera and add to node
     }
     
-    scnNode.simdTransform = node.localTransform;
+    if (@available(iOS 11.0, *)) {
+        scnNode.simdTransform = node.localTransform;
+    } else {
+        scnNode.transform = SCNMatrix4FromMat4(node.localTransform);
+    }
     scnNode.name = node.name;
 
     [parentNode addChildNode:scnNode];
