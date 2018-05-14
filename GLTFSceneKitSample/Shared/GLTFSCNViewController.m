@@ -15,10 +15,13 @@
 //
 
 #import "GLTFSCNViewController.h"
+#import "GLTFSCNAnimationPlaybackViewController.h"
+
 #import <GLTFSCN/GLTFSCN.h>
 
 @interface GLTFSCNViewController ()
 @property (nonatomic, weak) SCNView *scnView;
+@property (nonatomic, strong) GLTFSCNAnimationPlaybackViewController *animationController;
 @end
 
 @implementation GLTFSCNViewController
@@ -40,10 +43,13 @@
 - (void)setAsset:(GLTFAsset *)asset {
     GLTFSCNAsset *scnAsset = [SCNScene assetFromGLTFAsset:asset options:@{}];
     _scene = scnAsset.defaultScene;
-    for (GLTFSCNAnimationTargetPair *animation in scnAsset.animations) {
-        [animation.target addAnimation:animation.animation forKey:nil];
-    }
     
+    if ([scnAsset.animations count] > 0) {
+        [self showAnimationUI];
+        self.animationController.animationsForNames = scnAsset.animations;
+        self.animationController.scnView = self.scnView;
+    }
+
     _scene.lightingEnvironment.contents = @"tropical_beach.hdr";
     _scene.lightingEnvironment.intensity = 2.0;
     
@@ -61,6 +67,20 @@
     [_scene.rootNode addChildNode:cameraNode];
 
     self.scnView.scene = _scene;
+}
+
+- (void)showAnimationUI {
+    self.animationController = [[GLTFSCNAnimationPlaybackViewController alloc] initWithNibName:@"AnimationPlaybackView" bundle:nil];
+    self.animationController.view.translatesAutoresizingMaskIntoConstraints = NO;
+    [self.view addSubview:self.animationController.view];
+    NSDictionary *views = @{ @"controller" : self.animationController.view };
+    [NSLayoutConstraint constraintWithItem:self.animationController.view attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual
+                                    toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:0 constant:480].active = YES;
+    [NSLayoutConstraint constraintWithItem:self.animationController.view attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual
+                                    toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:0 constant:100].active = YES;
+    [NSLayoutConstraint constraintWithItem:self.animationController.view attribute:NSLayoutAttributeCenterX relatedBy:NSLayoutRelationEqual
+                                    toItem:self.view attribute:NSLayoutAttributeCenterX multiplier:1 constant:0].active = YES;
+    [self.view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[controller]-(12)-|" options:0 metrics:nil views:views]];
 }
 
 @end

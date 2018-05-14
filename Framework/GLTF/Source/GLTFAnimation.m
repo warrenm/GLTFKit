@@ -22,6 +22,10 @@
 
 @implementation GLTFAnimationSampler
 
+- (NSString *)description {
+    return [NSString stringWithFormat:@"%@ interpolation: %d", super.description, (int)self.interpolationMode];
+}
+
 - (const void *)inputValues {
     return [self.inputAccessor.bufferView.buffer contents] + self.inputAccessor.bufferView.offset + self.inputAccessor.offset;
 }
@@ -37,22 +41,36 @@
 @end
 
 @implementation GLTFAnimationChannel
+
+- (NSString *)description {
+    return [NSString stringWithFormat:@"%@ target: %@; path: %@; sampler: %@", super.description, self.targetNode, self.targetPath, self.sampler];
+}
+
+- (NSTimeInterval)startTime {
+    GLTFAnimationSampler *sampler = self.sampler;
+    const float *timeValues = sampler.inputValues;
+    float startTime = timeValues[0];
+    return startTime;
+}
+
+- (NSTimeInterval)endTime {
+    GLTFAnimationSampler *sampler = self.sampler;
+    const float *timeValues = sampler.inputValues;
+    int keyFrameCount = sampler.keyFrameCount;
+    float endTime = timeValues[keyFrameCount - 1];
+    return endTime;
+}
+
+- (NSTimeInterval)duration {
+    return self.endTime - self.startTime;
+}
+
 @end
 
 @implementation GLTFAnimation
 
-- (NSTimeInterval)duration {
-    NSTimeInterval maxEndTime = 0;
-    for (GLTFAnimationChannel *channel in self.channels) {
-        GLTFAnimationSampler *sampler = channel.sampler;
-        const float *timeValues = sampler.inputValues;
-        int keyFrameCount = sampler.keyFrameCount;
-        float endTime = timeValues[keyFrameCount - 1];
-        if (endTime > maxEndTime) {
-            maxEndTime = endTime;
-        }
-    }
-    return maxEndTime;
+- (NSString *)description {
+    return [NSString stringWithFormat:@"%@ channels: %@", super.description, self.channels];
 }
 
 - (void)runAtTime:(NSTimeInterval)time {
@@ -130,7 +148,7 @@
             if(sampler.outputAccessor.componentType != GLTFDataTypeFloat) {
                 static dispatch_once_t floatWeightsNonce;
                 dispatch_once(&floatWeightsNonce, ^{
-                    NSLog(@"WARNING: Only scalar float accessors are supported for rotation animations. This will only be reported once.");
+                    NSLog(@"WARNING: Only scalar float accessors are supported for weight animations. This will only be reported once.");
                 });
             }
             const float *weightValues = sampler.outputValues;

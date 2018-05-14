@@ -24,7 +24,6 @@ NS_ASSUME_NONNULL_BEGIN
 @interface GLTFAnimation : GLTFObject
 @property (nonatomic, copy) NSArray *channels;
 @property (nonatomic, copy) NSDictionary *samplers;
-@property (nonatomic, readonly, assign) NSTimeInterval duration;
 
 - (void)runAtTime:(NSTimeInterval)time;
 @end
@@ -39,6 +38,9 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, weak) GLTFNode *targetNode;
 @property (nonatomic, weak) NSString *targetPath;
 @property (nonatomic, weak) GLTFAnimationSampler *sampler;
+@property (nonatomic, readonly, assign) NSTimeInterval duration;
+@property (nonatomic, readonly, assign) NSTimeInterval startTime;
+@property (nonatomic, readonly, assign) NSTimeInterval endTime;
 @end
 
 NS_ASSUME_NONNULL_END

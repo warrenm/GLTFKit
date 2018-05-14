@@ -183,8 +183,10 @@
     
     NSTimeInterval maxAnimDuration = 0;
     for (GLTFAnimation *animation in self.asset.animations) {
-        if (animation.duration > maxAnimDuration) {
-            maxAnimDuration = animation.duration;
+        for (GLTFAnimationChannel *channel in animation.channels) {
+            if (channel.duration > maxAnimDuration) {
+                maxAnimDuration = channel.duration;
+            }
         }
     }
     

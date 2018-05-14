@@ -28,7 +28,7 @@ NS_ASSUME_NONNULL_BEGIN
 @interface GLTFSCNAsset : NSObject
 @property (nonatomic, copy) NSArray<SCNScene *> *scenes;
 @property (nonatomic, strong) SCNScene * _Nullable defaultScene;
-@property (nonatomic, copy) NSArray<GLTFSCNAnimationTargetPair *> *animations;
+@property (nonatomic, copy) NSDictionary<NSString *, NSArray<GLTFSCNAnimationTargetPair *> *> *animations;
 //@property (nonatomic, copy) NSArray<SCNCamera *> *cameras;
 //@property (nonatomic, copy) NSArray<SCNLight *> *lights;
 @end

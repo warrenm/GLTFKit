@@ -94,6 +94,7 @@ static SCNMatrix4 GLTFSCNMatrix4FromFloat4x4(GLTFMatrix4 m) {
 @property (nonatomic, strong) NSMutableDictionary<NSString *, id> *cgImagesForImagesAndChannels;
 @property (nonatomic, strong) NSMutableDictionary<NSUUID *, SCNNode *> *scnNodesForGLTFNodes;
 @property (nonatomic, strong) NSMutableDictionary<NSUUID *, NSArray<NSValue *> *> *inverseBindMatricesForSkins;
+@property (nonatomic, assign) NSInteger anonymousAnimationIndex;
 
 - (instancetype)initWithGLTFAsset:(GLTFAsset *)asset options:(NSDictionary<id<NSCopying>, id> *)options;
 
@@ -114,6 +115,12 @@ static SCNMatrix4 GLTFSCNMatrix4FromFloat4x4(GLTFMatrix4 m) {
     return self;
 }
 
+- (NSString *)_nextAnonymousAnimationName {
+    NSString *name = [NSString stringWithFormat:@"UNNAMED_%d", (int)self.anonymousAnimationIndex];
+    self.anonymousAnimationIndex = self.anonymousAnimationIndex + 1;
+    return name;
+}
+
 - (GLTFSCNAsset *)buildSceneContainer {
     GLTFSCNAsset *scnAsset = [GLTFSCNAsset new];
     
@@ -129,8 +136,10 @@ static SCNMatrix4 GLTFSCNMatrix4FromFloat4x4(GLTFMatrix4 m) {
         [scenes addObject:scnScene];
     }
     
-    NSMutableArray<GLTFSCNAnimationTargetPair *> *animations = [NSMutableArray array];
+    NSMutableDictionary *animations = [NSMutableDictionary dictionary];
     for (GLTFAnimation *animation in self.asset.animations) {
+        NSString *name = animation.name ?: [self _nextAnonymousAnimationName];
+        NSMutableArray *pairs = [NSMutableArray array];
         for (GLTFAnimationChannel *channel in animation.channels) {
             CAKeyframeAnimation *keyframeAnimation = nil;
             if ([channel.targetPath isEqualToString:@"rotation"]) {
@@ -145,8 +154,11 @@ static SCNMatrix4 GLTFSCNMatrix4FromFloat4x4(GLTFMatrix4 m) {
             } else {
                 continue;
             }
-            keyframeAnimation.keyTimes = [self floatArrayFromFloatAccessor:channel.sampler.inputAccessor];
-            keyframeAnimation.duration = animation.duration;
+            keyframeAnimation.keyTimes = [self normalizedArrayFromFloatAccessor:channel.sampler.inputAccessor
+                                                                   minimumValue:channel.startTime
+                                                                   maximumValue:channel.endTime];
+            keyframeAnimation.beginTime = channel.startTime;
+            keyframeAnimation.duration = channel.duration;
             keyframeAnimation.repeatDuration = FLT_MAX;
             
             SCNNode *scnNode = self.scnNodesForGLTFNodes[channel.targetNode.identifier];
@@ -154,11 +166,12 @@ static SCNMatrix4 GLTFSCNMatrix4FromFloat4x4(GLTFMatrix4 m) {
                 GLTFSCNAnimationTargetPair *pair = [GLTFSCNAnimationTargetPair new];
                 pair.animation = keyframeAnimation;
                 pair.target = scnNode;
-                [animations addObject:pair];
+                [pairs addObject:pair];
             } else {
                 NSLog(@"WARNING: Could not find node for channel target node identifier %@", channel.targetNode.identifier);
             }
         }
+        animations[name] = [pairs copy];
     }
     
     scnAsset.scenes = [scenes copy];
@@ -585,12 +598,14 @@ static SCNMatrix4 GLTFSCNMatrix4FromFloat4x4(GLTFMatrix4 m) {
     return [values copy];
 }
 
-- (NSArray<NSNumber *> *)floatArrayFromFloatAccessor:(GLTFAccessor *)accessor {
+- (NSArray<NSNumber *> *)normalizedArrayFromFloatAccessor:(GLTFAccessor *)accessor minimumValue:(float)minimumValue maximumValue:(float)maximumValue {
     NSMutableArray *values = [NSMutableArray array];
     const float *floats = accessor.bufferView.buffer.contents + accessor.bufferView.offset + accessor.offset;
     NSInteger count = accessor.count;
     for (NSInteger i = 0; i < count; ++i) {
-        NSValue *value = [NSNumber numberWithFloat:floats[i]];
+        float f = floats[i];
+        f = fmin(fmax(0, (f - minimumValue) / (maximumValue - minimumValue)), 1);
+        NSValue *value = [NSNumber numberWithFloat:f];
         [values addObject:value];
     }
     return [values copy];
