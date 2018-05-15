@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name         = "GLTF"
-  s.version      = "0.5.1"
+  s.version      = "1.0.0-rc2"
   s.summary      = "A framework for loading GL Transmission Format (glTF) models"
   s.homepage     = "https://github.com/warrenm/GLTFKit"
   s.screenshots  = "https://github.com/warrenm/GLTFKit/raw/master/Images/screenshot-polly.jpg"

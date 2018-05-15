@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name         = "GLTFSCN"
-  s.version      = "0.5.2"
+  s.version      = "1.0.0-rc2"
   s.summary      = "A framework for importing GL Transmission Format (glTF) models into SceneKit"
   s.homepage     = "https://github.com/warrenm/GLTFKit"
   s.screenshots  = "https://github.com/warrenm/GLTFKit/raw/master/Images/screenshot-polly.jpg"
