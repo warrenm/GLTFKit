@@ -263,9 +263,8 @@ static SCNMatrix4 GLTFSCNMatrix4FromFloat4x4(GLTFMatrix4 m) {
         id<GLTFBuffer> indexBuffer = indexBufferView.buffer;
         SCNGeometryPrimitiveType primitiveType = GLTFSCNGeometryPrimitiveTypeForPrimitiveType(submesh.primitiveType);
         NSInteger bytesPerIndex = (indexAccessor.componentType == GLTFDataTypeUShort) ? sizeof(uint16_t) : sizeof(uint32_t);
-        NSData *indexData = [NSData dataWithBytesNoCopy:indexBuffer.contents + indexBufferView.offset + indexAccessor.offset
-                                                 length:indexAccessor.count * bytesPerIndex
-                                           freeWhenDone:NO];
+        NSData *indexData = [NSData dataWithBytes:indexBuffer.contents + indexBufferView.offset + indexAccessor.offset
+                                           length:indexAccessor.count * bytesPerIndex];
         NSInteger indexCount = indexAccessor.count;
         NSInteger primitiveCount = GLTFPrimitiveCountForIndexCount(indexCount, primitiveType);
         SCNGeometryElement *geometryElement = [SCNGeometryElement geometryElementWithData:indexData
@@ -320,9 +319,8 @@ static SCNMatrix4 GLTFSCNMatrix4FromFloat4x4(GLTFMatrix4 m) {
         dataStride = bytesPerElement;
     }
     
-    NSData *data = [NSData dataWithBytesNoCopy:buffer.contents + bufferView.offset + accessor.offset
-                                        length:accessor.count * dataStride
-                                  freeWhenDone:NO];
+    NSData *data = [NSData dataWithBytes:buffer.contents + bufferView.offset + accessor.offset
+                                  length:accessor.count * dataStride];
 
     SCNGeometrySource *source = [SCNGeometrySource geometrySourceWithData:data
                                                                  semantic:semantic

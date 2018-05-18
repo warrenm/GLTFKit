@@ -332,7 +332,7 @@
         id<GLTFBuffer> buffer = [_bufferAllocator newBufferWithData:data];
         
         if (byteLength != [buffer length]) {
-            NSLog(@"WARNING: Expected to load buffer of length %lu bytes; got %lu bytes", byteLength, [buffer length]);
+            NSLog(@"WARNING: Expected to load buffer of length %lu bytes; got %lu bytes", (unsigned long)byteLength, (unsigned long)[buffer length]);
         }
         [buffers addObject: buffer];
     }
