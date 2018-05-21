@@ -60,6 +60,7 @@
 @property (nonatomic, assign) BOOL usesPBRSpecularGlossiness;
 @property (nonatomic, assign) BOOL usesEXTPBRAttributes;
 @property (nonatomic, assign) BOOL usesKHRLights;
+@property (nonatomic, assign) BOOL usesKHRTextureTransform;
 @end
 
 @implementation GLTFAsset
@@ -180,6 +181,8 @@
             _usesEXTPBRAttributes = YES;
         } else if ([extension isEqualToString:GLTFExtensionKHRLights]) {
             _usesKHRLights = YES;
+        } else if ([extension isEqualToString:GLTFExtensionKHRTextureTransform]) {
+            _usesKHRTextureTransform = YES;
         } else {
             NSLog(@"WARNING: Unsupported extension \"%@\" used", extension);
         }
@@ -466,7 +469,7 @@
         texture.name = properties[@"name"];
         texture.extensions = properties[@"extensions"];
         texture.extras = properties[@"extras"];
-
+        
         [textures addObject: texture];
     }
 
@@ -693,15 +696,19 @@
             NSDictionary *baseColorTextureMap = pbrValuesMap[@"baseColorTexture"];
             NSNumber *baseColorTextureIndexValue = baseColorTextureMap[@"index"];
             if (baseColorTextureIndexValue != nil) {
+                material.baseColorTexture = [[GLTFTextureInfo alloc] init];
                 NSUInteger baseColorTextureIndex = baseColorTextureIndexValue.integerValue;
                 if (baseColorTextureIndex < _textures.count) {
-                    material.baseColorTexture = _textures[baseColorTextureIndex];
+                    material.baseColorTexture.texture = _textures[baseColorTextureIndex];
                 }
             }
             NSNumber *baseColorTexCoordValue = baseColorTextureMap[@"texCoord"];
             if (baseColorTexCoordValue != nil) {
-                material.baseColorTexCoord = baseColorTexCoordValue.integerValue;
+                material.baseColorTexture.texCoord = baseColorTexCoordValue.integerValue;
             }
+            
+            material.baseColorTexture.extras = baseColorTextureMap[@"extras"];
+            material.baseColorTexture.extensions = baseColorTextureMap[@"extensions"];
 
             NSArray *baseColorFactorComponents = pbrValuesMap[@"baseColorFactor"];
             if (baseColorFactorComponents.count == 4) {
@@ -721,50 +728,83 @@
             NSDictionary *metallicRoughnessTextureMap = pbrValuesMap[@"metallicRoughnessTexture"];
             NSNumber *metallicRoughnessTextureIndexValue = metallicRoughnessTextureMap[@"index"];
             if (metallicRoughnessTextureIndexValue != nil) {
+                material.metallicRoughnessTexture = [[GLTFTextureInfo alloc] init];
                 NSUInteger metallicRoughnessTextureIndex = metallicRoughnessTextureIndexValue.integerValue;
                 if (metallicRoughnessTextureIndex < _textures.count) {
-                    material.metallicRoughnessTexture = _textures[metallicRoughnessTextureIndex];
+                    material.metallicRoughnessTexture.texture = _textures[metallicRoughnessTextureIndex];
                 }
             }
 
             NSNumber *metallicRoughnessTexCoordValue = metallicRoughnessTextureMap[@"texCoord"];
             if (metallicRoughnessTexCoordValue != nil) {
-                material.metallicRoughnessTexCoord = metallicRoughnessTexCoordValue.integerValue;
+                material.metallicRoughnessTexture.texCoord = metallicRoughnessTexCoordValue.integerValue;
             }
+
+            material.metallicRoughnessTexture.extras = metallicRoughnessTextureMap[@"extras"];
+            material.metallicRoughnessTexture.extensions = metallicRoughnessTextureMap[@"extensions"];
         }
         
         NSDictionary *normalTextureMap = properties[@"normalTexture"];
         if (normalTextureMap) {
+            material.normalTexture = [[GLTFTextureInfo alloc] init];
             NSNumber *normalTextureIndexValue = normalTextureMap[@"index"];
             NSUInteger normalTextureIndex = normalTextureIndexValue.integerValue;
             if (normalTextureIndex < _textures.count) {
-                material.normalTexture = _textures[normalTextureIndex];
+                material.normalTexture.texture = _textures[normalTextureIndex];
             }
             NSNumber *normalTextureScaleValue = normalTextureMap[@"scale"];
             material.normalTextureScale = (normalTextureScaleValue != nil) ? normalTextureScaleValue.floatValue : 1.0;
 
             NSNumber *normalTexCoordValue = normalTextureMap[@"texCoord"];
             if (normalTexCoordValue != nil) {
-                material.normalTexCoord = normalTexCoordValue.integerValue;
+                material.normalTexture.texCoord = normalTexCoordValue.integerValue;
             }
+            
+            material.normalTexture.extras = normalTextureMap[@"extras"];
+            material.normalTexture.extensions = normalTextureMap[@"extensions"];
         }
 
         NSDictionary *emissiveTextureMap = properties[@"emissiveTexture"];
         if (emissiveTextureMap) {
+            material.emissiveTexture = [[GLTFTextureInfo alloc] init];
             NSNumber *emissiveTextureIndexValue = emissiveTextureMap[@"index"];
             NSUInteger emissiveTextureIndex = emissiveTextureIndexValue.integerValue;
             if (emissiveTextureIndex < _textures.count) {
-                material.emissiveTexture = _textures[emissiveTextureIndex];
+                material.emissiveTexture.texture = _textures[emissiveTextureIndex];
             }
             NSNumber *emissiveTexCoordValue = emissiveTextureMap[@"texCoord"];
             if (emissiveTexCoordValue != nil) {
-                material.emissiveTexCoord = emissiveTexCoordValue.integerValue;
+                material.emissiveTexture.texCoord = emissiveTexCoordValue.integerValue;
             }
+
+            material.emissiveTexture.extras = emissiveTextureMap[@"extras"];
+            material.emissiveTexture.extensions = emissiveTextureMap[@"extensions"];
         }
         
         NSArray *emissiveFactorArray = properties[@"emissiveFactor"];
         if (emissiveFactorArray.count == 3) {
             material.emissiveFactor = GLTFVectorFloat3FromArray(emissiveFactorArray);
+        }
+        
+        NSDictionary *occlusionTextureMap = properties[@"occlusionTexture"];
+        if (occlusionTextureMap) {
+            material.occlusionTexture = [[GLTFTextureInfo alloc] init];
+            NSNumber *occlusionTextureIndexValue = occlusionTextureMap[@"index"];
+            NSUInteger occlusionTextureIndex = occlusionTextureIndexValue.integerValue;
+            if (occlusionTextureIndex < _textures.count) {
+                material.occlusionTexture.texture = _textures[occlusionTextureIndex];
+            }
+            NSNumber *occlusionTexCoordValue = occlusionTextureMap[@"texCoord"];
+            if (occlusionTexCoordValue != nil) {
+                material.occlusionTexture.texCoord = occlusionTexCoordValue.integerValue;
+            }
+            NSNumber *occlusionStrengthValue = occlusionTextureMap[@"strength"];
+            if (occlusionStrengthValue != nil) {
+                material.occlusionStrength = occlusionStrengthValue.integerValue;
+            }
+
+            material.occlusionTexture.extras = occlusionTextureMap[@"extras"];
+            material.occlusionTexture.extensions = occlusionTextureMap[@"extensions"];
         }
         
         NSNumber *doubleSidedValue = properties[@"doubleSided"];
@@ -784,23 +824,6 @@
             material.alphaCutoff = alphaCutoffValue.floatValue;
         }
 
-        NSDictionary *occlusionTextureMap = properties[@"occlusionTexture"];
-        if (occlusionTextureMap) {
-            NSNumber *occlusionTextureIndexValue = occlusionTextureMap[@"index"];
-            NSUInteger occlusionTextureIndex = occlusionTextureIndexValue.integerValue;
-            if (occlusionTextureIndex < _textures.count) {
-                material.occlusionTexture = _textures[occlusionTextureIndex];
-            }
-            NSNumber *occlusionTexCoordValue = occlusionTextureMap[@"texCoord"];
-            if (occlusionTexCoordValue != nil) {
-                material.occlusionTexCoord = occlusionTexCoordValue.integerValue;
-            }
-            NSNumber *occlusionStrengthValue = occlusionTextureMap[@"strength"];
-            if (occlusionStrengthValue != nil) {
-                material.occlusionStrength = occlusionStrengthValue.integerValue;
-            }
-        }
-        
         material.name = properties[@"name"];
         material.extensions = properties[@"extensions"];
         material.extras = properties[@"extras"];
@@ -819,11 +842,13 @@
                     }
                     NSNumber *diffuseTexCoordValue = diffuseTextureMap[@"texCoord"];
                     if (diffuseTexCoordValue != nil) {
-                        material.baseColorTexCoord = diffuseTexCoordValue.integerValue;
+                        material.baseColorTexture.texCoord = diffuseTexCoordValue.integerValue;
                     }
                 }
                 
                 // TODO: Support specularGlossinessTexture
+                
+                // TODO: Support texture transform of specular-glossiness map
 
                 NSArray *diffuseFactorComponents = pbrSpecularGlossinessProperties[@"diffuseFactor"];
                 if (diffuseFactorComponents.count == 4) {
@@ -839,6 +864,10 @@
                 }
             }
         }
+        
+        if (_usesKHRTextureTransform) {
+            [self _fixMaterialTextureTransforms:material];
+        }
 
         [materials addObject: material];
     }
@@ -846,6 +875,68 @@
     _materials = [materials copy];
 
     return YES;
+}
+
+- (GLTFTextureTransform)_textureTransformWithProperties:(NSDictionary *)properties {
+    GLTFTextureTransform transform = GLTFTextureTransformMakeIdentity();
+    NSArray *offsetArray = properties[@"offset"];
+    if (offsetArray != nil && offsetArray.count == 2) {
+        transform.offset = GLTFVectorFloat2FromArray(offsetArray);
+    }
+    NSNumber *rotationValue = properties[@"rotation"];
+    if (rotationValue != nil) {
+        transform.rotation = rotationValue.floatValue;
+    }
+    NSArray *scaleArray = properties[@"scale"];
+    if (scaleArray != nil && scaleArray.count == 2) {
+        transform.scale = GLTFVectorFloat2FromArray(scaleArray);
+    }
+    return transform;
+}
+
+- (void)_fixMaterialTextureTransforms:(GLTFMaterial *)material {
+    NSDictionary *baseColorTransformProperties = material.baseColorTexture.extensions[GLTFExtensionKHRTextureTransform];
+    if (baseColorTransformProperties != nil) {
+        material.baseColorTexture.transform = [self _textureTransformWithProperties:baseColorTransformProperties];
+        NSNumber *texCoordValue = baseColorTransformProperties[@"texCoord"];
+        if (texCoordValue != nil) {
+            material.baseColorTexture.texCoord = texCoordValue.intValue;
+        }
+    }
+    NSDictionary *normalTransformProperties = material.normalTexture.extensions[GLTFExtensionKHRTextureTransform];
+    if (normalTransformProperties != nil) {
+        material.normalTexture.transform = [self _textureTransformWithProperties:normalTransformProperties];
+        NSNumber *texCoordValue = normalTransformProperties[@"texCoord"];
+        if (texCoordValue != nil) {
+            material.normalTexture.texCoord = texCoordValue.intValue;
+        }
+    }
+    NSDictionary *metallicRoughnessTransformProperties = material.metallicRoughnessTexture.extensions[GLTFExtensionKHRTextureTransform];
+    if (metallicRoughnessTransformProperties != nil) {
+        material.metallicRoughnessTexture.transform = [self _textureTransformWithProperties:metallicRoughnessTransformProperties];
+        NSNumber *texCoordValue = metallicRoughnessTransformProperties[@"texCoord"];
+        if (texCoordValue != nil) {
+            material.metallicRoughnessTexture.texCoord = texCoordValue.intValue;
+        }
+    }
+    NSDictionary *occlusionTransformProperties = material.occlusionTexture.extensions[GLTFExtensionKHRTextureTransform];
+    if (occlusionTransformProperties != nil) {
+        material.occlusionTexture.transform = [self _textureTransformWithProperties:occlusionTransformProperties];
+        NSNumber *texCoordValue = occlusionTransformProperties[@"texCoord"];
+        if (texCoordValue != nil) {
+            material.occlusionTexture.texCoord = texCoordValue.intValue;
+        }
+    }
+    NSDictionary *emissiveTransformProperties = material.emissiveTexture.extensions[GLTFExtensionKHRTextureTransform];
+    if (emissiveTransformProperties != nil) {
+        material.emissiveTexture.transform = [self _textureTransformWithProperties:emissiveTransformProperties];
+        NSNumber *texCoordValue = emissiveTransformProperties[@"texCoord"];
+        if (texCoordValue != nil) {
+            material.emissiveTexture.texCoord = texCoordValue.intValue;
+        }
+    }
+    
+    material.hasTextureTransforms = YES;
 }
 
 - (BOOL)loadNodes:(NSArray *)nodesMap {

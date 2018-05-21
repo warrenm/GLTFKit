@@ -15,6 +15,39 @@
 //
 
 #import "GLTFTexture.h"
+#import "GLTFUtilities.h"
+
+GLTFTextureTransform GLTFTextureTransformMakeIdentity(void) {
+    GLTFTextureTransform t = {
+        .offset = (simd_float2){ 0, 0 },
+        .scale  = (simd_float2){ 1, 1 },
+        .rotation = 0,
+    };
+    return t;
+}
+
+GLTFTextureTransform GLTFTextureTransformMakeSRT(simd_float2 scale, float rotation, simd_float2 offset) {
+    GLTFTextureTransform t = {
+        .offset = offset,
+        .scale = scale,
+        .rotation = rotation,
+    };
+    return t;
+}
+
+simd_float3x3 GLTFTextureMatrixFromTransform(GLTFTextureTransform transform) {
+    float rs = sinf(-transform.rotation);
+    float rc = cosf(-transform.rotation);
+    float tx = transform.offset.x;
+    float ty = transform.offset.y;
+    float sx = transform.scale.x;
+    float sy = transform.scale.y;
+    simd_float3 c0 = (simd_float3){  rc * sx, rs * sy, 0 };
+    simd_float3 c1 = (simd_float3){ -rs * sx, rc * sy, 0 };
+    simd_float3 c2 = (simd_float3){       tx,      ty, 1 };
+    simd_float3x3 m = (simd_float3x3){ c0, c1, c2 };
+    return m;
+}
 
 @implementation GLTFTexture
 
@@ -24,6 +57,17 @@
         _internalFormat = GLTFTextureFormatRGBA;
         _type = GLTFTextureTypeUChar;
         _target = GLTFTextureTargetTexture2D;
+    }
+    return self;
+}
+
+@end
+
+@implementation GLTFTextureInfo
+
+- (instancetype)init {
+    if ((self = [super init])) {
+        _transform = GLTFTextureTransformMakeIdentity();
     }
     return self;
 }

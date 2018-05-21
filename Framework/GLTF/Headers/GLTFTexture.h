@@ -17,22 +17,61 @@
 #import "GLTFObject.h"
 #import "GLTFEnums.h"
 
+@import simd;
+
+typedef struct {
+    simd_float2 offset;
+    simd_float2 scale;
+    float rotation;
+} GLTFTextureTransform;
+
+extern GLTFTextureTransform GLTFTextureTransformMakeIdentity(void);
+
+extern GLTFTextureTransform GLTFTextureTransformMakeSRT(simd_float2 scale, float rotation, simd_float2 offset);
+
+extern simd_float3x3 GLTFTextureMatrixFromTransform(GLTFTextureTransform transform);
+
 NS_ASSUME_NONNULL_BEGIN
 
 @class GLTFTextureSampler, GLTFImage;
 
 @interface GLTFTexture : GLTFObject
+
 @property (nonatomic, weak) GLTFTextureSampler *sampler;
+
 @property (nonatomic, weak) GLTFImage *image;
+
 // GLTFTextureFormatRGBA
 @property (nonatomic, assign) GLTFTextureFormat format;
+
 // GLTFTextureFormatRGBA
 @property (nonatomic, assign) GLTFTextureFormat internalFormat;
+
 // GLTFTextureTypeUChar
 @property (nonatomic, assign) GLTFTextureType type;
+
 // GLTFTextureTargetTexture2D
 @property (nonatomic, assign) GLTFTextureTarget target;
+
 @end
+
+@interface GLTFTextureInfo : NSObject
+
+@property (nonatomic, strong) GLTFTexture *texture;
+
+@property (nonatomic, assign) NSInteger texCoord;
+
+// The transform to apply to texture coordinates before sampling from this texture.
+// Defaults to the identity transform. Only populated if KHR_texture_transform is included
+// as an optional or required extension for the containing asset.
+@property (nonatomic, assign) GLTFTextureTransform transform;
+
+@property (nonatomic, strong) NSDictionary *_Nullable extensions;
+
+@property (nonatomic, strong) NSDictionary *_Nullable extras;
+
+@end
+
 
 NS_ASSUME_NONNULL_END
 

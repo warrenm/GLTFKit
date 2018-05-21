@@ -15,12 +15,13 @@
 //
 
 #import "GLTFObject.h"
+#import "GLTFTexture.h"
 
 @import simd;
 
 NS_ASSUME_NONNULL_BEGIN
 
-@class GLTFParameter, GLTFTexture;
+@class GLTFParameter;
 
 typedef NS_ENUM(NSInteger, GLTFAlphaMode) {
     GLTFAlphaModeOpaque,
@@ -40,17 +41,13 @@ typedef NS_ENUM(NSInteger, GLTFAlphaMode) {
 @property (nonatomic, assign) float glossinessFactor; // Only used by KHR_materials_pbrSpecularGlossiness extension
 @property (nonatomic, assign) simd_float3 specularFactor; // Only used by KHR_materials_pbrSpecularGlossiness extension
 
-@property (nonatomic, strong) GLTFTexture * _Nullable baseColorTexture;
-@property (nonatomic, strong) GLTFTexture * _Nullable metallicRoughnessTexture;
-@property (nonatomic, strong) GLTFTexture * _Nullable normalTexture;
-@property (nonatomic, strong) GLTFTexture * _Nullable emissiveTexture;
-@property (nonatomic, strong) GLTFTexture * _Nullable occlusionTexture;
+@property (nonatomic, strong) GLTFTextureInfo * _Nullable baseColorTexture;
+@property (nonatomic, strong) GLTFTextureInfo * _Nullable metallicRoughnessTexture;
+@property (nonatomic, strong) GLTFTextureInfo * _Nullable normalTexture;
+@property (nonatomic, strong) GLTFTextureInfo * _Nullable emissiveTexture;
+@property (nonatomic, strong) GLTFTextureInfo * _Nullable occlusionTexture;
 
-@property (nonatomic, assign) NSInteger baseColorTexCoord;
-@property (nonatomic, assign) NSInteger metallicRoughnessTexCoord;
-@property (nonatomic, assign) NSInteger normalTexCoord;
-@property (nonatomic, assign) NSInteger emissiveTexCoord;
-@property (nonatomic, assign) NSInteger occlusionTexCoord;
+@property (nonatomic, assign) BOOL hasTextureTransforms; // Only used when KHR_texture_transform extension is present
 
 @property (nonatomic, assign, getter=isDoubleSided) BOOL doubleSided;
 

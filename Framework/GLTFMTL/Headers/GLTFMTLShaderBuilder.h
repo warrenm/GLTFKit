@@ -15,10 +15,14 @@
 //
 
 #import <GLTF/GLTF.h>
+#import "GLTFMTLUtilities.h"
 
 @import Metal;
 
 #define GLTFMTLMaximumLightCount 3
+
+// Maximum number of textures supplied by a material; excludes IBL textures, etc.
+#define GLTFMTLMaximumTextureCount (GLTFTextureBindIndexEmissive + 1)
 
 NS_ASSUME_NONNULL_BEGIN
 

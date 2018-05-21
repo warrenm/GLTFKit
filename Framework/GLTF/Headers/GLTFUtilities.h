@@ -61,6 +61,12 @@ extern simd_float4x4 GLTFMatrixFromTranslation(float x, float y, float z);
 
 extern simd_float4x4 GLTFRotationMatrixFromAxisAngle(simd_float3 axis, float angle);
 
+extern simd_float3x3 GLTFMatrixUpperLeft3x3(simd_float4x4 m);
+
+extern simd_float3x3 GLTFNormalMatrixFromModelMatrix(simd_float4x4 m);
+
+extern simd_float4x4 GLTFPerspectiveProjectionMatrixAspectFovRH(const float fovY, const float aspect, const float nearZ, const float farZ);
+
 extern simd_float3 GLTFAxisX;
 extern simd_float3 GLTFAxisY;
 extern simd_float3 GLTFAxisZ;

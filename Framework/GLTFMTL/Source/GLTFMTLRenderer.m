@@ -50,6 +50,7 @@ typedef struct {
     float envIntensity;
     Light ambientLight;
     Light lights[GLTFMTLMaximumLightCount];
+    simd_float3x3 textureMatrices[GLTFMTLMaximumTextureCount];
 } FragmentUniforms;
 
 @interface GLTFMTLRenderItem: NSObject
@@ -289,36 +290,36 @@ typedef struct {
 
 - (void)bindTexturesForMaterial:(GLTFMaterial *)material commandEncoder:(id<MTLRenderCommandEncoder>)renderEncoder {
     if (material.baseColorTexture != nil) {
-        id<MTLTexture> texture = [self textureForImage:material.baseColorTexture.image];
-        id<MTLSamplerState> sampler = [self samplerStateForSampler:material.baseColorTexture.sampler];
+        id<MTLTexture> texture = [self textureForImage:material.baseColorTexture.texture.image];
+        id<MTLSamplerState> sampler = [self samplerStateForSampler:material.baseColorTexture.texture.sampler];
         [renderEncoder setFragmentTexture:texture atIndex:GLTFTextureBindIndexBaseColor];
         [renderEncoder setFragmentSamplerState:sampler atIndex:GLTFTextureBindIndexBaseColor];
     }
     
     if (material.normalTexture != nil) {
-        id<MTLTexture> texture = [self textureForImage:material.normalTexture.image];
-        id<MTLSamplerState> sampler = [self samplerStateForSampler:material.normalTexture.sampler];
+        id<MTLTexture> texture = [self textureForImage:material.normalTexture.texture.image];
+        id<MTLSamplerState> sampler = [self samplerStateForSampler:material.normalTexture.texture.sampler];
         [renderEncoder setFragmentTexture:texture atIndex:GLTFTextureBindIndexNormal];
         [renderEncoder setFragmentSamplerState:sampler atIndex:GLTFTextureBindIndexNormal];
     }
     
     if (material.metallicRoughnessTexture != nil) {
-        id<MTLTexture> texture = [self textureForImage:material.metallicRoughnessTexture.image];
-        id<MTLSamplerState> sampler = [self samplerStateForSampler:material.metallicRoughnessTexture.sampler];
+        id<MTLTexture> texture = [self textureForImage:material.metallicRoughnessTexture.texture.image];
+        id<MTLSamplerState> sampler = [self samplerStateForSampler:material.metallicRoughnessTexture.texture.sampler];
         [renderEncoder setFragmentTexture:texture atIndex:GLTFTextureBindIndexMetallicRoughness];
         [renderEncoder setFragmentSamplerState:sampler atIndex:GLTFTextureBindIndexMetallicRoughness];
     }
     
     if (material.emissiveTexture != nil) {
-        id<MTLTexture> texture = [self textureForImage:material.emissiveTexture.image];
-        id<MTLSamplerState> sampler = [self samplerStateForSampler:material.emissiveTexture.sampler];
+        id<MTLTexture> texture = [self textureForImage:material.emissiveTexture.texture.image];
+        id<MTLSamplerState> sampler = [self samplerStateForSampler:material.emissiveTexture.texture.sampler];
         [renderEncoder setFragmentTexture:texture atIndex:GLTFTextureBindIndexEmissive];
         [renderEncoder setFragmentSamplerState:sampler atIndex:GLTFTextureBindIndexEmissive];
     }
     
     if (material.occlusionTexture != nil) {
-        id<MTLTexture> texture = [self textureForImage:material.occlusionTexture.image];
-        id<MTLSamplerState> sampler = [self samplerStateForSampler:material.occlusionTexture.sampler];
+        id<MTLTexture> texture = [self textureForImage:material.occlusionTexture.texture.image];
+        id<MTLSamplerState> sampler = [self samplerStateForSampler:material.occlusionTexture.texture.sampler];
         [renderEncoder setFragmentTexture:texture atIndex:GLTFTextureBindIndexOcclusion];
         [renderEncoder setFragmentSamplerState:sampler atIndex:GLTFTextureBindIndexOcclusion];
     }
@@ -385,6 +386,22 @@ typedef struct {
             fragmentUniforms.alphaCutoff = material.alphaCutoff;
             fragmentUniforms.envIntensity = self.lightingEnvironment.intensity;
             
+            if (material.baseColorTexture != nil) {
+                fragmentUniforms.textureMatrices[GLTFTextureBindIndexBaseColor] = GLTFTextureMatrixFromTransform(material.baseColorTexture.transform);
+            }
+            if (material.normalTexture != nil) {
+                fragmentUniforms.textureMatrices[GLTFTextureBindIndexNormal] = GLTFTextureMatrixFromTransform(material.normalTexture.transform);
+            }
+            if (material.metallicRoughnessTexture != nil) {
+                fragmentUniforms.textureMatrices[GLTFTextureBindIndexMetallicRoughness] = GLTFTextureMatrixFromTransform(material.metallicRoughnessTexture.transform);
+            }
+            if (material.occlusionTexture != nil) {
+                fragmentUniforms.textureMatrices[GLTFTextureBindIndexOcclusion] = GLTFTextureMatrixFromTransform(material.occlusionTexture.transform);
+            }
+            if (material.emissiveTexture != nil) {
+                fragmentUniforms.textureMatrices[GLTFTextureBindIndexEmissive] = GLTFTextureMatrixFromTransform(material.emissiveTexture.transform);
+            }
+
             if (self.ambientLight != nil) {
                 fragmentUniforms.ambientLight.color = self.ambientLight.color;
                 fragmentUniforms.ambientLight.intensity = self.ambientLight.intensity;
