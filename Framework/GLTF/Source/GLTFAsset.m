@@ -41,18 +41,19 @@
 @interface GLTFAsset ()
 @property (nonatomic, strong) NSURL *url;
 @property (nonatomic, strong) id<GLTFBufferAllocator> bufferAllocator;
-@property (nonatomic, copy) NSArray *accessors;
-@property (nonatomic, copy) NSArray *buffers;
-@property (nonatomic, copy) NSArray *bufferViews;
-@property (nonatomic, copy) NSArray *images;
-@property (nonatomic, copy) NSArray *samplers;
-@property (nonatomic, copy) NSArray *textures;
-@property (nonatomic, copy) NSArray *meshes;
-@property (nonatomic, copy) NSArray *materials;
-@property (nonatomic, strong) NSMutableArray *lights;
-@property (nonatomic, strong) NSMutableArray *cameras;
-@property (nonatomic, copy) NSArray *nodes;
-@property (nonatomic, strong) NSArray *animations;
+@property (nonatomic, weak) id<GLTFAssetLoadingDelegate> delegate;
+@property (nonatomic, copy) NSArray<GLTFAccessor *> *accessors;
+@property (nonatomic, copy) NSArray<id<GLTFBuffer>> *buffers;
+@property (nonatomic, copy) NSArray<GLTFBufferView *> *bufferViews;
+@property (nonatomic, copy) NSArray<GLTFImage *> *images;
+@property (nonatomic, copy) NSArray<GLTFTextureSampler *> *samplers;
+@property (nonatomic, copy) NSArray<GLTFTexture *> *textures;
+@property (nonatomic, copy) NSArray<GLTFMesh *> *meshes;
+@property (nonatomic, copy) NSArray<GLTFMaterial *> *materials;
+@property (nonatomic, strong) NSMutableArray<GLTFKHRLight *> *lights;
+@property (nonatomic, strong) NSMutableArray<GLTFCamera *> *cameras;
+@property (nonatomic, copy) NSArray<GLTFNode *> *nodes;
+@property (nonatomic, strong) NSArray<GLTFAnimation *> *animations;
 @property (nonatomic, copy) NSArray<GLTFSkin *> *skins;
 @property (nonatomic, copy) NSArray<GLTFBinaryChunk *> *chunks;
 @property (nonatomic, strong) GLTFMaterial *defaultMaterial;
@@ -833,11 +834,13 @@
             if (pbrSpecularGlossinessProperties != nil) {
                 NSDictionary *diffuseTextureMap = pbrSpecularGlossinessProperties[@"diffuseTexture"];
                 if (diffuseTextureMap != nil) {
+                    material.baseColorTexture = [[GLTFTextureInfo alloc] init];
+                    
                     NSNumber *diffuseTextureIndexValue = diffuseTextureMap[@"index"];
                     if (diffuseTextureIndexValue != nil) {
                         NSUInteger diffuseTextureIndex = diffuseTextureIndexValue.integerValue;
                         if (diffuseTextureIndex < _textures.count) {
-                            material.baseColorTexture = _textures[diffuseTextureIndex];
+                            material.baseColorTexture.texture = _textures[diffuseTextureIndex];
                         }
                     }
                     NSNumber *diffuseTexCoordValue = diffuseTextureMap[@"texCoord"];
