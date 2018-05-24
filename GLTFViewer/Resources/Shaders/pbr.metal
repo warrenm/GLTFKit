@@ -90,6 +90,7 @@ struct VertexOut {
 struct VertexUniforms {
     float4x4 modelMatrix;
     float4x4 modelViewProjectionMatrix;
+    float4x4 normalMatrix;
 };
 
 struct Light {
@@ -125,7 +126,7 @@ vertex VertexOut vertex_main(VertexIn in [[stage_in]],
 {
     VertexOut out = { 0 };
     
-    float4x4 normalMatrix = uniforms.modelMatrix;
+    float4x4 normalMatrix = uniforms.normalMatrix;
     
     #if USE_VERTEX_SKINNING
         ushort4 jointIndices = ushort4(in.joints0);
@@ -147,7 +148,7 @@ vertex VertexOut vertex_main(VertexIn in [[stage_in]],
         #endif
         
         float4 skinnedPosition = skinMatrix * float4(in.position.xyz, 1);
-        normalMatrix = skinMatrix * normalMatrix;
+        normalMatrix = normalMatrix * skinMatrix;
     #else
         float4 skinnedPosition = float4(in.position.xyz, 1);
     #endif

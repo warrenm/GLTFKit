@@ -140,9 +140,15 @@ simd_float3x3 GLTFMatrixUpperLeft3x3(simd_float4x4 m) {
     return mout;
 }
 
-simd_float3x3 GLTFNormalMatrixFromModelMatrix(simd_float4x4 m) {
-    simd_float3x3 mout = GLTFMatrixUpperLeft3x3(m);
-    return matrix_invert(matrix_transpose(mout));
+simd_float4x4 GLTFNormalMatrixFromModelMatrix(simd_float4x4 m) {
+    simd_float3x3 nm = simd_inverse(simd_transpose(GLTFMatrixUpperLeft3x3(m)));
+    simd_float4x4 mout = { {
+        { nm.columns[0][0], nm.columns[0][1], nm.columns[0][2], 0 },
+        { nm.columns[1][0], nm.columns[1][1], nm.columns[1][2], 0 },
+        { nm.columns[2][0], nm.columns[2][1], nm.columns[2][2], 0 },
+        {                0,                0,                0, 1 }
+    } };
+    return mout;
 }
 
 simd_float4x4 GLTFPerspectiveProjectionMatrixAspectFovRH(const float fovY, const float aspect, const float nearZ, const float farZ)

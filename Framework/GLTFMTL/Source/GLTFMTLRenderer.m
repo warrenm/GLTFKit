@@ -27,6 +27,7 @@
 typedef struct {
     simd_float4x4 modelMatrix;
     simd_float4x4 modelViewProjectionMatrix;
+    simd_float4x4 normalMatrix;
 } VertexUniforms;
 
 typedef struct {
@@ -368,13 +369,14 @@ typedef struct {
         for (GLTFSubmesh *submesh in mesh.submeshes) {
             GLTFMaterial *material = submesh.material;
             
-            simd_float3x3 viewAffine = matrix_invert(GLTFMatrixUpperLeft3x3(self.viewMatrix));
+            simd_float3x3 viewAffine = simd_inverse(GLTFMatrixUpperLeft3x3(self.viewMatrix));
             simd_float3 cameraPos = self.viewMatrix.columns[3].xyz;
             simd_float3 cameraWorldPos = matrix_multiply(viewAffine, -cameraPos);
             
             VertexUniforms vertexUniforms;
             vertexUniforms.modelMatrix = modelMatrix;
             vertexUniforms.modelViewProjectionMatrix = matrix_multiply(matrix_multiply(self.projectionMatrix, self.viewMatrix), modelMatrix);
+            vertexUniforms.normalMatrix = GLTFNormalMatrixFromModelMatrix(modelMatrix);
             
             FragmentUniforms fragmentUniforms = { 0 };
             fragmentUniforms.normalScale = material.normalTextureScale;
