@@ -40,12 +40,13 @@ vertex VertexOut skybox_vertex_main(constant packed_float3 *vertices [[buffer(0)
 
 typedef VertexOut FragmentIn;
 
-fragment float4 skybox_fragment_main(FragmentIn in [[stage_in]],
+fragment half4 skybox_fragment_main(FragmentIn in [[stage_in]],
                                      constant float &environmentIntensity [[buffer(0)]],
-                                     texturecube<float, access::sample> skyboxTexture [[texture(0)]])
+                                     texturecube<half, access::sample> skyboxTexture [[texture(0)]])
 {
     constexpr sampler linearSampler(coord::normalized, min_filter::linear, mag_filter::linear, mip_filter::linear);
     float3 normal = normalize(in.worldPosition.xyz);
-    float3 color = environmentIntensity * skyboxTexture.sample(linearSampler, normal).rgb;
-    return float4(color, 1);
+    normal *= float3(1, 1, -1);
+    half3 color = environmentIntensity * skyboxTexture.sample(linearSampler, normal).rgb;
+    return half4(color, 1);
 }

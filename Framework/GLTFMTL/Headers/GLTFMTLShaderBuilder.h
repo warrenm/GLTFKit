@@ -34,6 +34,7 @@ NS_ASSUME_NONNULL_BEGIN
                                         lightingEnvironment:(GLTFMTLLightingEnvironment * _Nullable)lightingEnvironment
                                            colorPixelFormat:(MTLPixelFormat)colorPixelFormat
                                     depthStencilPixelFormat:(MTLPixelFormat)depthStencilPixelFormat
+                                                sampleCount:(int)sampleCount
                                                      device:(id<MTLDevice>)device;
 
 @end

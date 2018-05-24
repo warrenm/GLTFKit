@@ -30,6 +30,14 @@
 @property (nonatomic, strong) id <MTLCommandQueue> commandQueue;
 
 @property (nonatomic, strong) id<MTLRenderPipelineState> skyboxPipelineState;
+@property (nonatomic, strong) id<MTLRenderPipelineState> tonemapPipelineState;
+
+@property (nonatomic, assign) int sampleCount;
+@property (nonatomic, assign) MTLPixelFormat colorPixelFormat;
+@property (nonatomic, assign) MTLPixelFormat depthStencilPixelFormat;
+@property (nonatomic, strong) id<MTLTexture> multisampleColorTexture;
+@property (nonatomic, strong) id<MTLTexture> colorTexture;
+@property (nonatomic, strong) id<MTLTexture> depthStencilTexture;
 
 @property (nonatomic, strong) GLTFMTLRenderer *renderer;
 @property (nonatomic, strong) id<GLTFBufferAllocator> bufferAllocator;
@@ -51,10 +59,15 @@
 - (void)setView:(NSView *)view {
     [super setView:view];
     
+    self.sampleCount = 4;
+    self.colorPixelFormat = MTLPixelFormatRGBA16Float;
+    self.depthStencilPixelFormat = MTLPixelFormatDepth32Float;
+    
     [self setupMetal];
     [self setupView];
     [self setupRenderer];
     [self loadSkyboxPipeline];
+    [self loadTonemapPipeline];
     
     NSTrackingAreaOptions trackingOptions = NSTrackingMouseMoved | NSTrackingActiveInActiveApp | NSTrackingInVisibleRect;
     self.trackingArea = [[NSTrackingArea alloc] initWithRect:NSZeroRect
@@ -77,8 +90,7 @@
     
     self.metalView.sampleCount = 4;
     self.metalView.clearColor = MTLClearColorMake(0.25, 0.25, 0.25, 1.0);
-    self.metalView.colorPixelFormat = MTLPixelFormatBGRA8Unorm;
-    self.metalView.depthStencilPixelFormat = MTLPixelFormatDepth32Float_Stencil8;
+    self.metalView.colorPixelFormat = MTLPixelFormatBGRA8Unorm_sRGB;
     
     self.camera = [GLTFViewerOrbitCamera new];
 }
@@ -86,8 +98,8 @@
 - (void)setupRenderer {
     self.renderer = [[GLTFMTLRenderer alloc] initWithDevice:self.device];
     self.renderer.drawableSize = self.metalView.drawableSize;
-    self.renderer.colorPixelFormat = self.metalView.colorPixelFormat;
-    self.renderer.depthStencilPixelFormat = self.metalView.depthStencilPixelFormat;
+    self.renderer.colorPixelFormat = self.colorPixelFormat;
+    self.renderer.depthStencilPixelFormat = self.depthStencilPixelFormat;
 }
 
 - (void)setLightingEnvironment:(GLTFMTLLightingEnvironment *)lightingEnvironment {
@@ -106,12 +118,27 @@
     descriptor.vertexFunction = [library newFunctionWithName:@"skybox_vertex_main"];
     descriptor.fragmentFunction = [library newFunctionWithName:@"skybox_fragment_main"];
     descriptor.sampleCount = self.metalView.sampleCount;
-    descriptor.colorAttachments[0].pixelFormat = self.metalView.colorPixelFormat;
-    descriptor.depthAttachmentPixelFormat = self.metalView.depthStencilPixelFormat;
-    descriptor.stencilAttachmentPixelFormat = self.metalView.depthStencilPixelFormat;
+    descriptor.colorAttachments[0].pixelFormat = self.colorPixelFormat;
+    descriptor.depthAttachmentPixelFormat = self.depthStencilPixelFormat;
     
     self.skyboxPipelineState = [self.device newRenderPipelineStateWithDescriptor:descriptor error:&error];
     if (self.skyboxPipelineState == nil) {
+        NSLog(@"Error occurred when creating render pipeline state: %@", error);
+    }
+}
+
+- (void)loadTonemapPipeline {
+    NSError *error = nil;
+    id <MTLLibrary> library = [self.device newDefaultLibrary];
+    
+    MTLRenderPipelineDescriptor *descriptor = [MTLRenderPipelineDescriptor new];
+    descriptor.vertexFunction = [library newFunctionWithName:@"quad_vertex_main"];
+    descriptor.fragmentFunction = [library newFunctionWithName:@"tonemap_fragment_main"];
+    descriptor.sampleCount = self.metalView.sampleCount;
+    descriptor.colorAttachments[0].pixelFormat = self.metalView.colorPixelFormat;
+    
+    self.tonemapPipelineState = [self.device newRenderPipelineStateWithDescriptor:descriptor error:&error];
+    if (self.tonemapPipelineState == nil) {
         NSLog(@"Error occurred when creating render pipeline state: %@", error);
     }
 }
@@ -200,6 +227,60 @@
     [self computeTransforms];
 }
 
+- (void)makeFramebuffer:(CGSize)drawableSize {
+    MTLTextureDescriptor *textureDescriptor = [MTLTextureDescriptor new];
+
+    textureDescriptor.width = drawableSize.width;
+    textureDescriptor.height = drawableSize.height;
+    textureDescriptor.depth = 1;
+
+    textureDescriptor.textureType = self.sampleCount > 1 ? MTLTextureType2DMultisample : MTLTextureType2D;
+    textureDescriptor.pixelFormat = self.colorPixelFormat;
+    textureDescriptor.sampleCount = self.sampleCount;
+    textureDescriptor.storageMode = MTLStorageModePrivate;
+    textureDescriptor.usage = MTLTextureUsageRenderTarget;
+    self.multisampleColorTexture = [self.device newTextureWithDescriptor:textureDescriptor];
+    
+    textureDescriptor.textureType = MTLTextureType2D;
+    textureDescriptor.pixelFormat = self.colorPixelFormat;
+    textureDescriptor.sampleCount = 1;
+    textureDescriptor.storageMode = MTLStorageModePrivate;
+    textureDescriptor.usage = MTLTextureUsageRenderTarget | MTLTextureUsageShaderRead;
+    self.colorTexture = [self.device newTextureWithDescriptor:textureDescriptor];
+
+    textureDescriptor.textureType = self.sampleCount > 1 ? MTLTextureType2DMultisample : MTLTextureType2D;
+    textureDescriptor.pixelFormat = self.depthStencilPixelFormat;
+    textureDescriptor.sampleCount = self.sampleCount;
+    textureDescriptor.storageMode = MTLStorageModePrivate;
+    textureDescriptor.usage = MTLTextureUsageRenderTarget;
+    self.depthStencilTexture = [self.device newTextureWithDescriptor:textureDescriptor];
+    
+    self.renderer.sampleCount = self.sampleCount;
+}
+
+- (MTLRenderPassDescriptor *)currentRenderPassDescriptor {
+    if (self.colorTexture == nil) {
+        [self makeFramebuffer:self.metalView.drawableSize];
+    }
+    
+    MTLRenderPassDescriptor *pass = [MTLRenderPassDescriptor renderPassDescriptor];
+    if (self.sampleCount > 1) {
+        pass.colorAttachments[0].texture = self.multisampleColorTexture;
+        pass.colorAttachments[0].resolveTexture = self.colorTexture;
+        pass.colorAttachments[0].loadAction = MTLLoadActionClear;
+        pass.colorAttachments[0].storeAction = MTLStoreActionMultisampleResolve;
+    } else {
+        pass.colorAttachments[0].texture = self.colorTexture;
+        pass.colorAttachments[0].loadAction = MTLLoadActionClear;
+        pass.colorAttachments[0].storeAction = MTLStoreActionStore;
+    }
+    pass.depthAttachment.texture = self.depthStencilTexture;
+    pass.depthAttachment.loadAction = MTLLoadActionClear;
+    pass.depthAttachment.storeAction = MTLStoreActionDontCare;
+    
+    return pass;
+}
+
 - (void)drawSkyboxWithCommandEncoder:(id<MTLRenderCommandEncoder>)renderEncoder {
     float vertexData[] = {
         // +Z
@@ -264,9 +345,26 @@
     [renderEncoder setVertexBytes:vertexData length:sizeof(float) * 36 * 3 atIndex:0];
     [renderEncoder setVertexBytes:&vertexUniforms length:sizeof(vertexUniforms) atIndex:1];
     [renderEncoder setFragmentBytes:&environmentIntensity length:sizeof(environmentIntensity) atIndex:0];
-    [renderEncoder setFragmentTexture:self.lightingEnvironment.specularCube atIndex:0];
+    [renderEncoder setFragmentTexture:self.lightingEnvironment.environmentCube atIndex:0];
     [renderEncoder drawPrimitives:MTLPrimitiveTypeTriangle vertexStart:0 vertexCount:36];
     [renderEncoder setCullMode:MTLCullModeNone];
+}
+
+- (void)drawFullscreenPassWithPipeline:(id<MTLRenderPipelineState>)renderPipelineState
+                        commandEncoder:(id<MTLRenderCommandEncoder>)renderCommandEncoder
+                         sourceTexture:(id<MTLTexture>)sourceTexture
+{
+    float triangleData[] = {
+        -1,  3, 0, -1,
+        -1, -1, 0,  1,
+         3, -1, 2,  1
+    };
+    [renderCommandEncoder setRenderPipelineState:renderPipelineState];
+    [renderCommandEncoder setFrontFacingWinding:MTLWindingCounterClockwise];
+    [renderCommandEncoder setCullMode:MTLCullModeNone];
+    [renderCommandEncoder setVertexBytes:triangleData length:sizeof(float) * 12 atIndex:0];
+    [renderCommandEncoder setFragmentTexture:sourceTexture atIndex:0];
+    [renderCommandEncoder drawPrimitives:MTLPrimitiveTypeTriangle vertexStart:0 vertexCount:3];
 }
 
 // MARK: - NSResponder
@@ -314,10 +412,44 @@
 
 #endif
 
+- (void)encodeMainPass:(id<MTLCommandBuffer>)commandBuffer {
+    id <MTLRenderCommandEncoder> renderEncoder = [commandBuffer renderCommandEncoderWithDescriptor:self.currentRenderPassDescriptor];
+    
+    if (self.lightingEnvironment != nil) {
+        [renderEncoder pushDebugGroup:@"Draw Backdrop"];
+        [self drawSkyboxWithCommandEncoder:renderEncoder];
+        [renderEncoder popDebugGroup];
+    }
+    
+    [renderEncoder pushDebugGroup:@"Draw glTF Scene"];
+    [self.renderer renderScene:self.asset.defaultScene
+                 commandBuffer:commandBuffer
+                commandEncoder:renderEncoder];
+    [renderEncoder popDebugGroup];
+    
+    [renderEncoder endEncoding];
+}
+
+- (void)encodeBloomPasses:(id<MTLCommandBuffer>)commandBuffer {
+}
+
+- (void)encodeTonemappingPass:(id<MTLCommandBuffer>)commandBuffer {
+    if (self.metalView.currentRenderPassDescriptor != nil) {
+        id <MTLRenderCommandEncoder> renderEncoder = [commandBuffer renderCommandEncoderWithDescriptor:self.metalView.currentRenderPassDescriptor];
+        [renderEncoder pushDebugGroup:@"Post-process (Tonemapping)"];
+        [self drawFullscreenPassWithPipeline:self.tonemapPipelineState commandEncoder:renderEncoder sourceTexture:self.colorTexture];
+        [renderEncoder popDebugGroup];
+        [renderEncoder endEncoding];
+        
+        [commandBuffer presentDrawable:self.metalView.currentDrawable];
+    }
+}
+
 // MARK: - MTKViewDelegate
 
 - (void)mtkView:(MTKView *)view drawableSizeWillChange:(CGSize)size {
     self.renderer.drawableSize = size;
+    [self makeFramebuffer:size];
 }
 
 - (void)drawInMTKView:(MTKView *)view {
@@ -327,29 +459,10 @@
     
     id <MTLCommandBuffer> commandBuffer = [self.commandQueue commandBuffer];
     
-    MTLRenderPassDescriptor *renderPassDescriptor = self.metalView.currentRenderPassDescriptor;
-    
-    if(renderPassDescriptor != nil)
-    {
-        id <MTLRenderCommandEncoder> renderEncoder = [commandBuffer renderCommandEncoderWithDescriptor:renderPassDescriptor];
-        
-        if (self.lightingEnvironment != nil) {
-            [renderEncoder pushDebugGroup:@"Draw Backdrop"];
-            [self drawSkyboxWithCommandEncoder:renderEncoder];
-            [renderEncoder popDebugGroup];
-        }
-        
-        [renderEncoder pushDebugGroup:@"Draw glTF Scene"];
-        [self.renderer renderScene:self.asset.defaultScene
-                     commandBuffer:commandBuffer
-                    commandEncoder:renderEncoder];
-        [renderEncoder popDebugGroup];
-        
-        [renderEncoder endEncoding];
-        
-        [commandBuffer presentDrawable:self.metalView.currentDrawable];
-    }
-    
+    [self encodeMainPass:commandBuffer];
+    [self encodeBloomPasses:commandBuffer];
+    [self encodeTonemappingPass:commandBuffer];
+
     [commandBuffer addCompletedHandler:^(id<MTLCommandBuffer> buffer) {
         dispatch_async(dispatch_get_main_queue(), ^{
             [self.renderer signalFrameCompletion];

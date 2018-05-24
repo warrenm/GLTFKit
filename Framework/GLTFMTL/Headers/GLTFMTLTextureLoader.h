@@ -22,6 +22,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 extern NSString *const GLTFMTLTextureLoaderOptionGenerateMipmaps;
 extern NSString *const GLTFMTLTextureLoaderOptionUsageFlags;
+extern NSString *const GLTFMTLTextureLoaderOptionSRGB;
 
 @interface GLTFMTLTextureLoader : NSObject
 - (instancetype)initWithDevice:(id<MTLDevice>)device;

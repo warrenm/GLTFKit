@@ -17,7 +17,7 @@
 #include <metal_stdlib>
 using namespace metal;
 
-constant float minRoughness = 0.04;
+constant half minRoughness = 0.04;
 
 constant int textureIndexBaseColor           = 0;
 constant int textureIndexNormal              = 1;
@@ -198,12 +198,12 @@ vertex VertexOut vertex_main(VertexIn in [[stage_in]],
     return out;
 }
 
-static float3 LambertDiffuse(float3 baseColor)
+static half3 LambertDiffuse(half3 baseColor)
 {
     return baseColor / M_PI_F;
 }
 
-static float3 SchlickFresnel(float3 F0, float LdotH)
+static half3 SchlickFresnel(half3 F0, float LdotH)
 {
     return F0 + (1 - F0) * pow(1.0 - LdotH, 5.0);
 }
@@ -223,9 +223,9 @@ static float TrowbridgeReitzNDF(float NdotH, float roughness)
     return roughnessSq / (M_PI_F * f * f);
 }
 
-fragment float4 fragment_main(VertexOut in [[stage_in]],
+fragment half4 fragment_main(VertexOut in [[stage_in]],
 #if HAS_BASE_COLOR_MAP
-                              texture2d<float, access::sample> baseColorTexture [[texture(textureIndexBaseColor)]],
+                              texture2d<half, access::sample> baseColorTexture [[texture(textureIndexBaseColor)]],
                               sampler baseColorSampler [[sampler(textureIndexBaseColor)]],
 #endif
 #if HAS_NORMAL_MAP
@@ -233,21 +233,21 @@ fragment float4 fragment_main(VertexOut in [[stage_in]],
                               sampler normalSampler [[sampler(textureIndexNormal)]],
 #endif
 #if HAS_EMISSIVE_MAP
-                              texture2d<float, access::sample> emissiveTexture [[texture(textureIndexEmissive)]],
+                              texture2d<half, access::sample> emissiveTexture [[texture(textureIndexEmissive)]],
                               sampler emissiveSampler [[sampler(textureIndexEmissive)]],
 #endif
 #if HAS_METALLIC_ROUGHNESS_MAP
-                              texture2d<float, access::sample> metallicRoughnessTexture [[texture(textureIndexMetallicRoughness)]],
+                              texture2d<half, access::sample> metallicRoughnessTexture [[texture(textureIndexMetallicRoughness)]],
                               sampler metallicRoughnessSampler [[sampler(textureIndexMetallicRoughness)]],
 #endif
 #if HAS_OCCLUSION_MAP
-                              texture2d<float, access::sample> occlusionTexture [[texture(textureIndexOcclusion)]],
+                              texture2d<half, access::sample> occlusionTexture [[texture(textureIndexOcclusion)]],
                               sampler occlusionSampler [[sampler(textureIndexOcclusion)]],
 #endif
 #if USE_IBL
-                              texturecube<float, access::sample> diffuseEnvTexture [[texture(textureIndexDiffuseEnvironment)]],
-                              texturecube<float, access::sample> specularEnvTexture [[texture(textureIndexSpecularEnvironment)]],
-                              texture2d<float, access::sample> brdfLUT [[texture(textureIndexBRDFLookup)]],
+                              texturecube<half, access::sample> diffuseEnvTexture [[texture(textureIndexDiffuseEnvironment)]],
+                              texturecube<half, access::sample> specularEnvTexture [[texture(textureIndexSpecularEnvironment)]],
+                              texture2d<half, access::sample> brdfLUT [[texture(textureIndexBRDFLookup)]],
 #endif
                               constant FragmentUniforms &uniforms [[buffer(0)]],
                               bool frontFacing [[front_facing]])
@@ -273,7 +273,7 @@ fragment float4 fragment_main(VertexOut in [[stage_in]],
         float3 tex_dx = dfdx(float3(normalTexCoord, 0));
         float3 tex_dy = dfdy(float3(normalTexCoord, 0));
         float3 t = (tex_dy.y * pos_dx - tex_dx.y * pos_dy) / (tex_dx.x * tex_dy.y - tex_dy.x * tex_dx.y);
-        
+
         float3 ng(0);
         #if HAS_NORMALS
             ng = normalize(in.normal);
@@ -286,7 +286,7 @@ fragment float4 fragment_main(VertexOut in [[stage_in]],
     #else
         tbn = float3x3(in.tangent, in.bitangent, in.normal);
     #endif
-    
+
     float3 N(0, 0, 1);
     #if HAS_NORMAL_MAP
         N = normalTexture.sample(normalSampler, normalTexCoord).rgb;
@@ -294,16 +294,16 @@ fragment float4 fragment_main(VertexOut in [[stage_in]],
     #else
         N = tbn[2].xyz;
     #endif
-    
+
     #if USE_DOUBLE_SIDED_MATERIAL
         N *= frontFacing ? 1 : -1;
     #endif
-    
-    float perceptualRoughness = uniforms.metallicRoughnessValues.y;
-    float metallic = uniforms.metallicRoughnessValues.x;
+
+    half perceptualRoughness = uniforms.metallicRoughnessValues.y;
+    half metallic = uniforms.metallicRoughnessValues.x;
     
     #if HAS_METALLIC_ROUGHNESS_MAP
-        float4 mrSample = metallicRoughnessTexture.sample(metallicRoughnessSampler, metallicRoughnessTexCoord);
+        half4 mrSample = metallicRoughnessTexture.sample(metallicRoughnessSampler, metallicRoughnessTexCoord);
         perceptualRoughness = mrSample.g * perceptualRoughness;
         metallic = mrSample.b * metallic;
     #endif
@@ -316,37 +316,37 @@ fragment float4 fragment_main(VertexOut in [[stage_in]],
         metallic = in.metalness;
     #endif
 
-    perceptualRoughness = clamp(perceptualRoughness, minRoughness, 1.0);
+    perceptualRoughness = clamp(perceptualRoughness, minRoughness, 1.0h);
     metallic = saturate(metallic);
 
-    float4 baseColor;
+    half4 baseColor;
     #if HAS_BASE_COLOR_MAP
-        baseColor = baseColorTexture.sample(baseColorSampler, baseColorTexCoord) * uniforms.baseColorFactor;
+        baseColor = baseColorTexture.sample(baseColorSampler, baseColorTexCoord) * half4(uniforms.baseColorFactor);
     #else
         baseColor = uniforms.baseColorFactor;
     #endif
-    
+
     #if HAS_VERTEX_COLOR
-        baseColor *= in.color;
+        baseColor *= half4(in.color);
     #endif
     
-    float3 f0 = float3(0.04);
-    float3 diffuseColor = mix(baseColor.rgb * (1 - f0), float3(0), metallic);
-    float3 specularColor = mix(f0, baseColor.rgb, metallic);
+    half3 f0(0.04);
+    half3 diffuseColor = mix(baseColor.rgb * (1 - f0), half3(0), metallic);
+    half3 specularColor = mix(f0, baseColor.rgb, metallic);
 
-    float3 F0 = specularColor.rgb;
+    half3 F0 = specularColor.rgb;
 
     float alphaRoughness = perceptualRoughness * perceptualRoughness;
 
     float3 V = normalize(uniforms.camera - in.worldPosition);
     float NdotV = saturate(dot(N, V));
     
-    float3 reflection = -normalize(reflect(V, N));
+    float3 reflection = normalize(reflect(V, N)) * float3(-1, -1, 1);
 
-    float3 color(0);
+    half3 color(0);
 
-    #if USE_PBR
-        color += uniforms.ambientLight.color.rgb * uniforms.ambientLight.intensity * diffuseColor;
+    #if USE_PBR && false
+        color += half3(uniforms.ambientLight.color.rgb * uniforms.ambientLight.intensity) * diffuseColor;
 
         for (int i = 0; i < MAX_LIGHTS; ++i) {
             Light light = uniforms.lights[i];
@@ -358,25 +358,25 @@ fragment float4 fragment_main(VertexOut in [[stage_in]],
             float NdotH = saturate(dot(N, H));
             float VdotH = saturate(dot(V, H));
             
-            float3 F = SchlickFresnel(F0, VdotH);
+            half3 F = SchlickFresnel(F0, VdotH);
             float G = SmithGeometric(NdotL, NdotV, alphaRoughness);
             float D = TrowbridgeReitzNDF(NdotH, alphaRoughness);
             
-            float3 diffuseContrib(0);
-            float3 specContrib(0);
+            half3 diffuseContrib(0);
+            half3 specContrib(0);
             if (NdotL > 0) {
                 diffuseContrib = NdotL * LambertDiffuse(diffuseColor);
                 specContrib = NdotL * D * F * G / (4.0 * NdotL * NdotV);
             }
-
-            float atten = (light.position.w == 0) ? 1 : (1 / (1 + powr(length(light.position.xyz - in.worldPosition), 2)));
+            
+            half atten = (light.position.w == 0) ? 1 : (1 / (1 + powr(length(light.position.xyz - in.worldPosition), 2)));
 
             float relativeSpotAngle = acos(dot(-L, normalize(light.spotDirection.xyz)));
             float spotAttenParam = 1 - clamp((relativeSpotAngle - light.innerConeAngle) / max(0.001, light.outerConeAngle - light.innerConeAngle), 0.0, 1.0);
             float spotAtten = spotAttenParam * spotAttenParam * (3 - 2 * spotAttenParam);
             atten *= spotAtten;
 
-            color += light.color.rgb * light.intensity * atten * (diffuseContrib + specContrib);
+            color += half3(light.color.rgb * light.intensity) * atten * (diffuseContrib + specContrib);
         }
     #endif
 
@@ -385,11 +385,11 @@ fragment float4 fragment_main(VertexOut in [[stage_in]],
     
         float mipCount = SPECULAR_ENV_MIP_LEVELS;
         float lod = perceptualRoughness * mipCount;
-        float2 brdf = brdfLUT.sample(cubeSampler, float2(NdotV, perceptualRoughness)).xy;
-        float3 diffuseLight = diffuseEnvTexture.sample(cubeSampler, N).rgb;
+        half2 brdf = brdfLUT.sample(cubeSampler, float2(NdotV, perceptualRoughness)).xy;
+        half3 diffuseLight = diffuseEnvTexture.sample(cubeSampler, N).rgb;
         diffuseLight *= uniforms.envIntensity;
     
-        float3 specularLight(0);
+        half3 specularLight(0);
         if (mipCount > 1) {
             specularLight = specularEnvTexture.sample(cubeSampler, reflection, level(lod)).rgb;
         } else {
@@ -397,24 +397,24 @@ fragment float4 fragment_main(VertexOut in [[stage_in]],
         }
         specularLight *= uniforms.envIntensity;
     
-        float3 iblDiffuse = diffuseLight * diffuseColor;
-        float3 iblSpecular = specularLight * ((specularColor * brdf.x) + brdf.y);
+        half3 iblDiffuse = diffuseLight * diffuseColor;
+        half3 iblSpecular = specularLight * ((specularColor * brdf.x) + brdf.y);
     
-        float3 iblColor = iblDiffuse + iblSpecular;
-    
+        half3 iblColor = iblDiffuse + iblSpecular;
+
         color += iblColor;
     #endif
     
     #if HAS_OCCLUSION_MAP
-        float ao = occlusionTexture.sample(occlusionSampler, occlusionTexCoord).r;
-        color = mix(color, color * ao, uniforms.occlusionStrength);
+        half ao = occlusionTexture.sample(occlusionSampler, occlusionTexCoord).r;
+        color = mix(color, color * ao, half(uniforms.occlusionStrength));
     #endif
     
     #if HAS_EMISSIVE_MAP
-        float3 emissive = emissiveTexture.sample(emissiveSampler, emissiveTexCoord).rgb;
-        color += emissive * uniforms.emissiveFactor;
+        half3 emissive = emissiveTexture.sample(emissiveSampler, emissiveTexCoord).rgb;
+        color += emissive * half3(uniforms.emissiveFactor);
     #else
-        color += uniforms.emissiveFactor;
+        color += half3(uniforms.emissiveFactor);
     #endif
     
     #if USE_ALPHA_TEST
@@ -423,5 +423,5 @@ fragment float4 fragment_main(VertexOut in [[stage_in]],
         }
     #endif
 
-    return float4(color, baseColor.a);
+    return half4(color, baseColor.a);
 }

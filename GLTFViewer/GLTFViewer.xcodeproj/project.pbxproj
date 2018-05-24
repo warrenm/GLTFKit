@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		83390AE020B5779C00789D37 /* hdr.metal in Sources */ = {isa = PBXBuildFile; fileRef = 83390ADF20B5779C00789D37 /* hdr.metal */; };
 		834168101F8D70210052E7FE /* GLTFViewerOrbitCamera.m in Sources */ = {isa = PBXBuildFile; fileRef = 8341680F1F8D70210052E7FE /* GLTFViewerOrbitCamera.m */; };
 		834168131F8D70730052E7FE /* GLTFViewerFirstPersonCamera.m in Sources */ = {isa = PBXBuildFile; fileRef = 834168121F8D70730052E7FE /* GLTFViewerFirstPersonCamera.m */; };
 		834E00152031267700DCB66E /* brdf.metal in Sources */ = {isa = PBXBuildFile; fileRef = 834E000A202A70B200DCB66E /* brdf.metal */; };
@@ -51,6 +52,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		83390ADF20B5779C00789D37 /* hdr.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = hdr.metal; sourceTree = "<group>"; };
 		8341680E1F8D70210052E7FE /* GLTFViewerOrbitCamera.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = GLTFViewerOrbitCamera.h; path = Shared/GLTFViewerOrbitCamera.h; sourceTree = "<group>"; };
 		8341680F1F8D70210052E7FE /* GLTFViewerOrbitCamera.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = GLTFViewerOrbitCamera.m; path = Shared/GLTFViewerOrbitCamera.m; sourceTree = "<group>"; };
 		834168111F8D70730052E7FE /* GLTFViewerFirstPersonCamera.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = GLTFViewerFirstPersonCamera.h; path = Shared/GLTFViewerFirstPersonCamera.h; sourceTree = "<group>"; };
@@ -151,6 +153,7 @@
 				83D32B1E1FA915D000703763 /* skybox.metal */,
 				83D32B1F1FA915D000703763 /* pbr.metal */,
 				834E000A202A70B200DCB66E /* brdf.metal */,
+				83390ADF20B5779C00789D37 /* hdr.metal */,
 			);
 			path = Shaders;
 			sourceTree = "<group>";
@@ -286,6 +289,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				83390AE020B5779C00789D37 /* hdr.metal in Sources */,
 				83A6C51B1F88208E0095A4DC /* GLTFViewerCamera.m in Sources */,
 				834168101F8D70210052E7FE /* GLTFViewerOrbitCamera.m in Sources */,
 				834E00152031267700DCB66E /* brdf.metal in Sources */,

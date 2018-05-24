@@ -25,6 +25,7 @@
                                         lightingEnvironment:(GLTFMTLLightingEnvironment *)lightingEnvironment
                                            colorPixelFormat:(MTLPixelFormat)colorPixelFormat
                                     depthStencilPixelFormat:(MTLPixelFormat)depthStencilPixelFormat
+                                                sampleCount:(int)sampleCount
                                                      device:(id<MTLDevice>)device
 {
     NSParameterAssert(submesh);
@@ -67,7 +68,7 @@
     pipelineDescriptor.vertexDescriptor = vertexDescriptor;
     
     pipelineDescriptor.colorAttachments[0].pixelFormat = colorPixelFormat;
-    pipelineDescriptor.sampleCount = 4;
+    pipelineDescriptor.sampleCount = sampleCount;
 
     if (submesh.material.alphaMode == GLTFAlphaModeBlend) {
         pipelineDescriptor.colorAttachments[0].blendingEnabled = YES;
@@ -80,7 +81,7 @@
     }
 
     pipelineDescriptor.depthAttachmentPixelFormat = depthStencilPixelFormat;
-    pipelineDescriptor.stencilAttachmentPixelFormat = depthStencilPixelFormat;
+//    pipelineDescriptor.stencilAttachmentPixelFormat = depthStencilPixelFormat;
     
     id<MTLRenderPipelineState> pipeline = [device newRenderPipelineStateWithDescriptor:pipelineDescriptor error:&error];
     if (!pipeline) {

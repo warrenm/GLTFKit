@@ -55,6 +55,7 @@ typedef struct {
 } FragmentUniforms;
 
 @interface GLTFMTLRenderItem: NSObject
+@property (nonatomic, strong) NSString *label;
 @property (nonatomic, strong) GLTFNode *node;
 @property (nonatomic, strong) GLTFSubmesh *submesh;
 @property (nonatomic, assign) VertexUniforms vertexUniforms;
@@ -102,6 +103,7 @@ typedef struct {
         _drawableSize = CGSizeMake(1, 1);
         _colorPixelFormat = MTLPixelFormatBGRA8Unorm;
         _depthStencilPixelFormat = MTLPixelFormatDepth32Float_Stencil8;
+        _sampleCount = 1;
 
         _textureLoader = [[GLTFMTLTextureLoader alloc] initWithDevice:_device];
 
@@ -150,7 +152,7 @@ typedef struct {
     }
 }
 
-- (id<MTLTexture>)textureForImage:(GLTFImage *)image {
+- (id<MTLTexture>)textureForImage:(GLTFImage *)image preferSRGB:(BOOL)sRGB {
     NSParameterAssert(image != nil);
     
     id<MTLTexture> texture = self.texturesForImageIdentifiers[image.identifier];
@@ -159,11 +161,12 @@ typedef struct {
         return texture;
     }
     
-    NSDictionary *options = @{ GLTFMTLTextureLoaderOptionGenerateMipmaps : @YES };
+    NSDictionary *options = @{ GLTFMTLTextureLoaderOptionGenerateMipmaps : @YES,
+                               GLTFMTLTextureLoaderOptionSRGB : @(sRGB)
+                             };
     
     NSError *error = nil;
     if (image.imageData != nil) {
-        //texture = [self.textureLoader newTextureWithCGImage:image.cgImage options:options error:&error];
         texture = [self.textureLoader newTextureWithData:image.imageData options:options error:&error];
         texture.label = image.name;
     } else if (image.url != nil) {
@@ -212,6 +215,7 @@ typedef struct {
                                             lightingEnvironment:self.lightingEnvironment
                                                colorPixelFormat:self.colorPixelFormat
                                         depthStencilPixelFormat:self.depthStencilPixelFormat
+                                                    sampleCount:self.sampleCount
                                                          device:self.device];
         self.pipelineStatesForSubmeshes[submesh.identifier] = pipeline;
     }
@@ -291,35 +295,35 @@ typedef struct {
 
 - (void)bindTexturesForMaterial:(GLTFMaterial *)material commandEncoder:(id<MTLRenderCommandEncoder>)renderEncoder {
     if (material.baseColorTexture != nil) {
-        id<MTLTexture> texture = [self textureForImage:material.baseColorTexture.texture.image];
+        id<MTLTexture> texture = [self textureForImage:material.baseColorTexture.texture.image preferSRGB:YES];
         id<MTLSamplerState> sampler = [self samplerStateForSampler:material.baseColorTexture.texture.sampler];
         [renderEncoder setFragmentTexture:texture atIndex:GLTFTextureBindIndexBaseColor];
         [renderEncoder setFragmentSamplerState:sampler atIndex:GLTFTextureBindIndexBaseColor];
     }
     
     if (material.normalTexture != nil) {
-        id<MTLTexture> texture = [self textureForImage:material.normalTexture.texture.image];
+        id<MTLTexture> texture = [self textureForImage:material.normalTexture.texture.image preferSRGB:NO];
         id<MTLSamplerState> sampler = [self samplerStateForSampler:material.normalTexture.texture.sampler];
         [renderEncoder setFragmentTexture:texture atIndex:GLTFTextureBindIndexNormal];
         [renderEncoder setFragmentSamplerState:sampler atIndex:GLTFTextureBindIndexNormal];
     }
     
     if (material.metallicRoughnessTexture != nil) {
-        id<MTLTexture> texture = [self textureForImage:material.metallicRoughnessTexture.texture.image];
+        id<MTLTexture> texture = [self textureForImage:material.metallicRoughnessTexture.texture.image preferSRGB:NO];
         id<MTLSamplerState> sampler = [self samplerStateForSampler:material.metallicRoughnessTexture.texture.sampler];
         [renderEncoder setFragmentTexture:texture atIndex:GLTFTextureBindIndexMetallicRoughness];
         [renderEncoder setFragmentSamplerState:sampler atIndex:GLTFTextureBindIndexMetallicRoughness];
     }
     
     if (material.emissiveTexture != nil) {
-        id<MTLTexture> texture = [self textureForImage:material.emissiveTexture.texture.image];
+        id<MTLTexture> texture = [self textureForImage:material.emissiveTexture.texture.image preferSRGB:YES];
         id<MTLSamplerState> sampler = [self samplerStateForSampler:material.emissiveTexture.texture.sampler];
         [renderEncoder setFragmentTexture:texture atIndex:GLTFTextureBindIndexEmissive];
         [renderEncoder setFragmentSamplerState:sampler atIndex:GLTFTextureBindIndexEmissive];
     }
     
     if (material.occlusionTexture != nil) {
-        id<MTLTexture> texture = [self textureForImage:material.occlusionTexture.texture.image];
+        id<MTLTexture> texture = [self textureForImage:material.occlusionTexture.texture.image preferSRGB:NO];
         id<MTLSamplerState> sampler = [self samplerStateForSampler:material.occlusionTexture.texture.sampler];
         [renderEncoder setFragmentTexture:texture atIndex:GLTFTextureBindIndexOcclusion];
         [renderEncoder setFragmentSamplerState:sampler atIndex:GLTFTextureBindIndexOcclusion];
@@ -429,8 +433,9 @@ typedef struct {
                 }
                 fragmentUniforms.lights[lightIndex].spotDirection = lightNode.globalTransform.columns[2];
             }
-
+            
             GLTFMTLRenderItem *item = [GLTFMTLRenderItem new];
+            item.label = [NSString stringWithFormat:@"%@ - %@", node.name ?: @"Unnamed node", submesh.name ?: @"Unnamed primitive"];
             item.node = node;
             item.submesh = submesh;
             item.vertexUniforms = vertexUniforms;
@@ -454,6 +459,8 @@ typedef struct {
         GLTFNode *node = item.node;
         GLTFSubmesh *submesh = item.submesh;
         GLTFMaterial *material = submesh.material;
+        
+        [renderEncoder pushDebugGroup:[NSString stringWithFormat:@"%@", item.label]];
         
         id<MTLRenderPipelineState> renderPipelineState = [self renderPipelineStateForSubmesh:submesh];
                 
@@ -527,6 +534,8 @@ typedef struct {
             GLTFAccessor *positionAccessor = accessorsForAttributes[GLTFAttributeSemanticPosition];
             [renderEncoder drawPrimitives:primitiveType vertexStart:0 vertexCount:positionAccessor.count];
         }
+        
+        [renderEncoder popDebugGroup];
     }
 }
 

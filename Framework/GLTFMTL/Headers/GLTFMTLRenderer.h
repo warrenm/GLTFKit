@@ -31,6 +31,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, assign) simd_float4x4 viewMatrix;
 @property (nonatomic, assign) simd_float4x4 projectionMatrix;
 
+@property (nonatomic, assign) int sampleCount;
 @property (nonatomic, assign) MTLPixelFormat colorPixelFormat;
 @property (nonatomic, assign) MTLPixelFormat depthStencilPixelFormat;
 
