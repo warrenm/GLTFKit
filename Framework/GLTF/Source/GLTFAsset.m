@@ -66,19 +66,39 @@
 
 @implementation GLTFAsset
 
++ (dispatch_queue_t)assetLoaderQueue {
+    static dispatch_once_t onceToken;
+    static dispatch_queue_t _assetLoaderQueue;
+    dispatch_once(&onceToken, ^{
+        _assetLoaderQueue = dispatch_queue_create("net.warrenmoore.gltfkit.asset-loader-queue", DISPATCH_QUEUE_CONCURRENT);
+    });
+    return _assetLoaderQueue;
+}
+
++ (void)loadAssetWithURL:(NSURL *)url bufferAllocator:(id<GLTFBufferAllocator>)bufferAllocator delegate:(id<GLTFAssetLoadingDelegate>)delegate {
+    dispatch_async(GLTFAsset.assetLoaderQueue, ^{
+        (void)[[GLTFAsset alloc] _initWithURL:url bufferAllocator:bufferAllocator delegate:delegate];
+    });
+}
+
 - (instancetype)initWithURL:(NSURL *)url bufferAllocator:(id<GLTFBufferAllocator>)bufferAllocator {
-    if (url == nil) {
-        return nil;
-    }
-    
+    return [self _initWithURL:url bufferAllocator:bufferAllocator delegate:nil];
+}
+
+- (instancetype)_initWithURL:(NSURL *)url bufferAllocator:(id<GLTFBufferAllocator>)bufferAllocator delegate:(id<GLTFAssetLoadingDelegate>)delegate {
     if ((self = [super init])) {
         _url = url;
         _bufferAllocator = bufferAllocator;
+        _delegate = delegate;
         NSError *error = nil;
         if (![self loadWithError:&error]) {
+            [_delegate assetWithURL:_url didFailToLoadWithError:error];
             return nil;
         }
     }
+    
+    [_delegate assetWithURL:_url didFinishLoading:self];
+    
     return self;
 }
 
@@ -109,12 +129,36 @@
     return nil;
 }
 
+- (NSData *_Nullable)_contentsOfURL:(NSURL *)url error:(NSError **)error {
+    __block NSData *urlData = nil;
+    __block NSError *internalError = nil;
+    if (![_url isFileURL]) {
+        dispatch_semaphore_t loadingSemaphore = dispatch_semaphore_create(0);
+        [_delegate assetWithURL:_url requiresContentsOfURL:url completionHandler:^(NSData *_Nullable data, NSError *_Nullable responseError) {
+            urlData = data;
+            internalError = responseError;
+            dispatch_semaphore_signal(loadingSemaphore);
+        }];
+        dispatch_semaphore_wait(loadingSemaphore, DISPATCH_TIME_FOREVER);
+    } else {
+        urlData = [NSData dataWithContentsOfURL:url];
+    }
+    
+    if (internalError != nil && error != nil) {
+        *error = internalError;
+    }
+
+    return urlData;
+}
 
 - (BOOL)loadWithError:(NSError **)errorOrNil {
-    NSData *assetData = [NSData dataWithContentsOfURL:_url];
-
     NSError *error = nil;
     NSDictionary *rootObject = nil;
+    
+    NSData *assetData = [self _contentsOfURL:_url error:&error];
+    if (assetData == nil) {
+        return NO;
+    }
     
     if ([self assetIsGLB:assetData]) {
         [self readBinaryChunks:assetData];
@@ -322,10 +366,10 @@
                 continue;
             }
         } else if (uri.length > 0) {
-            NSURL *fileURL = [[_url URLByDeletingLastPathComponent] URLByAppendingPathComponent:uri];
+            NSURL *bufferURL = [[_url URLByDeletingLastPathComponent] URLByAppendingPathComponent:uri];
             NSError *error = nil;
-            data = [NSData dataWithContentsOfURL:fileURL options:0 error:&error];
-            NSAssert(data != nil, @"Unable to load data at URL %@; error %@", fileURL, error);
+            data = [self _contentsOfURL:bufferURL error:&error];
+            NSAssert(data != nil, @"Unable to load data at URL %@; error %@", bufferURL, error);
         } else if (_chunks.count > 1) {
             data = _chunks[1].data;
         } else {

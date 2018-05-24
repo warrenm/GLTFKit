@@ -203,7 +203,8 @@ Below is a checklist of glTF features and their current level of support.
 #### Extensions
 - [ ] KHR_materials_pbrSpecularGlossiness
 - [ ] KHR_materials_common
-- [x] KHR_lights
+- [] KHR_lights
+- [] KHR_texture_transform
 - [x] EXT_pbr_attributes
 
 ### Conformance

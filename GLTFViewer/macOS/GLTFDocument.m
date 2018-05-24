@@ -19,13 +19,14 @@
 
 #import <GLTFMTL/GLTFMTL.h>
 
-@interface GLTFDocument()
+@interface GLTFDocument() <GLTFAssetLoadingDelegate>
 
 @property (nonatomic, strong) GLTFViewerViewController *viewerController;
 
 @property (class, nonatomic, readonly, strong) id<MTLDevice> device;
 @property (class, nonatomic, readonly, strong) id<GLTFBufferAllocator> bufferAllocator;
 @property (class, nonatomic, readonly, strong) GLTFMTLLightingEnvironment *lightingEnvironment;
+@property (class, nonatomic, readonly, strong) NSURLSession *urlSession;
 @end
 
 @implementation GLTFDocument
@@ -62,6 +63,21 @@
     return _lightingEnvironment;
 }
 
++ (NSURLSession *)urlSession {
+    static NSURLSession *_urlSession = nil;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        NSURLSessionConfiguration *configuration = [NSURLSessionConfiguration defaultSessionConfiguration];
+        _urlSession = [NSURLSession sessionWithConfiguration:configuration];
+    });
+    return _urlSession;
+}
+
+- (void)setAsset:(GLTFAsset *)asset {
+    _asset = asset;
+    self.viewerController.asset = asset;
+}
+
 - (void)makeWindowControllers {
     NSRect contentsRect = NSMakeRect(0, 0, 800, 600);
     NSWindowStyleMask styleMask = NSWindowStyleMaskTitled | NSWindowStyleMaskClosable | NSWindowStyleMaskMiniaturizable | NSWindowStyleMaskResizable;
@@ -72,6 +88,7 @@
     viewController.view = mtkView;
     viewController.asset = self.asset;
     viewController.lightingEnvironment = [GLTFDocument lightingEnvironment];
+    self.viewerController = viewController;
     
     NSWindowController *windowController = [[NSWindowController alloc] initWithWindow:window];
     windowController.contentViewController = viewController;
@@ -98,16 +115,35 @@
 }
 
 - (BOOL)readFromURL:(NSURL *)url ofType:(NSString *)typeName error:(NSError **)outError {
-    self.asset = [[GLTFAsset alloc] initWithURL:url bufferAllocator:GLTFDocument.bufferAllocator];
-    NSLog(@"INFO: Total live buffer allocation size after document load is %0.2f MB", ([GLTFMTLBufferAllocator liveAllocationSize] / (float)1e6));
+    //NSURL *remoteURL = [NSURL URLWithString:@"https://warrenmoore.net/files/gltf/animated_humanoid_robot/scene.gltf"];
+
+    [GLTFAsset loadAssetWithURL:url bufferAllocator:GLTFDocument.bufferAllocator delegate:self];
 
     self.displayName = [url lastPathComponent];
-    
-    return (self.asset != nil);
+
+    return YES;
 }
 
 + (BOOL)autosavesInPlace {
     return YES;
+}
+
+- (void)assetWithURL:(nonnull NSURL *)assetURL didFailToLoadWithError:(nonnull NSError *)error {
+    NSLog(@"Asset load failed with error: %@", error);
+}
+
+- (void)assetWithURL:(nonnull NSURL *)assetURL didFinishLoading:(nonnull GLTFAsset *)asset {
+    self.asset = asset;
+    NSLog(@"INFO: Total live buffer allocation size after document load is %0.2f MB", ([GLTFMTLBufferAllocator liveAllocationSize] / (float)1e6));
+}
+
+- (void)assetWithURL:(nonnull NSURL *)assetURL requiresContentsOfURL:(nonnull NSURL *)url completionHandler:(void (^)(NSData *_Nullable, NSError *_Nullable))completionHandler {
+    NSURLSessionDataTask *task = [GLTFDocument.urlSession dataTaskWithURL:url
+                                                        completionHandler:^(NSData *data, NSURLResponse *response, NSError *error)
+    {
+        completionHandler(data, error);
+    }];
+    [task resume];
 }
 
 @end

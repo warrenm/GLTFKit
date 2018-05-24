@@ -21,9 +21,16 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+@class GLTFAsset;
 @class GLTFScene, GLTFCamera, GLTFAnimation;
 @class GLTFKHRLight;
 @protocol GLTFBufferAllocator;
+
+@protocol GLTFAssetLoadingDelegate
+- (void)assetWithURL:(NSURL *)assetURL requiresContentsOfURL:(NSURL *)url completionHandler:(void (^)(NSData *_Nullable, NSError *_Nullable))completionHandler;
+- (void)assetWithURL:(NSURL *)assetURL didFinishLoading:(GLTFAsset *)asset;
+- (void)assetWithURL:(NSURL *)assetURL didFailToLoadWithError:(NSError *)error;
+@end
 
 @interface GLTFAsset : NSObject
 
@@ -42,6 +49,12 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (nonatomic, copy) NSArray<NSString *> *extensionsUsed;
 
+/// Load an asset asynchronously. The asset may either be a local asset or a remote asset; the provided
+/// delegate will receive callbacks requesting the contents of remote URLs referenced by the asset. These
+/// callbacks will occur on an arbitrary internal queue. 
++ (void)loadAssetWithURL:(NSURL *)url bufferAllocator:(id<GLTFBufferAllocator>)bufferAllocator delegate:(id<GLTFAssetLoadingDelegate>)delegate;
+
+/// Load a local asset. The provided URL must be a file URL, or else loading will fail.
 - (instancetype)initWithURL:(NSURL *)url bufferAllocator:(id<GLTFBufferAllocator>)bufferAllocator;
 
 - (void)addLight:(GLTFKHRLight *)light;
