@@ -15,7 +15,6 @@
 //
 
 #import "GLTFMTLTextureLoader.h"
-#import "stb_image.h"
 @import Accelerate;
 
 NSString *const GLTFMTLTextureLoaderOptionGenerateMipmaps = @"GLTFMTLTextureLoaderOptionGenerateMipmaps";
