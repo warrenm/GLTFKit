@@ -17,6 +17,7 @@
 #import "GLTFViewerViewController.h"
 #import "GLTFViewerOrbitCamera.h"
 #import "GLTFViewerFirstPersonCamera.h"
+#import "GLTFViewerNodeCamera.h"
 #import "HIToolboxEvents.h"
 
 @interface GLTFViewerViewController ()
@@ -26,11 +27,16 @@
 @property (nonatomic, strong) NSTrackingArea *trackingArea;
 #endif
 
-@property (nonatomic, strong) id <MTLDevice> device;
-@property (nonatomic, strong) id <MTLCommandQueue> commandQueue;
+@property (nonatomic, strong) id<MTLDevice> device;
+@property (nonatomic, strong) id<MTLCommandQueue> commandQueue;
+@property (nonatomic, strong) id<MTLLibrary> library;
 
 @property (nonatomic, strong) id<MTLRenderPipelineState> skyboxPipelineState;
 @property (nonatomic, strong) id<MTLRenderPipelineState> tonemapPipelineState;
+@property (nonatomic, strong) id<MTLRenderPipelineState> bloomThresholdPipelineState;
+@property (nonatomic, strong) id<MTLRenderPipelineState> blurHorizontalPipelineState;
+@property (nonatomic, strong) id<MTLRenderPipelineState> blurVerticalPipelineState;
+@property (nonatomic, strong) id<MTLRenderPipelineState> additiveBlendPipelineState;
 
 @property (nonatomic, assign) int sampleCount;
 @property (nonatomic, assign) MTLPixelFormat colorPixelFormat;
@@ -39,9 +45,13 @@
 @property (nonatomic, strong) id<MTLTexture> colorTexture;
 @property (nonatomic, strong) id<MTLTexture> depthStencilTexture;
 
+@property (nonatomic, strong) id<MTLTexture> bloomTextureA;
+@property (nonatomic, strong) id<MTLTexture> bloomTextureB;
+
 @property (nonatomic, strong) GLTFMTLRenderer *renderer;
 @property (nonatomic, strong) id<GLTFBufferAllocator> bufferAllocator;
 
+@property (nonatomic, strong) GLTFNode *_Nullable pointOfView;
 @property (nonatomic, strong) GLTFViewerCamera *camera;
 @property (nonatomic, assign) simd_float4x4 regularizationMatrix;
 
@@ -67,6 +77,7 @@
     [self setupView];
     [self setupRenderer];
     [self loadSkyboxPipeline];
+    [self loadBloomPipelines];
     [self loadTonemapPipeline];
     
     NSTrackingAreaOptions trackingOptions = NSTrackingMouseMoved | NSTrackingActiveInActiveApp | NSTrackingInVisibleRect;
@@ -81,6 +92,7 @@
 - (void)setupMetal {
     self.device = MTLCreateSystemDefaultDevice();
     self.commandQueue = [self.device newCommandQueue];
+    self.library = [self.device newDefaultLibrary];
 }
 
 - (void)setupView {
@@ -112,11 +124,10 @@
 
 - (void)loadSkyboxPipeline {
     NSError *error = nil;
-    id <MTLLibrary> library = [self.device newDefaultLibrary];
     
     MTLRenderPipelineDescriptor *descriptor = [MTLRenderPipelineDescriptor new];
-    descriptor.vertexFunction = [library newFunctionWithName:@"skybox_vertex_main"];
-    descriptor.fragmentFunction = [library newFunctionWithName:@"skybox_fragment_main"];
+    descriptor.vertexFunction = [self.library newFunctionWithName:@"skybox_vertex_main"];
+    descriptor.fragmentFunction = [self.library newFunctionWithName:@"skybox_fragment_main"];
     descriptor.sampleCount = self.metalView.sampleCount;
     descriptor.colorAttachments[0].pixelFormat = self.colorPixelFormat;
     descriptor.depthAttachmentPixelFormat = self.depthStencilPixelFormat;
@@ -129,16 +140,52 @@
 
 - (void)loadTonemapPipeline {
     NSError *error = nil;
-    id <MTLLibrary> library = [self.device newDefaultLibrary];
-    
     MTLRenderPipelineDescriptor *descriptor = [MTLRenderPipelineDescriptor new];
-    descriptor.vertexFunction = [library newFunctionWithName:@"quad_vertex_main"];
-    descriptor.fragmentFunction = [library newFunctionWithName:@"tonemap_fragment_main"];
+    descriptor.vertexFunction = [self.library newFunctionWithName:@"quad_vertex_main"];
+    descriptor.fragmentFunction = [self.library newFunctionWithName:@"tonemap_fragment_main"];
     descriptor.sampleCount = self.metalView.sampleCount;
     descriptor.colorAttachments[0].pixelFormat = self.metalView.colorPixelFormat;
     
     self.tonemapPipelineState = [self.device newRenderPipelineStateWithDescriptor:descriptor error:&error];
     if (self.tonemapPipelineState == nil) {
+        NSLog(@"Error occurred when creating render pipeline state: %@", error);
+    }
+}
+
+- (void)loadBloomPipelines {
+    NSError *error = nil;
+    MTLRenderPipelineDescriptor *descriptor = [MTLRenderPipelineDescriptor new];
+    descriptor.vertexFunction = [self.library newFunctionWithName:@"quad_vertex_main"];
+    descriptor.colorAttachments[0].pixelFormat = self.colorPixelFormat;
+    
+    descriptor.fragmentFunction = [self.library newFunctionWithName:@"bloom_threshold_fragment_main"];
+    self.bloomThresholdPipelineState = [self.device newRenderPipelineStateWithDescriptor:descriptor error:&error];
+    if (self.bloomThresholdPipelineState == nil) {
+        NSLog(@"Error occurred when creating render pipeline state: %@", error);
+    }
+
+    descriptor.fragmentFunction = [self.library newFunctionWithName:@"blur_horizontal7_fragment_main"];
+    self.blurHorizontalPipelineState = [self.device newRenderPipelineStateWithDescriptor:descriptor error:&error];
+    if (self.blurHorizontalPipelineState == nil) {
+        NSLog(@"Error occurred when creating render pipeline state: %@", error);
+    }
+
+    descriptor.fragmentFunction = [self.library newFunctionWithName:@"blur_vertical7_fragment_main"];
+    self.blurVerticalPipelineState = [self.device newRenderPipelineStateWithDescriptor:descriptor error:&error];
+    if (self.blurVerticalPipelineState == nil) {
+        NSLog(@"Error occurred when creating render pipeline state: %@", error);
+    }
+
+    descriptor.fragmentFunction = [self.library newFunctionWithName:@"additive_blend_fragment_main"];
+    descriptor.colorAttachments[0].blendingEnabled = YES;
+    descriptor.colorAttachments[0].rgbBlendOperation = MTLBlendOperationAdd;
+    descriptor.colorAttachments[0].alphaBlendOperation = MTLBlendOperationAdd;
+    descriptor.colorAttachments[0].sourceRGBBlendFactor = MTLBlendFactorOne;
+    descriptor.colorAttachments[0].sourceAlphaBlendFactor = MTLBlendFactorOne;
+    descriptor.colorAttachments[0].destinationRGBBlendFactor = MTLBlendFactorOne;
+    descriptor.colorAttachments[0].destinationAlphaBlendFactor = MTLBlendFactorZero;
+    self.additiveBlendPipelineState = [self.device newRenderPipelineStateWithDescriptor:descriptor error:&error];
+    if (self.additiveBlendPipelineState == nil) {
         NSLog(@"Error occurred when creating render pipeline state: %@", error);
     }
 }
@@ -186,23 +233,20 @@
     GLTFBoundingSphere bounds = GLTFBoundingSphereFromBox(self.asset.defaultScene.approximateBounds);
     float scale = (bounds.radius > 0) ? (1 / (bounds.radius)) : 1;
     simd_float4x4 centerScale = GLTFMatrixFromUniformScale(scale);
-    simd_float4x4 centerTranslation = GLTFMatrixFromTranslation(-bounds.center.x, -bounds.center.y, -bounds.center.z);
+    simd_float4x4 centerTranslation = GLTFMatrixFromTranslation(-bounds.center);
     self.regularizationMatrix = matrix_multiply(centerScale, centerTranslation);
 }
 
 - (void)computeTransforms {
-    self.viewMatrix = matrix_multiply(self.camera.viewMatrix, self.regularizationMatrix);
+    if (self.pointOfView == nil) {
+        self.viewMatrix = matrix_multiply(self.camera.viewMatrix, self.regularizationMatrix);
+    } else {
+        self.viewMatrix = self.camera.viewMatrix;
+    }
 
-//    if (_lastCameraIndex >= 0 && _lastCameraIndex < self.asset.cameras.count) {
-//        GLTFCamera *camera = self.asset.cameras[_lastCameraIndex];
-//        if (camera.referencingNodes.count > 0) {
-//            GLTFNode *cameraNode = camera.referencingNodes.firstObject;
-//            self.viewMatrix = matrix_invert(cameraNode.globalTransform);
-//        }
-//    }
-    
     float aspectRatio = self.renderer.drawableSize.width / self.renderer.drawableSize.height;
-    self.projectionMatrix = GLTFPerspectiveProjectionMatrixAspectFovRH(M_PI / 3, aspectRatio, 0.01, 250);
+    simd_float4x4 aspectCorrection = GLTFMatrixFromScale((simd_float3){ 1 / aspectRatio, 1, 1 });
+    self.projectionMatrix = simd_mul(aspectCorrection, self.camera.projectionMatrix);
 }
 
 - (void)updateWithTimestep:(NSTimeInterval)timestep {
@@ -255,14 +299,28 @@
     textureDescriptor.usage = MTLTextureUsageRenderTarget;
     self.depthStencilTexture = [self.device newTextureWithDescriptor:textureDescriptor];
     
+    textureDescriptor.width = drawableSize.width / 2;
+    textureDescriptor.height = drawableSize.height / 2;
+    textureDescriptor.textureType = MTLTextureType2D;
+    textureDescriptor.pixelFormat = self.colorPixelFormat;
+    textureDescriptor.sampleCount = 1;
+    textureDescriptor.storageMode = MTLStorageModePrivate;
+    textureDescriptor.usage = MTLTextureUsageRenderTarget | MTLTextureUsageShaderRead;
+    self.bloomTextureA = [self.device newTextureWithDescriptor:textureDescriptor];
+
+    textureDescriptor.width = drawableSize.width / 2;
+    textureDescriptor.height = drawableSize.height / 2;
+    textureDescriptor.textureType = MTLTextureType2D;
+    textureDescriptor.pixelFormat = self.colorPixelFormat;
+    textureDescriptor.sampleCount = 1;
+    textureDescriptor.storageMode = MTLStorageModePrivate;
+    textureDescriptor.usage = MTLTextureUsageRenderTarget | MTLTextureUsageShaderRead;
+    self.bloomTextureB = [self.device newTextureWithDescriptor:textureDescriptor];
+    
     self.renderer.sampleCount = self.sampleCount;
 }
 
 - (MTLRenderPassDescriptor *)currentRenderPassDescriptor {
-    if (self.colorTexture == nil) {
-        [self makeFramebuffer:self.metalView.drawableSize];
-    }
-    
     MTLRenderPassDescriptor *pass = [MTLRenderPassDescriptor renderPassDescriptor];
     if (self.sampleCount > 1) {
         pass.colorAttachments[0].texture = self.multisampleColorTexture;
@@ -345,7 +403,7 @@
     [renderEncoder setVertexBytes:vertexData length:sizeof(float) * 36 * 3 atIndex:0];
     [renderEncoder setVertexBytes:&vertexUniforms length:sizeof(vertexUniforms) atIndex:1];
     [renderEncoder setFragmentBytes:&environmentIntensity length:sizeof(environmentIntensity) atIndex:0];
-    [renderEncoder setFragmentTexture:self.lightingEnvironment.environmentCube atIndex:0];
+    [renderEncoder setFragmentTexture:self.lightingEnvironment.diffuseCube atIndex:0];
     [renderEncoder drawPrimitives:MTLPrimitiveTypeTriangle vertexStart:0 vertexCount:36];
     [renderEncoder setCullMode:MTLCullModeNone];
 }
@@ -365,6 +423,17 @@
     [renderCommandEncoder setVertexBytes:triangleData length:sizeof(float) * 12 atIndex:0];
     [renderCommandEncoder setFragmentTexture:sourceTexture atIndex:0];
     [renderCommandEncoder drawPrimitives:MTLPrimitiveTypeTriangle vertexStart:0 vertexCount:3];
+}
+
+- (void)_selectCameraAtIndex:(int)cameraIndex {
+    if (cameraIndex >= 0 && cameraIndex < self.asset.cameras.count) {
+        GLTFCamera *camera = self.asset.cameras[cameraIndex];
+        if (camera.referencingNodes.count > 0) {
+            GLTFNode *cameraNode = camera.referencingNodes.firstObject;
+            self.pointOfView = cameraNode;
+            self.camera = [[GLTFViewerNodeCamera alloc] initWithNode:cameraNode];
+        }
+    }
 }
 
 // MARK: - NSResponder
@@ -395,12 +464,37 @@
     [self.camera keyDown:event];
     
     switch (event.keyCode) {
+        case kVK_ANSI_1:
+            [self _selectCameraAtIndex:0];
+            break;
+        case kVK_ANSI_2:
+            [self _selectCameraAtIndex:1];
+            break;
+        case kVK_ANSI_3:
+            [self _selectCameraAtIndex:2];
+            break;
+        case kVK_ANSI_4:
+            [self _selectCameraAtIndex:3];
+            break;
+        case kVK_ANSI_5:
+            [self _selectCameraAtIndex:4];
+            break;
+        case kVK_ANSI_6:
+            [self _selectCameraAtIndex:5];
+            break;
+        case kVK_ANSI_7:
+            [self _selectCameraAtIndex:6];
+            break;
+        case kVK_ANSI_8:
+            [self _selectCameraAtIndex:7];
+            break;
+        case kVK_ANSI_9:
+            self.camera = [GLTFViewerOrbitCamera new];
+            break;
         case kVK_ANSI_0:
             self.camera = [GLTFViewerFirstPersonCamera new];
             break;
-        case kVK_ANSI_1:
-            self.camera = [GLTFViewerOrbitCamera new];
-            break;
+            
         default:
             break;
     }
@@ -431,6 +525,46 @@
 }
 
 - (void)encodeBloomPasses:(id<MTLCommandBuffer>)commandBuffer {
+    MTLRenderPassDescriptor *pass = [MTLRenderPassDescriptor renderPassDescriptor];
+    pass.colorAttachments[0].texture = self.bloomTextureA;
+    pass.colorAttachments[0].loadAction = MTLLoadActionDontCare;
+    pass.colorAttachments[0].storeAction = MTLStoreActionStore;
+
+    id<MTLRenderCommandEncoder> renderEncoder = [commandBuffer renderCommandEncoderWithDescriptor:pass];
+    [renderEncoder pushDebugGroup:@"Post-process (Bloom threshold)"];
+    [self drawFullscreenPassWithPipeline:self.bloomThresholdPipelineState commandEncoder:renderEncoder sourceTexture:self.colorTexture];
+    [renderEncoder popDebugGroup];
+    [renderEncoder endEncoding];
+
+    pass = [MTLRenderPassDescriptor renderPassDescriptor];
+    pass.colorAttachments[0].texture = self.bloomTextureB;
+    pass.colorAttachments[0].loadAction = MTLLoadActionDontCare;
+    pass.colorAttachments[0].storeAction = MTLStoreActionStore;
+    renderEncoder = [commandBuffer renderCommandEncoderWithDescriptor:pass];
+    [renderEncoder pushDebugGroup:@"Post-process (Bloom blur - horizontal)"];
+    [self drawFullscreenPassWithPipeline:self.blurHorizontalPipelineState commandEncoder:renderEncoder sourceTexture:self.bloomTextureA];
+    [renderEncoder popDebugGroup];
+    [renderEncoder endEncoding];
+
+    pass = [MTLRenderPassDescriptor renderPassDescriptor];
+    pass.colorAttachments[0].texture = self.bloomTextureA;
+    pass.colorAttachments[0].loadAction = MTLLoadActionDontCare;
+    pass.colorAttachments[0].storeAction = MTLStoreActionStore;
+    renderEncoder = [commandBuffer renderCommandEncoderWithDescriptor:pass];
+    [renderEncoder pushDebugGroup:@"Post-process (Bloom blur - vertical)"];
+    [self drawFullscreenPassWithPipeline:self.blurVerticalPipelineState commandEncoder:renderEncoder sourceTexture:self.bloomTextureB];
+    [renderEncoder popDebugGroup];
+    [renderEncoder endEncoding];
+
+    pass = [MTLRenderPassDescriptor renderPassDescriptor];
+    pass.colorAttachments[0].texture = self.colorTexture;
+    pass.colorAttachments[0].loadAction = MTLLoadActionLoad;
+    pass.colorAttachments[0].storeAction = MTLStoreActionStore;
+    renderEncoder = [commandBuffer renderCommandEncoderWithDescriptor:pass];
+    [renderEncoder pushDebugGroup:@"Post-process (Bloom combine)"];
+    [self drawFullscreenPassWithPipeline:self.additiveBlendPipelineState commandEncoder:renderEncoder sourceTexture:self.bloomTextureA];
+    [renderEncoder popDebugGroup];
+    [renderEncoder endEncoding];
 }
 
 - (void)encodeTonemappingPass:(id<MTLCommandBuffer>)commandBuffer {
@@ -457,6 +591,10 @@
     
     [self updateWithTimestep:timestep];
     
+    if (self.colorTexture == nil) {
+        [self makeFramebuffer:self.metalView.drawableSize];
+    }
+
     id <MTLCommandBuffer> commandBuffer = [self.commandQueue commandBuffer];
     
     [self encodeMainPass:commandBuffer];

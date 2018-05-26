@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		835756082043E3BF00CE345A /* tropical_beach.hdr in Resources */ = {isa = PBXBuildFile; fileRef = 835756062043E3B600CE345A /* tropical_beach.hdr */; };
 		836715F91FA9014E007ECCC9 /* GLTFSCNViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 836715F81FA9014E007ECCC9 /* GLTFSCNViewController.m */; };
 		83B9705520A7053C004E3C34 /* AnimationPlaybackView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 83B9705420A7053C004E3C34 /* AnimationPlaybackView.xib */; };
 		83B9705920A70785004E3C34 /* GLTFSCNAnimationPlaybackViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 83B9705720A70785004E3C34 /* GLTFSCNAnimationPlaybackViewController.m */; };
@@ -19,6 +18,7 @@
 		83E99B601FA91063006E8004 /* GLTFSCN.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 83E99B621FA91063006E8004 /* GLTFSCN.framework */; };
 		83E99B651FA9106C006E8004 /* GLTF.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 83E99B611FA91063006E8004 /* GLTF.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		83E99B671FA9106C006E8004 /* GLTFSCN.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 83E99B621FA91063006E8004 /* GLTFSCN.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		83ED907A20B940010035CB48 /* piazza_san_marco.hdr in Resources */ = {isa = PBXBuildFile; fileRef = 83ED907920B940010035CB48 /* piazza_san_marco.hdr */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -37,7 +37,6 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		835756062043E3B600CE345A /* tropical_beach.hdr */ = {isa = PBXFileReference; lastKnownFileType = file; path = tropical_beach.hdr; sourceTree = "<group>"; };
 		836715F81FA9014E007ECCC9 /* GLTFSCNViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GLTFSCNViewController.m; sourceTree = "<group>"; };
 		83B9705420A7053C004E3C34 /* AnimationPlaybackView.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = AnimationPlaybackView.xib; sourceTree = "<group>"; };
 		83B9705620A70785004E3C34 /* GLTFSCNAnimationPlaybackViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GLTFSCNAnimationPlaybackViewController.h; sourceTree = "<group>"; };
@@ -53,6 +52,7 @@
 		83E99B611FA91063006E8004 /* GLTF.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = GLTF.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		83E99B621FA91063006E8004 /* GLTFSCN.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = GLTFSCN.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		83E99B631FA91064006E8004 /* SceneKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SceneKit.framework; path = System/Library/Frameworks/SceneKit.framework; sourceTree = SDKROOT; };
+		83ED907920B940010035CB48 /* piazza_san_marco.hdr */ = {isa = PBXFileReference; lastKnownFileType = file; path = piazza_san_marco.hdr; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -79,7 +79,7 @@
 		835756032043E3B600CE345A /* Environment */ = {
 			isa = PBXGroup;
 			children = (
-				835756062043E3B600CE345A /* tropical_beach.hdr */,
+				83ED907920B940010035CB48 /* piazza_san_marco.hdr */,
 			);
 			name = Environment;
 			path = ../../Resources/Environment;
@@ -203,7 +203,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				83B9705520A7053C004E3C34 /* AnimationPlaybackView.xib in Resources */,
-				835756082043E3BF00CE345A /* tropical_beach.hdr in Resources */,
+				83ED907A20B940010035CB48 /* piazza_san_marco.hdr in Resources */,
 				83BD8A0F1FA82BCF002CF9B9 /* Assets.xcassets in Resources */,
 				83BD8A121FA82BCF002CF9B9 /* Main.storyboard in Resources */,
 			);

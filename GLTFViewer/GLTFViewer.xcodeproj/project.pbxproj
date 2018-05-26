@@ -7,11 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		8332AF8420B6D6D8003C33CB /* piazza_san_marco.hdr in Resources */ = {isa = PBXBuildFile; fileRef = 8332AF8220B6D6D8003C33CB /* piazza_san_marco.hdr */; };
+		8332AF8720B8272D003C33CB /* GLTFViewerNodeCamera.m in Sources */ = {isa = PBXBuildFile; fileRef = 8332AF8620B8272D003C33CB /* GLTFViewerNodeCamera.m */; };
 		83390AE020B5779C00789D37 /* hdr.metal in Sources */ = {isa = PBXBuildFile; fileRef = 83390ADF20B5779C00789D37 /* hdr.metal */; };
 		834168101F8D70210052E7FE /* GLTFViewerOrbitCamera.m in Sources */ = {isa = PBXBuildFile; fileRef = 8341680F1F8D70210052E7FE /* GLTFViewerOrbitCamera.m */; };
 		834168131F8D70730052E7FE /* GLTFViewerFirstPersonCamera.m in Sources */ = {isa = PBXBuildFile; fileRef = 834168121F8D70730052E7FE /* GLTFViewerFirstPersonCamera.m */; };
 		834E00152031267700DCB66E /* brdf.metal in Sources */ = {isa = PBXBuildFile; fileRef = 834E000A202A70B200DCB66E /* brdf.metal */; };
-		83637A692043B94F0093C117 /* tropical_beach.hdr in Resources */ = {isa = PBXBuildFile; fileRef = 83637A612043B9230093C117 /* tropical_beach.hdr */; };
 		83850FC21F4A5E8F00F9A444 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 83850FBE1F4A5C5C00F9A444 /* main.m */; };
 		83850FC71F4A5F4D00F9A444 /* GLTFViewerViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 83850FC51F4A5F2600F9A444 /* GLTFViewerViewController.m */; };
 		83850FCA1F4A616E00F9A444 /* GLTFDocument.m in Sources */ = {isa = PBXBuildFile; fileRef = 83850FC91F4A616E00F9A444 /* GLTFDocument.m */; };
@@ -52,13 +53,15 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		8332AF8220B6D6D8003C33CB /* piazza_san_marco.hdr */ = {isa = PBXFileReference; lastKnownFileType = file; path = piazza_san_marco.hdr; sourceTree = "<group>"; };
+		8332AF8520B8272D003C33CB /* GLTFViewerNodeCamera.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = GLTFViewerNodeCamera.h; path = Shared/GLTFViewerNodeCamera.h; sourceTree = "<group>"; };
+		8332AF8620B8272D003C33CB /* GLTFViewerNodeCamera.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = GLTFViewerNodeCamera.m; path = Shared/GLTFViewerNodeCamera.m; sourceTree = "<group>"; };
 		83390ADF20B5779C00789D37 /* hdr.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = hdr.metal; sourceTree = "<group>"; };
 		8341680E1F8D70210052E7FE /* GLTFViewerOrbitCamera.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = GLTFViewerOrbitCamera.h; path = Shared/GLTFViewerOrbitCamera.h; sourceTree = "<group>"; };
 		8341680F1F8D70210052E7FE /* GLTFViewerOrbitCamera.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = GLTFViewerOrbitCamera.m; path = Shared/GLTFViewerOrbitCamera.m; sourceTree = "<group>"; };
 		834168111F8D70730052E7FE /* GLTFViewerFirstPersonCamera.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = GLTFViewerFirstPersonCamera.h; path = Shared/GLTFViewerFirstPersonCamera.h; sourceTree = "<group>"; };
 		834168121F8D70730052E7FE /* GLTFViewerFirstPersonCamera.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = GLTFViewerFirstPersonCamera.m; path = Shared/GLTFViewerFirstPersonCamera.m; sourceTree = "<group>"; };
 		834E000A202A70B200DCB66E /* brdf.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = brdf.metal; sourceTree = "<group>"; };
-		83637A612043B9230093C117 /* tropical_beach.hdr */ = {isa = PBXFileReference; lastKnownFileType = file; path = tropical_beach.hdr; sourceTree = "<group>"; };
 		837EEE511FA2B48F004BA504 /* GLTFSCN.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = GLTFSCN.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		83850FB01F4A403800F9A444 /* GLTF.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = GLTF.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		83850FB31F4A403800F9A444 /* GLTFMTL.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = GLTFMTL.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -104,6 +107,8 @@
 				8341680F1F8D70210052E7FE /* GLTFViewerOrbitCamera.m */,
 				834168111F8D70730052E7FE /* GLTFViewerFirstPersonCamera.h */,
 				834168121F8D70730052E7FE /* GLTFViewerFirstPersonCamera.m */,
+				8332AF8520B8272D003C33CB /* GLTFViewerNodeCamera.h */,
+				8332AF8620B8272D003C33CB /* GLTFViewerNodeCamera.m */,
 			);
 			name = Cameras;
 			sourceTree = "<group>";
@@ -111,7 +116,7 @@
 		83637A5E2043B9230093C117 /* Environment */ = {
 			isa = PBXGroup;
 			children = (
-				83637A612043B9230093C117 /* tropical_beach.hdr */,
+				8332AF8220B6D6D8003C33CB /* piazza_san_marco.hdr */,
 			);
 			name = Environment;
 			path = ../../Resources/Environment;
@@ -276,9 +281,9 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				83637A692043B94F0093C117 /* tropical_beach.hdr in Resources */,
 				83DBFDA71FA51F3400722FA8 /* Assets.xcassets in Resources */,
 				83850FF71F4A715D00F9A444 /* Main.storyboard in Resources */,
+				8332AF8420B6D6D8003C33CB /* piazza_san_marco.hdr in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -298,6 +303,7 @@
 				83D32B2A1FA915D000703763 /* pbr.metal in Sources */,
 				83850FCA1F4A616E00F9A444 /* GLTFDocument.m in Sources */,
 				83850FC21F4A5E8F00F9A444 /* main.m in Sources */,
+				8332AF8720B8272D003C33CB /* GLTFViewerNodeCamera.m in Sources */,
 				834168131F8D70730052E7FE /* GLTFViewerFirstPersonCamera.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

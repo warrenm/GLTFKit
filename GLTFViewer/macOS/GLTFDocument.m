@@ -54,7 +54,7 @@
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
         NSError *error = nil;
-        NSURL *environmentURL = [[NSBundle mainBundle] URLForResource:@"tropical_beach" withExtension:@"hdr"];
+        NSURL *environmentURL = [[NSBundle mainBundle] URLForResource:@"piazza_san_marco" withExtension:@"hdr"];
         _lightingEnvironment = [[GLTFMTLLightingEnvironment alloc] initWithContentsOfURL:environmentURL
                                                                                   device:GLTFDocument.device
                                                                                    error:&error];
@@ -115,8 +115,6 @@
 }
 
 - (BOOL)readFromURL:(NSURL *)url ofType:(NSString *)typeName error:(NSError **)outError {
-    //NSURL *remoteURL = [NSURL URLWithString:@"https://warrenmoore.net/files/gltf/animated_humanoid_robot/scene.gltf"];
-
     [GLTFAsset loadAssetWithURL:url bufferAllocator:GLTFDocument.bufferAllocator delegate:self];
 
     self.displayName = [url lastPathComponent];

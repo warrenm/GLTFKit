@@ -543,10 +543,12 @@
                 camera.ymag = [params[@"ymag"] floatValue];
                 break;
             case GLTFCameraTypePerspective:
-            default:
-                camera.aspectRatio = [params[@"aspectRatio"] floatValue];
+            default: {
+                NSNumber *aspectRatioValue = params[@"aspectRatio"];
+                camera.aspectRatio = (aspectRatioValue != nil) ? aspectRatioValue.floatValue : 1.0;
                 camera.yfov = [params[@"yfov"] floatValue];
                 break;
+            }
         }
         
         camera.znear = [params[@"znear"] floatValue];

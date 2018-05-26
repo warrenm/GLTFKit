@@ -15,6 +15,7 @@
 //
 
 #import "GLTFViewerCamera.h"
+#import <GLTF/GLTF.h>
 
 @implementation GLTFViewerCamera
 
@@ -32,6 +33,11 @@
 
 - (simd_float4x4)viewMatrix {
     return matrix_identity_float4x4;
+}
+
+- (simd_float4x4)projectionMatrix {
+    simd_float4x4 matrix = GLTFPerspectiveProjectionMatrixAspectFovRH(M_PI / 3, 1.0, 0.01, 250);
+    return matrix;
 }
 
 - (void)keyDown:(NSEvent *)event {

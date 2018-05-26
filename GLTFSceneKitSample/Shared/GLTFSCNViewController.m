@@ -50,10 +50,10 @@
         self.animationController.scnView = self.scnView;
     }
 
-    _scene.lightingEnvironment.contents = @"tropical_beach.hdr";
+    _scene.lightingEnvironment.contents = @"piazza_san_marco.hdr";
     _scene.lightingEnvironment.intensity = 2.0;
     
-    _scene.background.contents = @"tropical_beach.hdr";
+    _scene.background.contents = @"piazza_san_marco.hdr";
 
     SCNNode *cameraNode = [SCNNode node];
     cameraNode.camera = [SCNCamera camera];

@@ -66,7 +66,7 @@ const float GLTFViewerOrbitCameraZoomSensitivity = 2;
     
     simd_float4x4 pitchRotation = GLTFRotationMatrixFromAxisAngle(GLTFAxisX, -self.rotationAngles.y);
     simd_float4x4 yawRotation = GLTFRotationMatrixFromAxisAngle(GLTFAxisY, -self.rotationAngles.x);
-    simd_float4x4 translation = GLTFMatrixFromTranslation(0, 0, self.distance);
+    simd_float4x4 translation = GLTFMatrixFromTranslation((simd_float3){ 0, 0, self.distance });
     _viewMatrix = matrix_invert(matrix_multiply(matrix_multiply(yawRotation, pitchRotation), translation));
 }
 

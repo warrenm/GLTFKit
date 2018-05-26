@@ -97,8 +97,7 @@ GLTFQuaternion GLTFQuaternionFromEulerAngles(float pitch, float yaw, float roll)
     return q;
 }
 
-simd_float4x4 GLTFMatrixFromUniformScale(float s)
-{
+simd_float4x4 GLTFMatrixFromUniformScale(float s) {
     simd_float4x4 m = matrix_identity_float4x4;
     m.columns[0].x = s;
     m.columns[1].y = s;
@@ -106,10 +105,17 @@ simd_float4x4 GLTFMatrixFromUniformScale(float s)
     return m;
 }
 
-simd_float4x4 GLTFMatrixFromTranslation(float x, float y, float z)
-{
+simd_float4x4 GLTFMatrixFromScale(simd_float3 s) {
     simd_float4x4 m = matrix_identity_float4x4;
-    m.columns[3] = (simd_float4) { x, y, z, 1.0 };
+    m.columns[0].x = s.x;
+    m.columns[1].y = s.y;
+    m.columns[2].z = s.z;
+    return m;
+}
+
+simd_float4x4 GLTFMatrixFromTranslation(simd_float3 t) {
+    simd_float4x4 m = matrix_identity_float4x4;
+    m.columns[3] = (simd_float4) { t.x, t.y, t.z, 1.0 };
     return m;
 }
 

@@ -118,7 +118,7 @@ const float GLTFViewerFirstPersonCameraRotationScale = 0.0033;
     
     self.position = self.position + (velocity.x * right + velocity.z * forward) * GLTFViewerFirstPersonCameraDefaultSpeed;
 
-    simd_float4x4 translation = GLTFMatrixFromTranslation(self.position.x, self.position.y, self.position.z);
+    simd_float4x4 translation = GLTFMatrixFromTranslation(self.position);
     _viewMatrix = matrix_invert(matrix_multiply(translation, rotation));
 }
 

@@ -19,7 +19,13 @@
 
 @interface GLTFViewerCamera: NSObject
 
+/// A matrix specifying the location and orientation of the camera
 @property (nonatomic, readonly, assign) simd_float4x4 viewMatrix;
+
+/// A matrix specifying the projective aspects of the viewing transform.
+/// This matrix should assume an aspect ratio of 1:1; clients of this
+/// method are expected to apply a suitable aspect-correction transform.
+@property (nonatomic, readonly, assign) simd_float4x4 projectionMatrix;
 
 @property (nonatomic, readonly, assign) BOOL *keysDown;
 
