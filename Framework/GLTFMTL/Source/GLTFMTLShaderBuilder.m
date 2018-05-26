@@ -74,8 +74,8 @@
         pipelineDescriptor.colorAttachments[0].blendingEnabled = YES;
         pipelineDescriptor.colorAttachments[0].rgbBlendOperation = MTLBlendOperationAdd;
         pipelineDescriptor.colorAttachments[0].alphaBlendOperation = MTLBlendOperationAdd;
-        pipelineDescriptor.colorAttachments[0].sourceRGBBlendFactor = MTLBlendFactorSourceAlpha;
-        pipelineDescriptor.colorAttachments[0].sourceAlphaBlendFactor = MTLBlendFactorSourceAlpha;
+        pipelineDescriptor.colorAttachments[0].sourceRGBBlendFactor = MTLBlendFactorOne;
+        pipelineDescriptor.colorAttachments[0].sourceAlphaBlendFactor = MTLBlendFactorOne;
         pipelineDescriptor.colorAttachments[0].destinationRGBBlendFactor = MTLBlendFactorOneMinusSourceAlpha;
         pipelineDescriptor.colorAttachments[0].destinationAlphaBlendFactor = MTLBlendFactorOneMinusSourceAlpha;
     }
@@ -127,6 +127,7 @@
     BOOL vertexColorIsRGB = submesh.accessorsForAttributes[GLTFAttributeSemanticColor0].dimension == GLTFDataDimensionVector3;
     BOOL hasVertexRoughness = submesh.accessorsForAttributes[GLTFAttributeSemanticRoughness] != nil;
     BOOL hasVertexMetallic = submesh.accessorsForAttributes[GLTFAttributeSemanticMetallic] != nil;
+    BOOL premultiplyBaseColor = material.alphaMode == GLTFAlphaModeBlend;
     BOOL useAlphaTest = material.alphaMode == GLTFAlphaModeMask;
 
     NSMutableString *shaderFeatures = [NSMutableString string];
@@ -150,6 +151,7 @@
     [shaderFeatures appendFormat:@"#define HAS_VERTEX_ROUGHNESS %d\n", hasVertexRoughness];
     [shaderFeatures appendFormat:@"#define HAS_VERTEX_METALLIC %d\n", hasVertexMetallic];
     [shaderFeatures appendFormat:@"#define HAS_TEXTURE_TRANSFORM %d\n", hasTextureTransforms];
+    [shaderFeatures appendFormat:@"#define PREMULTIPLY_BASE_COLOR %d\n", premultiplyBaseColor];
     [shaderFeatures appendFormat:@"#define SPECULAR_ENV_MIP_LEVELS %d\n", lightingEnvironment.specularMipLevelCount];
     [shaderFeatures appendFormat:@"#define MAX_LIGHTS %d\n", (int)GLTFMTLMaximumLightCount];
     [shaderFeatures appendFormat:@"#define MAX_MATERIAL_TEXTURES %d\n\n", (int)GLTFMTLMaximumTextureCount];

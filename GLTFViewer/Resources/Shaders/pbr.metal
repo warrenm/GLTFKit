@@ -48,6 +48,7 @@ constant int textureIndexBRDFLookup          = 7;
 #define HAS_OCCLUSION_MAP 1
 #define HAS_EMISSIVE_MAP 1
 #define HAS_TEXTURE_TRANSFORM 1
+#define PREMULTIPLY_BASE_COLOR 1
 #define SPECULAR_ENV_MIP_LEVELS 6
 #define MAX_LIGHTS 3
 #define MAX_MATERIAL_TEXTURES 5
@@ -321,9 +322,13 @@ fragment half4 fragment_main(VertexOut in [[stage_in]],
 
     half4 baseColor;
     #if HAS_BASE_COLOR_MAP
-        baseColor = baseColorTexture.sample(baseColorSampler, baseColorTexCoord) * half4(uniforms.baseColorFactor);
+        baseColor = baseColorTexture.sample(baseColorSampler, baseColorTexCoord);
+        #if PREMULTIPLY_BASE_COLOR
+            baseColor.rgb *= baseColor.a;
+        #endif
+        baseColor *= half4(uniforms.baseColorFactor);
     #else
-        baseColor = uniforms.baseColorFactor;
+        baseColor = half4(uniforms.baseColorFactor);
     #endif
 
     #if HAS_VERTEX_COLOR
