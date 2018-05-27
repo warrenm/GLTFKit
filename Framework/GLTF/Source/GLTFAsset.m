@@ -62,6 +62,7 @@
 @property (nonatomic, assign) BOOL usesEXTPBRAttributes;
 @property (nonatomic, assign) BOOL usesKHRLights;
 @property (nonatomic, assign) BOOL usesKHRTextureTransform;
+@property (nonatomic, assign) BOOL usesKHRMaterialsUnlit;
 @end
 
 @implementation GLTFAsset
@@ -226,6 +227,8 @@
             _usesEXTPBRAttributes = YES;
         } else if ([extension isEqualToString:GLTFExtensionKHRLights]) {
             _usesKHRLights = YES;
+        } else if ([extension isEqualToString:GLTFExtensionKHRMaterialsUnlit]) {
+            _usesKHRMaterialsUnlit = YES;
         } else if ([extension isEqualToString:GLTFExtensionKHRTextureTransform]) {
             _usesKHRTextureTransform = YES;
         } else {
@@ -911,6 +914,13 @@
                 if (specularFactorComponents.count == 3) {
                     material.specularFactor = GLTFVectorFloat3FromArray(specularFactorComponents);
                 }
+            }
+        }
+        
+        if (_usesKHRMaterialsUnlit) {
+            NSDictionary *unlitMap = material.extensions[GLTFExtensionKHRMaterialsUnlit];
+            if (unlitMap != nil) {
+                material.unlit = YES;
             }
         }
         

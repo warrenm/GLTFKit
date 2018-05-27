@@ -128,6 +128,7 @@
     BOOL hasVertexRoughness = submesh.accessorsForAttributes[GLTFAttributeSemanticRoughness] != nil;
     BOOL hasVertexMetallic = submesh.accessorsForAttributes[GLTFAttributeSemanticMetallic] != nil;
     BOOL premultiplyBaseColor = material.alphaMode == GLTFAlphaModeBlend;
+    BOOL materialIsUnlit = material.isUnlit;
     BOOL useAlphaTest = material.alphaMode == GLTFAlphaModeMask;
 
     NSMutableString *shaderFeatures = [NSMutableString string];
@@ -152,6 +153,7 @@
     [shaderFeatures appendFormat:@"#define HAS_VERTEX_METALLIC %d\n", hasVertexMetallic];
     [shaderFeatures appendFormat:@"#define HAS_TEXTURE_TRANSFORM %d\n", hasTextureTransforms];
     [shaderFeatures appendFormat:@"#define PREMULTIPLY_BASE_COLOR %d\n", premultiplyBaseColor];
+    [shaderFeatures appendFormat:@"#define MATERIAL_IS_UNLIT %d\n", materialIsUnlit];
     [shaderFeatures appendFormat:@"#define SPECULAR_ENV_MIP_LEVELS %d\n", lightingEnvironment.specularMipLevelCount];
     [shaderFeatures appendFormat:@"#define MAX_LIGHTS %d\n", (int)GLTFMTLMaximumLightCount];
     [shaderFeatures appendFormat:@"#define MAX_MATERIAL_TEXTURES %d\n\n", (int)GLTFMTLMaximumTextureCount];

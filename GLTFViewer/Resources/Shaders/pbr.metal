@@ -48,6 +48,7 @@ constant int textureIndexBRDFLookup          = 7;
 #define HAS_OCCLUSION_MAP 1
 #define HAS_EMISSIVE_MAP 1
 #define HAS_TEXTURE_TRANSFORM 1
+#define MATERIAL_IS_UNLIT 0
 #define PREMULTIPLY_BASE_COLOR 1
 #define SPECULAR_ENV_MIP_LEVELS 6
 #define MAX_LIGHTS 3
@@ -333,6 +334,15 @@ fragment half4 fragment_main(VertexOut in [[stage_in]],
 
     #if HAS_VERTEX_COLOR
         baseColor *= half4(in.color);
+    #endif
+    
+    #if MATERIAL_IS_UNLIT
+        #if USE_ALPHA_TEST
+            if (baseColor.a < uniforms.alphaCutoff) {
+                discard_fragment();
+            }
+        #endif
+        return baseColor;
     #endif
     
     half3 f0(0.04);

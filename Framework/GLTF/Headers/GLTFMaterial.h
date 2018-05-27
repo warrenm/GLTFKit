@@ -54,6 +54,8 @@ typedef NS_ENUM(NSInteger, GLTFAlphaMode) {
 @property (nonatomic, assign) GLTFAlphaMode alphaMode;
 @property (nonatomic, assign) float alphaCutoff; // Only used when `alphaMode` == GLTFAlphaModeMask
 
+@property (nonatomic, assign, getter=isUnlit) BOOL unlit; // Only used when KHR_materials_unlit extension is present
+
 @end
 
 NS_ASSUME_NONNULL_END

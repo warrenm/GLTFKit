@@ -18,5 +18,6 @@
 
 NSString *const GLTFExtensionKHRMaterialsPBRSpecularGlossiness = @"KHR_materials_pbrSpecularGlossiness";
 NSString *const GLTFExtensionKHRLights = @"KHR_lights";
+NSString *const GLTFExtensionKHRMaterialsUnlit = @"KHR_materials_unlit";
 NSString *const GLTFExtensionKHRTextureTransform = @"KHR_texture_transform";
 NSString *const GLTFExtensionEXTPBRAttributes = @"EXT_pbr_attributes";
