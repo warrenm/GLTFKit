@@ -214,19 +214,19 @@
 }
 
 - (void)addDefaultLights {
-    GLTFNode *lightNode = [[GLTFNode alloc] init];
-    lightNode.translation = (simd_float3){ 0, 0, 1 };
-    lightNode.rotationQuaternion = simd_quaternion(1.0f, 0, 0, 0);
-    GLTFKHRLight *light = [[GLTFKHRLight alloc] init];
-    lightNode.light = light;
-    [self.asset.defaultScene addNode:lightNode];
-    [self.asset addLight:light];
-    
-    GLTFKHRLight *ambientLight = [[GLTFKHRLight alloc] init];
-    ambientLight.type = GLTFKHRLightTypeAmbient;
-    ambientLight.intensity = 0.1;
-    [self.asset addLight:ambientLight];
-    self.asset.defaultScene.ambientLight = ambientLight;
+//    GLTFNode *lightNode = [[GLTFNode alloc] init];
+//    lightNode.translation = (simd_float3){ 0, 0, 1 };
+//    lightNode.rotationQuaternion = simd_quaternion(1.0f, 0, 0, 0);
+//    GLTFKHRLight *light = [[GLTFKHRLight alloc] init];
+//    lightNode.light = light;
+//    [self.asset.defaultScene addNode:lightNode];
+//    [self.asset addLight:light];
+//    
+//    GLTFKHRLight *ambientLight = [[GLTFKHRLight alloc] init];
+//    ambientLight.type = GLTFKHRLightTypeAmbient;
+//    ambientLight.intensity = 0.1;
+//    [self.asset addLight:ambientLight];
+//    self.asset.defaultScene.ambientLight = ambientLight;
 }
 
 - (void)computeRegularizationMatrix {

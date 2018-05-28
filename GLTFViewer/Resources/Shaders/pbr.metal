@@ -101,7 +101,7 @@ struct Light {
     float intensity;
     float innerConeAngle;
     float outerConeAngle;
-    float pad;
+    float range;
     float4 spotDirection;
 };
 
@@ -360,7 +360,7 @@ fragment half4 fragment_main(VertexOut in [[stage_in]],
 
     half3 color(0);
 
-    #if USE_PBR && false
+    #if USE_PBR
         color += half3(uniforms.ambientLight.color.rgb * uniforms.ambientLight.intensity) * diffuseColor;
 
         for (int i = 0; i < MAX_LIGHTS; ++i) {
@@ -384,7 +384,9 @@ fragment half4 fragment_main(VertexOut in [[stage_in]],
                 specContrib = NdotL * D * F * G / (4.0 * NdotL * NdotV);
             }
             
-            half atten = (light.position.w == 0) ? 1 : (1 / (1 + powr(length(light.position.xyz - in.worldPosition), 2)));
+            half lightDist = length(light.position.xyz - in.worldPosition);
+            half attenNum = (light.range > 0) ? saturate(1.0 - powr(lightDist / light.range, 4)) : 1;
+            half atten = (light.position.w == 0) ? 1 : attenNum / powr(lightDist, 2);
 
             float relativeSpotAngle = acos(dot(-L, normalize(light.spotDirection.xyz)));
             float spotAttenParam = 1 - clamp((relativeSpotAngle - light.innerConeAngle) / max(0.001, light.outerConeAngle - light.innerConeAngle), 0.0, 1.0);

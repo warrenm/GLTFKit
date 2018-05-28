@@ -36,7 +36,7 @@ typedef struct {
     float intensity;
     float innerConeAngle;
     float outerConeAngle;
-    float pad;
+    float range;
     simd_float4 spotDirection;
 } Light;
 
@@ -424,6 +424,7 @@ typedef struct {
                 }
                 fragmentUniforms.lights[lightIndex].color = light.color;
                 fragmentUniforms.lights[lightIndex].intensity = light.intensity;
+                fragmentUniforms.lights[lightIndex].range = light.range;
                 if (light.type == GLTFKHRLightTypeSpot) {
                     fragmentUniforms.lights[lightIndex].innerConeAngle = light.innerConeAngle;
                     fragmentUniforms.lights[lightIndex].outerConeAngle = light.outerConeAngle;

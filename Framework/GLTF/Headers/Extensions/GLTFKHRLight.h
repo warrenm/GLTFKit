@@ -36,6 +36,10 @@ typedef NS_ENUM(NSInteger, GLTFKHRLightType) {
 /// while directional lights use illuminance in lux (lm/m^2).
 @property (nonatomic, assign) float intensity;
 
+/// Distance threshold at which the light's intensity may be considered to have reached zero,
+/// expressed in meters. Default is 0, signifying effectively infinite range.
+@property (nonatomic, assign) float range;
+
 /// Angle, in radians, from the center of a spotlight to where falloff begins.
 /// Must be greater than or equal to 0, less than or equal to `outerConeAngle`,
 /// and less than pi / 2. Default value is 0.

@@ -23,6 +23,7 @@
         _type = GLTFKHRLightTypeDirectional;
         _color = (simd_float4){ 1, 1, 1, 1 };
         _intensity = 1;
+        _range = 0;
         _innerConeAngle = 0;
         _outerConeAngle = M_PI_4;
     }
