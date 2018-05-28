@@ -37,8 +37,6 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (nonatomic, copy) NSArray<GLTFNode *> *referencingNodes;
 
-- (void)buildProjectionMatrix;
-
 @end
 
 NS_ASSUME_NONNULL_END

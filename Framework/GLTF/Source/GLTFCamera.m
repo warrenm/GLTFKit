@@ -16,7 +16,13 @@
 
 #import "GLTFCamera.h"
 
+@interface GLTFCamera ()
+@property (nonatomic, assign, getter=projectionMatrixIsDirty) BOOL projectionMatrixDirty;
+@end
+
 @implementation GLTFCamera
+
+@synthesize projectionMatrix=_projectionMatrix;
 
 - (instancetype)init {
     if ((self = [super init])) {
@@ -25,7 +31,54 @@
     return self;
 }
 
-- (void)buildProjectionMatrix {
+- (void)setCameraType:(GLTFCameraType)cameraType {
+    _cameraType = cameraType;
+    _projectionMatrixDirty = YES;
+}
+
+- (void)setAspectRatio:(float)aspectRatio {
+    _aspectRatio = aspectRatio;
+    _projectionMatrixDirty = YES;
+}
+
+- (void)setYfov:(float)yfov {
+    _yfov = yfov;
+    _projectionMatrixDirty = YES;
+}
+
+- (void)setXmag:(float)xmag {
+    _xmag = xmag;
+    _projectionMatrixDirty = YES;
+}
+
+- (void)setYmag:(float)ymag {
+    _ymag = ymag;
+    _projectionMatrixDirty = YES;
+}
+
+- (void)setZnear:(float)znear {
+    _znear = znear;
+    _projectionMatrixDirty = YES;
+}
+
+- (void)setZfar:(float)zfar {
+    _zfar = zfar;
+    _projectionMatrixDirty = YES;
+}
+
+- (void)setProjectionMatrix:(simd_float4x4)projectionMatrix {
+    _projectionMatrix = projectionMatrix;
+    _projectionMatrixDirty = NO;
+}
+
+- (simd_float4x4)projectionMatrix {
+    if (self.projectionMatrixIsDirty) {
+        [self _buildProjectionMatrix];
+    }
+    return _projectionMatrix;
+}
+
+- (void)_buildProjectionMatrix {
     switch (_cameraType) {
         case GLTFCameraTypeOrthographic: {
             simd_float4 X = (simd_float4){ 1 / _xmag, 0, 0, 0 };
@@ -49,6 +102,7 @@
             break;
         }
     }
+    _projectionMatrixDirty = NO;
 }
 
 @end

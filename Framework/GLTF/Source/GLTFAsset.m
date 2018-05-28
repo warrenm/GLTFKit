@@ -564,9 +564,7 @@
 
         camera.extensions = properties[@"extensions"];
         camera.extras = properties[@"extras"];
-        
-        [camera buildProjectionMatrix];
-        
+
         [_cameras addObject: camera];
     }
     
