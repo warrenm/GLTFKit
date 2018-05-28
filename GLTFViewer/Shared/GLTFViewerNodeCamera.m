@@ -17,6 +17,7 @@
 
 - (simd_float4x4)projectionMatrix {
     NSAssert(self.node.camera != nil, @"Point-of-view node has no associated camera");
+    self.node.camera.aspectRatio = 1.0; // Hack away the included aspect ratio since we need to match the viewer viewport
     return self.node.camera.projectionMatrix;
 }
 
