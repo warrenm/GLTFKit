@@ -191,7 +191,6 @@ Below is a checklist of glTF features and their current level of support.
 - [x] Linear interpolation
 - [ ] Discrete animations
 - [ ] Cubic spline interpolation
-- [ ] Catmull-Rom interpolation
 
 #### Skinning
 - [x] Joint matrix calculation
@@ -203,7 +202,7 @@ Below is a checklist of glTF features and their current level of support.
 #### Extensions
 - [ ] KHR_materials_pbrSpecularGlossiness
 - [ ] KHR_materials_common
-- [] KHR_lights
+- [ ] KHR_lights
 - [x] KHR_materials_unlit
 - [x] KHR_texture_transform
 - [x] EXT_pbr_attributes

@@ -175,5 +175,4 @@ typedef NS_ENUM(NSInteger, GLTFInterpolationMode) {
     GLTFInterpolationModeStep,
     GLTFInterpolationModeLinear,
     GLTFInterpolationModeCubic,
-    GLTFInterpolationModeCatmullRom,
 };

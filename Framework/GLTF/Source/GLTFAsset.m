@@ -1117,7 +1117,7 @@
         return YES;
     }
 
-    NSArray *interpolationModes = @[ @"STEP", @"LINEAR", @"CUBICSPLINE", @"CATMULLROMSPLINE" ];
+    NSArray *interpolationModes = @[ @"STEP", @"LINEAR", @"CUBICSPLINE" ];
 
     NSMutableArray *animations = [NSMutableArray arrayWithCapacity:animationsMap.count];
 
