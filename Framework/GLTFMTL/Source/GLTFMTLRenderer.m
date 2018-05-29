@@ -279,7 +279,7 @@ typedef struct {
     [self drawRenderList:renderList commandEncoder:renderEncoder];
     
     NSArray *copiedDeferredReusableBuffers = [self.deferredReusableBuffers copy];
-    [commandBuffer addScheduledHandler:^(id<MTLCommandBuffer> commandBuffer) {
+    [commandBuffer addCompletedHandler:^(id<MTLCommandBuffer> commandBuffer) {
         dispatch_async(dispatch_get_main_queue(), ^{
             for (id<MTLBuffer> buffer in copiedDeferredReusableBuffers) {
                 [self enqueueReusableBuffer:buffer];
