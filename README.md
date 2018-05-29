@@ -2,7 +2,7 @@
 
 An Objective-C glTF 2.0 loader and Metal-based renderer
 
-![A screenshot of a glTF asset rendered with SceneKit](Images/screenshot-polly.jpg)
+![A screenshot of a glTF asset rendered with the GLTFMTL framework](Images/screenshot-polly.png)
 
 ## Contents
 
