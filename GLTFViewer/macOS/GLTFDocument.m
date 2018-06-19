@@ -58,7 +58,7 @@
         _lightingEnvironment = [[GLTFMTLLightingEnvironment alloc] initWithContentsOfURL:environmentURL
                                                                                   device:GLTFDocument.device
                                                                                    error:&error];
-        _lightingEnvironment.intensity = 1.0;
+        _lightingEnvironment.intensity = 2;
     });
     return _lightingEnvironment;
 }

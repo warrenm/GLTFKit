@@ -47,6 +47,6 @@ fragment half4 skybox_fragment_main(FragmentIn in [[stage_in]],
     constexpr sampler linearSampler(coord::normalized, min_filter::linear, mag_filter::linear, mip_filter::linear);
     float3 normal = normalize(in.worldPosition.xyz);
     normal *= float3(1, 1, -1);
-    half3 color = environmentIntensity * skyboxTexture.sample(linearSampler, normal).rgb;
+    half3 color = skyboxTexture.sample(linearSampler, normal).rgb;
     return half4(color, 1);
 }

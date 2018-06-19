@@ -399,9 +399,8 @@ fragment half4 fragment_main(VertexOut in [[stage_in]],
 
     #if USE_IBL
         constexpr sampler cubeSampler(coord::normalized, filter::linear, mip_filter::linear);
-    
         float mipCount = SPECULAR_ENV_MIP_LEVELS;
-        float lod = perceptualRoughness * mipCount;
+        float lod = perceptualRoughness * (mipCount - 1);
         half2 brdf = brdfLUT.sample(cubeSampler, float2(NdotV, perceptualRoughness)).xy;
         half3 diffuseLight = diffuseEnvTexture.sample(cubeSampler, N).rgb;
         diffuseLight *= uniforms.envIntensity;
