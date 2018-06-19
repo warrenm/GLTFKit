@@ -848,7 +848,7 @@
             }
             NSNumber *occlusionStrengthValue = occlusionTextureMap[@"strength"];
             if (occlusionStrengthValue != nil) {
-                material.occlusionStrength = occlusionStrengthValue.integerValue;
+                material.occlusionStrength = occlusionStrengthValue.floatValue;
             }
 
             material.occlusionTexture.extras = occlusionTextureMap[@"extras"];
