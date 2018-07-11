@@ -27,11 +27,12 @@ __fp16 *GLTFMTLConvertImageToRGBA16F(CGImageRef image)
     size_t height = CGImageGetHeight(image);
 
     void *dstPixels = malloc(sizeof(__fp16) * 4 * width * height);
+    size_t dstBytesPerRow = sizeof(__fp16) * 4 * width;
     vImage_Buffer dstBuffer = {
         .data = dstPixels,
         .height = height,
         .width = width,
-        .rowBytes = sizeof(__fp16) * 4 * width
+        .rowBytes = dstBytesPerRow
     };
 
     vImage_CGImageFormat srcFormat = {
@@ -45,7 +46,7 @@ __fp16 *GLTFMTLConvertImageToRGBA16F(CGImageRef image)
         .bitsPerComponent = sizeof(__fp16) * 8,
         .bitsPerPixel = sizeof(__fp16) * 8 * 4,
         .colorSpace = CGImageGetColorSpace(image),
-        .bitmapInfo = kCGBitmapByteOrder16Little | kCGBitmapFloatComponents | kCGImageAlphaPremultipliedLast
+        .bitmapInfo = kCGBitmapByteOrder16Little | kCGBitmapFloatComponents | kCGImageAlphaLast
     };
 
     vImage_Error error = kvImageNoError;
@@ -60,19 +61,16 @@ __fp16 *GLTFMTLConvertImageToRGBA16F(CGImageRef image)
     CFDataRef srcData = CGDataProviderCopyData(dataProvider);
 
     const void *srcPixels = CFDataGetBytePtr(srcData);
-    
-    int srcBytesPerComponent = (int)CGImageGetBitsPerComponent(image) / 8;
-    
-    int srcComponentCount = (int)CGColorSpaceGetNumberOfComponents(CGImageGetColorSpace(image));
+    size_t srcBytesPerRow = CGImageGetBytesPerRow(image);
 
     vImage_Buffer srcBuffer = {
         .data = (void *)srcPixels,
         .height = height,
         .width = width,
-        .rowBytes = srcBytesPerComponent * srcComponentCount * width
+        .rowBytes = srcBytesPerRow
     };
 
-    vImageConvert_AnyToAny(converter, &srcBuffer, &dstBuffer, NULL, kvImageNoFlags);
+    error = vImageConvert_AnyToAny(converter, &srcBuffer, &dstBuffer, NULL, kvImageNoFlags);
 
     vImageConverter_Release(converter);
     CFRelease(srcData);
@@ -185,13 +183,14 @@ unsigned char *GLTFMTLConvertImageToRGBA8U(CGImageRef image)
     if (bitsPerComponent == 8) {
         pixelFormat = sRGB ? MTLPixelFormatRGBA8Unorm_sRGB : MTLPixelFormatRGBA8Unorm;
         dstBytes = GLTFMTLConvertImageToRGBA8U(image);
-    } else if (bitsPerComponent == 16) {
+        bitsPerComponent = 8;
+    } else if (bitsPerComponent == 16 || bitsPerComponent == 32) {
         pixelFormat = MTLPixelFormatRGBA16Float;
         dstBytes = GLTFMTLConvertImageToRGBA16F(image);
+        bitsPerComponent = 16;
     }
 
     size_t bytesPerRow = (bitsPerComponent / 8) * 4 * width;
-
     NSNumber *mipmapOption = options[GLTFMTLTextureLoaderOptionGenerateMipmaps];
     BOOL mipmapped = (mipmapOption != nil) ? mipmapOption.boolValue : NO;
 
@@ -200,8 +199,12 @@ unsigned char *GLTFMTLConvertImageToRGBA8U(CGImageRef image)
                                                                                          height:height
                                                                                       mipmapped:mipmapped];
 
-    id<MTLTexture> texture = [self newTextureWithBytes:dstBytes bytesPerRow:bytesPerRow descriptor:descriptor options:options error:error];
-
+    id<MTLTexture> texture = [self newTextureWithBytes:dstBytes
+                                           bytesPerRow:bytesPerRow
+                                            descriptor:descriptor
+                                               options:options
+                                                 error:error];
+    
     free(dstBytes);
     CGImageRelease(image);
     CFRelease(imageSource);
