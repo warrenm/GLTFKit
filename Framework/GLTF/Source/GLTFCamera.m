@@ -102,6 +102,13 @@
             break;
         }
     }
+    simd_float4x4 glToMetal = (simd_float4x4){{
+        { 1, 0,   0, 0 },
+        { 0, 1,   0, 0 },
+        { 0, 0, 0.5, 0 },
+        { 0, 0, 0.5, 1 },
+    }};
+    _projectionMatrix = simd_mul(glToMetal, _projectionMatrix);
     _projectionMatrixDirty = NO;
 }
 
