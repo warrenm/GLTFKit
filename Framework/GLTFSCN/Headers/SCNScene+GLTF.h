@@ -25,6 +25,28 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, strong) SCNNode *target;
 @end
 
+
+typedef NS_ENUM(NSInteger, GLTFImageChannel) {
+  GLTFImageChannelRed,
+  GLTFImageChannelGreen,
+  GLTFImageChannelBlue,
+  GLTFImageChannelAlpha,
+  GLTFImageChannelAll = 255
+};
+
+@protocol GLTFSCNAssetLoadingDelegate
+- (CGImageRef)cgImageForGLTFImage:(GLTFImage *)image channelMask:(GLTFImageChannel)channelMask;
+@end
+
+@interface DefaultGLTFSCNAssetLoadingDelegate : NSObject <GLTFSCNAssetLoadingDelegate>
+@property (nonatomic, strong) NSMutableDictionary<NSString *, id> *cgImagesForImagesAndChannels;
+
+- (CGImageRef)cgImageForGLTFImage:(GLTFImage *)image channelMask:(GLTFImageChannel)channelMask;
+- (CGImageRef)newCGImageByExtractingChannel:(NSInteger)channelIndex fromCGImage:(CGImageRef)sourceImage;
+
+@end
+
+
 @interface GLTFSCNAsset : NSObject
 @property (nonatomic, copy) NSArray<SCNScene *> *scenes;
 @property (nonatomic, strong) SCNScene * _Nullable defaultScene;
@@ -36,6 +58,24 @@ NS_ASSUME_NONNULL_BEGIN
 @interface SCNScene (GLTF)
 
 + (GLTFSCNAsset *)assetFromGLTFAsset:(GLTFAsset *)asset options:(NSDictionary<id<NSCopying>, id> *)options;
++ (GLTFSCNAsset *)assetFromGLTFAsset:(GLTFAsset *)asset delegate:(id<GLTFSCNAssetLoadingDelegate>)delegate options:(NSDictionary<id<NSCopying>, id> *)options;
+
+@end
+
+
+
+@interface GLTFSCNSceneBuilder : NSObject
+
+@property (nonatomic, strong) GLTFAsset *asset;
+@property (nonatomic, copy) NSDictionary<id<NSCopying>, id> *options;
+@property (nonatomic, weak) id<GLTFSCNAssetLoadingDelegate> loadingDelegate;
+@property (nonatomic, strong) NSMutableDictionary<NSUUID *, SCNNode *> *scnNodesForGLTFNodes;
+@property (nonatomic, strong) NSMutableDictionary<NSUUID *, NSArray<NSValue *> *> *inverseBindMatricesForSkins;
+@property (nonatomic, assign) NSInteger anonymousAnimationIndex;
+
+- (instancetype)initWithGLTFAsset:(GLTFAsset *)asset delegate:(id<GLTFSCNAssetLoadingDelegate>)delegate options:(NSDictionary<id<NSCopying>, id> *)options;
+
+- (GLTFSCNAsset *)buildSceneContainer;
 
 @end
 
