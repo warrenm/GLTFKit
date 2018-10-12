@@ -64,19 +64,6 @@ typedef NS_ENUM(NSInteger, GLTFImageChannel) {
 
 
 
-@interface GLTFSCNSceneBuilder : NSObject
 
-@property (nonatomic, strong) GLTFAsset *asset;
-@property (nonatomic, copy) NSDictionary<id<NSCopying>, id> *options;
-@property (nonatomic, weak) id<GLTFSCNAssetLoadingDelegate> loadingDelegate;
-@property (nonatomic, strong) NSMutableDictionary<NSUUID *, SCNNode *> *scnNodesForGLTFNodes;
-@property (nonatomic, strong) NSMutableDictionary<NSUUID *, NSArray<NSValue *> *> *inverseBindMatricesForSkins;
-@property (nonatomic, assign) NSInteger anonymousAnimationIndex;
-
-- (instancetype)initWithGLTFAsset:(GLTFAsset *)asset delegate:(id<GLTFSCNAssetLoadingDelegate>)delegate options:(NSDictionary<id<NSCopying>, id> *)options;
-
-- (GLTFSCNAsset *)buildSceneContainer;
-
-@end
 
 NS_ASSUME_NONNULL_END
