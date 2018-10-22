@@ -116,6 +116,7 @@ static SCNMatrix4 GLTFSCNContentsTransformFromTextureTransform(GLTFTextureTransf
         _options = options;
         _scnNodesForGLTFNodes = [NSMutableDictionary dictionary];
         _inverseBindMatricesForSkins = [NSMutableDictionary dictionary];
+        _loadingDelegate = delegate;
     }
     return self;
 }
