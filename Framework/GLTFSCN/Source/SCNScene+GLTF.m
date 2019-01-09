@@ -325,8 +325,28 @@ static SCNMatrix4 GLTFSCNContentsTransformFromTextureTransform(GLTFTextureTransf
         dataStride = bytesPerElement;
     }
     
-    NSData *data = [NSData dataWithBytes:buffer.contents + bufferView.offset + accessor.offset
-                                  length:accessor.count * dataStride];
+    void *dataBase = buffer.contents + bufferView.offset + accessor.offset;
+
+    // Ensure linear sum of weights is equal to 1; this is required by the spec, and SceneKit
+    // relies on this invariant as of iOS 12 and macOS Mojave. This fix is due to Alexander Petrovichev;
+    // refer to https://github.com/warrenm/GLTFKit/issues/5
+    if ([semantic isEqualToString:SCNGeometrySourceSemanticBoneWeights])
+    {
+        NSAssert(accessor.componentType == GLTFDataTypeFloat && accessor.dimension == GLTFDataDimensionVector4,
+                 @"Accessor for joint weights must be of float4 type; other data types are not currently supported");
+        for (int i = 0; i < accessor.count; ++i) {
+            float *weights = (float *)(dataBase + i * dataStride);
+            float sum = weights[0] + weights[1] + weights[2] + weights[3];
+            if (sum != 1.0f) {
+                weights[0] /= sum;
+                weights[1] /= sum;
+                weights[2] /= sum;
+                weights[3] /= sum;
+            }
+        }
+    }
+
+    NSData *data = [NSData dataWithBytes:dataBase length:accessor.count * dataStride];
 
     SCNGeometrySource *source = [SCNGeometrySource geometrySourceWithData:data
                                                                  semantic:semantic

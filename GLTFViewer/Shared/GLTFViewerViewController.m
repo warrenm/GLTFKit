@@ -403,7 +403,7 @@
     [renderEncoder setVertexBytes:vertexData length:sizeof(float) * 36 * 3 atIndex:0];
     [renderEncoder setVertexBytes:&vertexUniforms length:sizeof(vertexUniforms) atIndex:1];
     [renderEncoder setFragmentBytes:&environmentIntensity length:sizeof(environmentIntensity) atIndex:0];
-    [renderEncoder setFragmentTexture:self.lightingEnvironment.diffuseCube atIndex:0];
+    [renderEncoder setFragmentTexture:self.lightingEnvironment.specularCube atIndex:0];
     [renderEncoder drawPrimitives:MTLPrimitiveTypeTriangle vertexStart:0 vertexCount:36];
     [renderEncoder setCullMode:MTLCullModeNone];
 }
