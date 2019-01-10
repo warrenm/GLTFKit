@@ -129,19 +129,19 @@ static SCNMatrix4 GLTFSCNContentsTransformFromTextureTransform(GLTFTextureTransf
 
 - (GLTFSCNAsset *)buildSceneContainer {
     GLTFSCNAsset *scnAsset = [GLTFSCNAsset new];
-    
+
     NSMutableArray *scenes = [NSMutableArray array];
-    
+
     for (GLTFScene *scene in self.asset.scenes) {
         SCNScene *scnScene = [SCNScene scene];
-        
+
         for (GLTFNode *node in scene.nodes) {
             [self recursiveAddNode:node toSCNNode:scnScene.rootNode];
         }
-        
+
         [scenes addObject:scnScene];
     }
-    
+
     NSMutableDictionary *animations = [NSMutableDictionary dictionary];
     for (GLTFAnimation *animation in self.asset.animations) {
         NSString *name = animation.name ?: [self _nextAnonymousAnimationName];
@@ -156,7 +156,7 @@ static SCNMatrix4 GLTFSCNContentsTransformFromTextureTransform(GLTFTextureTransf
                 keyframeAnimation.values = [self vectorArrayFromAccessor:channel.sampler.outputAccessor];
             } else if ([channel.targetPath isEqualToString:@"scale"]) {
                 keyframeAnimation = [CAKeyframeAnimation animationWithKeyPath:@"scale"];
-                keyframeAnimation.values = [self vectorArrayFromScalarAccessor:channel.sampler.outputAccessor];
+                keyframeAnimation.values = [self vectorArrayFromAccessor:channel.sampler.outputAccessor];
             } else {
                 continue;
             }
@@ -166,7 +166,7 @@ static SCNMatrix4 GLTFSCNContentsTransformFromTextureTransform(GLTFTextureTransf
             keyframeAnimation.beginTime = channel.startTime;
             keyframeAnimation.duration = channel.duration;
             keyframeAnimation.repeatDuration = FLT_MAX;
-            
+
             SCNNode *scnNode = self.scnNodesForGLTFNodes[channel.targetNode.identifier];
             if (scnNode != nil) {
                 GLTFSCNAnimationTargetPair *pair = [GLTFSCNAnimationTargetPair new];
@@ -179,10 +179,10 @@ static SCNMatrix4 GLTFSCNContentsTransformFromTextureTransform(GLTFTextureTransf
         }
         animations[name] = [pairs copy];
     }
-    
+
     scnAsset.scenes = [scenes copy];
     scnAsset.animations = [animations copy];
-    
+
     if (self.asset.defaultScene != nil) {
         NSUInteger defaultSceneIndex = [self.asset.scenes indexOfObject:self.asset.defaultScene];
         if (defaultSceneIndex < scenes.count) {
@@ -195,11 +195,11 @@ static SCNMatrix4 GLTFSCNContentsTransformFromTextureTransform(GLTFTextureTransf
 
 - (void)recursiveAddNode:(GLTFNode *)node toSCNNode:(SCNNode *)parentNode {
     SCNNode *scnNode = [self makeSCNNodeForGLTFNode:node];
-    
+
     if (node.camera != nil) {
         // generate camera and add to node
     }
-    
+
     if (@available(iOS 11.0, *)) {
         scnNode.simdTransform = node.localTransform;
     } else {
@@ -223,9 +223,9 @@ static SCNMatrix4 GLTFSCNContentsTransformFromTextureTransform(GLTFTextureTransf
     if (mesh == nil) {
         return nil;
     }
-    
+
     NSMutableArray *nodes = [NSMutableArray array];
-    
+
     NSArray<SCNNode *> *bones = [self bonesForGLTFSkin:skin];
     NSArray<NSValue *> *inverseBindMatrices = [self inverseBindMatricesForGLTFSkin:skin];
 
@@ -239,13 +239,13 @@ static SCNMatrix4 GLTFSCNContentsTransformFromTextureTransform(GLTFTextureTransf
         if (positionSource != nil) {
             [sources addObject:positionSource];
         }
-        
+
         SCNGeometrySource *normalSource = [self geometrySourceWithSemantic:SCNGeometrySourceSemanticNormal
                                                                   accessor:submesh.accessorsForAttributes[GLTFAttributeSemanticNormal]];
         if (normalSource != nil) {
             [sources addObject:normalSource];
         }
-        
+
         SCNGeometrySource *tangentSource = [self geometrySourceWithSemantic:SCNGeometrySourceSemanticTangent
                                                                    accessor:submesh.accessorsForAttributes[GLTFAttributeSemanticTangent]];
         if (tangentSource != nil) {
@@ -257,7 +257,7 @@ static SCNMatrix4 GLTFSCNContentsTransformFromTextureTransform(GLTFTextureTransf
         if (texCoord0Source != nil) {
             [sources addObject:texCoord0Source];
         }
-        
+
         SCNGeometrySource *color0Source = [self geometrySourceWithSemantic:SCNGeometrySourceSemanticColor
                                                                   accessor:submesh.accessorsForAttributes[GLTFAttributeSemanticColor0]];
         if (color0Source != nil) {
@@ -278,12 +278,12 @@ static SCNMatrix4 GLTFSCNContentsTransformFromTextureTransform(GLTFTextureTransf
                                                                            primitiveCount:primitiveCount
                                                                             bytesPerIndex:bytesPerIndex];
         [elements addObject:geometryElement];
-        
+
         SCNGeometry *geometry = [SCNGeometry geometryWithSources:sources elements:elements];
-        
+
         SCNMaterial *material = [self materialForGLTFMaterial:submesh.material];
         geometry.materials = @[material];
-        
+
         SCNNode *node = [SCNNode node];
         node.geometry = geometry;
 
@@ -303,7 +303,7 @@ static SCNMatrix4 GLTFSCNContentsTransformFromTextureTransform(GLTFTextureTransf
         [nodes addObject:node];
         ++submeshIndex;
     }
-    
+
     return nodes;
 }
 
@@ -311,7 +311,7 @@ static SCNMatrix4 GLTFSCNContentsTransformFromTextureTransform(GLTFTextureTransf
     if (accessor == nil) {
         return nil;
     }
-    
+
     GLTFBufferView *bufferView = accessor.bufferView;
     id<GLTFBuffer> buffer = bufferView.buffer;
 
@@ -324,7 +324,7 @@ static SCNMatrix4 GLTFSCNContentsTransformFromTextureTransform(GLTFTextureTransf
     if (dataStride == 0) {
         dataStride = bytesPerElement;
     }
-    
+
     void *dataBase = buffer.contents + bufferView.offset + accessor.offset;
 
     // Ensure linear sum of weights is equal to 1; this is required by the spec, and SceneKit
@@ -372,7 +372,7 @@ static SCNMatrix4 GLTFSCNContentsTransformFromTextureTransform(GLTFTextureTransf
     if (skin == nil) {
         return @[];
     }
-    
+
     NSMutableArray<SCNNode *> *bones = [NSMutableArray array];
     for (GLTFNode *jointNode in skin.jointNodes) {
         SCNNode *boneNode = [self makeSCNNodeForGLTFNode:jointNode];
@@ -382,13 +382,13 @@ static SCNMatrix4 GLTFSCNContentsTransformFromTextureTransform(GLTFTextureTransf
             NSLog(@"WARNING: Did not find node for joint with identifier %@", jointNode.identifier);
         }
     }
-    
+
     if (bones.count == skin.jointNodes.count) {
         return [bones copy];
     } else {
         NSLog(@"WARNING: Bone count for skinner does not match joint node count for skin with identifier %@", skin.identifier);
     }
-    
+
     return @[];
 }
 
@@ -420,13 +420,13 @@ static SCNMatrix4 GLTFSCNContentsTransformFromTextureTransform(GLTFTextureTransf
     if (material == nil) {
         return nil;
     }
-  
+
     kdebug_signpost_start(60, 0, 0, 0, 0);
-  
+
     SCNMaterial *scnMaterial = [SCNMaterial material];
-    
+
     scnMaterial.name = material.name;
-    
+
     scnMaterial.lightingModelName = SCNLightingModelPhysicallyBased;
 
     scnMaterial.diffuse.contents = (__bridge id)[self.loadingDelegate cgImageForGLTFImage:material.baseColorTexture.texture.image
@@ -438,7 +438,7 @@ static SCNMatrix4 GLTFSCNContentsTransformFromTextureTransform(GLTFTextureTransf
     scnMaterial.diffuse.wrapT = GLTFSCNWrapModeForAddressMode(material.baseColorTexture.texture.sampler.tAddressMode);
     scnMaterial.diffuse.mappingChannel = material.baseColorTexture.texCoord;
     scnMaterial.diffuse.contentsTransform = GLTFSCNContentsTransformFromTextureTransform(material.baseColorTexture.transform);
-    
+
     scnMaterial.metalness.contents = (__bridge id)[self.loadingDelegate cgImageForGLTFImage:material.metallicRoughnessTexture.texture.image
                                                                 channelMask:GLTFImageChannelBlue];
     if (scnMaterial.metalness.contents == nil) {
@@ -589,19 +589,19 @@ static SCNMatrix4 GLTFSCNContentsTransformFromTextureTransform(GLTFTextureTransf
   if (image == nil) {
     return nil;
   }
-  
+
   NSString *maskedIdentifier = [NSString stringWithFormat:@"%@/%d", image.identifier.UUIDString, (int)channelMask];
-  
+
   // Check the cache to see if we already have an exact match for the requested image and channel subset
   CGImageRef exactCachedImage = (__bridge CGImageRef)self.cgImagesForImagesAndChannels[maskedIdentifier];
   if (exactCachedImage != nil) {
     return exactCachedImage;
   }
-  
+
   // If we don't have an exact match for the image+channel pair, we may still have the original image cached
   NSString *unmaskedIdentifier = [NSString stringWithFormat:@"%@/%d", image.identifier.UUIDString, (int)GLTFImageChannelAll];
   CGImageRef originalImage = (__bridge CGImageRef)self.cgImagesForImagesAndChannels[unmaskedIdentifier];
-  
+
   if (originalImage == NULL) {
     // We got unlucky, so we need to load and cache the original
     if (image.imageData != nil) {
@@ -626,12 +626,12 @@ static SCNMatrix4 GLTFSCNContentsTransformFromTextureTransform(GLTFTextureTransf
         CFRelease(imageSource);
       }
     }
-    
+
     NSLog(@"CACHE STORE id: %@", unmaskedIdentifier);
     self.cgImagesForImagesAndChannels[unmaskedIdentifier] = (__bridge id)originalImage;
     CGImageRelease(originalImage);
   }
-  
+
   // Now that we have the original, we may need to extract the requisite channel and cache the result
   if (channelMask != GLTFImageChannelAll) {
     CGImageRef extractedImage = [self newCGImageByExtractingChannel:(int)channelMask fromCGImage:originalImage];
@@ -640,7 +640,7 @@ static SCNMatrix4 GLTFSCNContentsTransformFromTextureTransform(GLTFTextureTransf
     CGImageRelease(extractedImage);
     return extractedImage;
   }
-  
+
   return originalImage;
 }
 
@@ -648,34 +648,34 @@ static SCNMatrix4 GLTFSCNContentsTransformFromTextureTransform(GLTFTextureTransf
   if (sourceImage == NULL) {
     return NULL;
   }
-  
+
   size_t width = CGImageGetWidth(sourceImage);
   size_t height = CGImageGetHeight(sourceImage);
   size_t bpc = 8;
   size_t Bpr = width * 4;
-  
+
   uint8_t *pixels = malloc(Bpr * height);
-  
+
   CGColorSpaceRef colorSpace = CGColorSpaceCreateWithName(kCGColorSpaceSRGB);
   CGContextRef context = CGBitmapContextCreate(pixels, width, height, bpc, Bpr, colorSpace, kCGImageAlphaPremultipliedLast);
   CGContextDrawImage(context, CGRectMake(0, 0, width, height), sourceImage);
-  
+
   for (int i = 0; i < width * height; ++i) {
     uint8_t components[4] = { pixels[i * 4 + 0], pixels[i * 4 + 1], pixels[i * 4 + 2], pixels[i * 4 + 3] }; // RGBA
     pixels[i] = components[channelIndex];
   }
-  
+
   CGColorSpaceRef monoColorSpace = CGColorSpaceCreateWithName(kCGColorSpaceGenericGrayGamma2_2);
   CGContextRef monoContext = CGBitmapContextCreate(pixels, width, height, bpc, width, monoColorSpace, kCGImageAlphaNone);
-  
+
   CGImageRef channelImage = CGBitmapContextCreateImage(monoContext);
-  
+
   CGColorSpaceRelease(monoColorSpace);
   CGContextRelease(monoContext);
   CGColorSpaceRelease(colorSpace);
   CGContextRelease(context);
   free(pixels);
-  
+
   return channelImage;
 }
 
