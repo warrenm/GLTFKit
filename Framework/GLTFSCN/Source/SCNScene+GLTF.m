@@ -122,7 +122,7 @@ static SCNMatrix4 GLTFSCNContentsTransformFromTextureTransform(GLTFTextureTransf
 }
 
 - (NSString *)_nextAnonymousAnimationName {
-    NSString *name = [NSString stringWithFormat:@"UNNAMED_%d", (int)self.anonymousAnimationIndex];
+    NSString *name = [NSString stringWithFormat:@"animation_%d", (int)self.anonymousAnimationIndex];
     self.anonymousAnimationIndex = self.anonymousAnimationIndex + 1;
     return name;
 }
