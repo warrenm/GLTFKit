@@ -51,11 +51,17 @@ NS_ASSUME_NONNULL_BEGIN
 
 /// Load an asset asynchronously. The asset may either be a local asset or a remote asset; the provided
 /// delegate will receive callbacks requesting the contents of remote URLs referenced by the asset. These
-/// callbacks will occur on an arbitrary internal queue. 
+/// callbacks will occur on an arbitrary internal queue.
 + (void)loadAssetWithURL:(NSURL *)url bufferAllocator:(id<GLTFBufferAllocator>)bufferAllocator delegate:(id<GLTFAssetLoadingDelegate>)delegate;
+
++ (instancetype)loadAssetWithData:(NSData *)assetData dataUrl:(NSURL *)url bufferAllocator:(id<GLTFBufferAllocator>)bufferAllocator delegate:(id<GLTFAssetLoadingDelegate>)delegate;
+
++ (NSMutableArray*)findDependentAssets:(NSData*)assetData parentUrl:(NSURL*)parentUrl;
 
 /// Load a local asset. The provided URL must be a file URL, or else loading will fail.
 - (instancetype)initWithURL:(NSURL *)url bufferAllocator:(id<GLTFBufferAllocator>)bufferAllocator;
+
+- (instancetype)initWithData:(NSData *)assetData dataUrl:(NSURL *)url bufferAllocator:(id<GLTFBufferAllocator>)bufferAllocator delegate:(id<GLTFAssetLoadingDelegate>)delegate;
 
 - (void)addLight:(GLTFKHRLight *)light;
 
