@@ -35,7 +35,7 @@ typedef NS_ENUM(NSInteger, GLTFImageChannel) {
 };
 
 @protocol GLTFSCNAssetLoadingDelegate
-- (CGImageRef)cgImageForGLTFImage:(GLTFImage *)image channelMask:(GLTFImageChannel)channelMask;
+- (UIImage*)uiImageForGLTFImage:(GLTFImage *)image channelMask:(GLTFImageChannel)channelMask;
 @end
 
 @interface DefaultGLTFSCNAssetLoadingDelegate : NSObject <GLTFSCNAssetLoadingDelegate>

@@ -429,7 +429,7 @@ static SCNMatrix4 GLTFSCNContentsTransformFromTextureTransform(GLTFTextureTransf
 
     scnMaterial.lightingModelName = SCNLightingModelPhysicallyBased;
 
-    scnMaterial.diffuse.contents = (__bridge id)[self.loadingDelegate cgImageForGLTFImage:material.baseColorTexture.texture.image
+    scnMaterial.diffuse.contents = [self.loadingDelegate uiImageForGLTFImage:material.baseColorTexture.texture.image
                                                               channelMask:GLTFImageChannelAll];
     if (scnMaterial.diffuse.contents == nil) {
         scnMaterial.diffuse.contents = (__bridge_transfer id)[self newCGColorForFloat4:material.baseColorFactor];
@@ -439,7 +439,7 @@ static SCNMatrix4 GLTFSCNContentsTransformFromTextureTransform(GLTFTextureTransf
     scnMaterial.diffuse.mappingChannel = material.baseColorTexture.texCoord;
     scnMaterial.diffuse.contentsTransform = GLTFSCNContentsTransformFromTextureTransform(material.baseColorTexture.transform);
 
-    scnMaterial.metalness.contents = (__bridge id)[self.loadingDelegate cgImageForGLTFImage:material.metallicRoughnessTexture.texture.image
+    scnMaterial.metalness.contents = [self.loadingDelegate uiImageForGLTFImage:material.metallicRoughnessTexture.texture.image
                                                                 channelMask:GLTFImageChannelBlue];
     if (scnMaterial.metalness.contents == nil) {
         scnMaterial.metalness.contents = @(material.metalnessFactor);
@@ -449,7 +449,7 @@ static SCNMatrix4 GLTFSCNContentsTransformFromTextureTransform(GLTFTextureTransf
     scnMaterial.metalness.mappingChannel = material.metallicRoughnessTexture.texCoord;
     scnMaterial.metalness.contentsTransform = GLTFSCNContentsTransformFromTextureTransform(material.metallicRoughnessTexture.transform);
 
-    scnMaterial.roughness.contents = (__bridge id)[self.loadingDelegate cgImageForGLTFImage:material.metallicRoughnessTexture.texture.image
+    scnMaterial.roughness.contents = [self.loadingDelegate uiImageForGLTFImage:material.metallicRoughnessTexture.texture.image
                                                                 channelMask:GLTFImageChannelGreen];
     if (scnMaterial.roughness.contents == nil) {
         scnMaterial.roughness.contents = @(material.roughnessFactor);
@@ -459,21 +459,21 @@ static SCNMatrix4 GLTFSCNContentsTransformFromTextureTransform(GLTFTextureTransf
     scnMaterial.roughness.mappingChannel = material.metallicRoughnessTexture.texCoord;
     scnMaterial.roughness.contentsTransform = GLTFSCNContentsTransformFromTextureTransform(material.metallicRoughnessTexture.transform);
 
-    scnMaterial.normal.contents = (__bridge id)[self.loadingDelegate cgImageForGLTFImage:material.normalTexture.texture.image
+    scnMaterial.normal.contents = [self.loadingDelegate uiImageForGLTFImage:material.normalTexture.texture.image
                                                              channelMask:GLTFImageChannelAll];
     scnMaterial.normal.wrapS = GLTFSCNWrapModeForAddressMode(material.normalTexture.texture.sampler.sAddressMode);
     scnMaterial.normal.wrapT = GLTFSCNWrapModeForAddressMode(material.normalTexture.texture.sampler.tAddressMode);
     scnMaterial.normal.mappingChannel = material.normalTexture.texCoord;
     scnMaterial.normal.contentsTransform = GLTFSCNContentsTransformFromTextureTransform(material.normalTexture.transform);
 
-    scnMaterial.ambientOcclusion.contents = (__bridge id)[self.loadingDelegate cgImageForGLTFImage:material.occlusionTexture.texture.image
+    scnMaterial.ambientOcclusion.contents = [self.loadingDelegate uiImageForGLTFImage:material.occlusionTexture.texture.image
                                                                        channelMask:GLTFImageChannelRed];
     scnMaterial.ambientOcclusion.wrapS = GLTFSCNWrapModeForAddressMode(material.occlusionTexture.texture.sampler.sAddressMode);
     scnMaterial.ambientOcclusion.wrapT = GLTFSCNWrapModeForAddressMode(material.occlusionTexture.texture.sampler.tAddressMode);
     scnMaterial.ambientOcclusion.mappingChannel = material.occlusionTexture.texCoord;
     scnMaterial.ambientOcclusion.contentsTransform = GLTFSCNContentsTransformFromTextureTransform(material.occlusionTexture.transform);
 
-    scnMaterial.emission.contents = (__bridge id)[self.loadingDelegate cgImageForGLTFImage:material.emissiveTexture.texture.image
+    scnMaterial.emission.contents = [self.loadingDelegate uiImageForGLTFImage:material.emissiveTexture.texture.image
                                                                channelMask:GLTFImageChannelAll];
     if (scnMaterial.emission.contents == nil) {
         scnMaterial.emission.contents = (__bridge_transfer id)[self newCGColorForFloat3:material.emissiveFactor];
