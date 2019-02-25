@@ -208,9 +208,11 @@
 
 - (void)setAsset:(GLTFAsset *)asset {
     _asset = asset;
-    [self computeRegularizationMatrix];
-    [self computeTransforms];
-    [self addDefaultLights];
+    if (_asset != nil) {
+        [self computeRegularizationMatrix];
+        [self computeTransforms];
+        [self addDefaultLights];
+    }
 }
 
 - (void)addDefaultLights {

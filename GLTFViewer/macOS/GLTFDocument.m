@@ -131,8 +131,10 @@
 }
 
 - (void)assetWithURL:(nonnull NSURL *)assetURL didFinishLoading:(nonnull GLTFAsset *)asset {
-    self.asset = asset;
-    NSLog(@"INFO: Total live buffer allocation size after document load is %0.2f MB", ([GLTFMTLBufferAllocator liveAllocationSize] / (float)1e6));
+    dispatch_async(dispatch_get_main_queue(), ^{
+        self.asset = asset;
+        NSLog(@"INFO: Total live buffer allocation size after document load is %0.2f MB", ([GLTFMTLBufferAllocator liveAllocationSize] / (float)1e6));
+    });
 }
 
 - (void)assetWithURL:(nonnull NSURL *)assetURL requiresContentsOfURL:(nonnull NSURL *)url completionHandler:(void (^)(NSData *_Nullable, NSError *_Nullable))completionHandler {
