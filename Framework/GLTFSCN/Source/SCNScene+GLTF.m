@@ -426,6 +426,8 @@ static SCNMatrix4 GLTFSCNContentsTransformFromTextureTransform(GLTFTextureTransf
     SCNMaterial *scnMaterial = [SCNMaterial material];
 
     scnMaterial.name = material.name;
+    
+    scnMaterial.doubleSided = material.doubleSided;
 
     scnMaterial.lightingModelName = SCNLightingModelPhysicallyBased;
 
