@@ -101,6 +101,7 @@ static SCNMatrix4 GLTFSCNContentsTransformFromTextureTransform(GLTFTextureTransf
 @property (nonatomic, strong) NSMutableDictionary<NSUUID *, SCNNode *> *scnNodesForGLTFNodes;
 @property (nonatomic, strong) NSMutableDictionary<NSUUID *, NSArray<NSValue *> *> *inverseBindMatricesForSkins;
 @property (nonatomic, assign) NSInteger anonymousAnimationIndex;
+@property (nonatomic, strong) NSMutableDictionary < NSNumber*, NSData* > *geomentrySourceDataCache;
 
 - (instancetype)initWithGLTFAsset:(GLTFAsset *)asset delegate:(id<GLTFSCNAssetLoadingDelegate>)delegate options:(NSDictionary<id<NSCopying>, id> *)options;
 
@@ -116,6 +117,7 @@ static SCNMatrix4 GLTFSCNContentsTransformFromTextureTransform(GLTFTextureTransf
         _options = options;
         _scnNodesForGLTFNodes = [NSMutableDictionary dictionary];
         _inverseBindMatricesForSkins = [NSMutableDictionary dictionary];
+        _geomentrySourceDataCache = [NSMutableDictionary dictionary];
         _loadingDelegate = delegate;
     }
     return self;
@@ -345,8 +347,14 @@ static SCNMatrix4 GLTFSCNContentsTransformFromTextureTransform(GLTFTextureTransf
             }
         }
     }
-
-    NSData *data = [NSData dataWithBytes:dataBase length:accessor.count * dataStride];
+    
+    NSNumber* shiftedPointer = [NSNumber numberWithInteger:(NSInteger)(buffer.contents + bufferView.offset + accessor.offset)];
+    NSData* data = [_geomentrySourceDataCache objectForKey:shiftedPointer];
+    if ( !data )
+    {
+        data = [NSData dataWithBytes:dataBase length:accessor.count * dataStride];
+        [_geomentrySourceDataCache setObject:data forKey:shiftedPointer];
+    }
 
     SCNGeometrySource *source = [SCNGeometrySource geometrySourceWithData:data
                                                                  semantic:semantic
