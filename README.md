@@ -197,7 +197,7 @@ Below is a checklist of glTF features and their current level of support.
 - [x] GPU-based vertex skinning
 
 #### Sparse Accessors
-- [ ] Sparse accessors
+- [x] Sparse accessors
 
 #### Extensions
 - [ ] KHR_materials_pbrSpecularGlossiness
