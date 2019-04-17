@@ -25,6 +25,28 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, strong) SCNNode *target;
 @end
 
+
+typedef NS_ENUM(NSInteger, GLTFImageChannel) {
+  GLTFImageChannelRed,
+  GLTFImageChannelGreen,
+  GLTFImageChannelBlue,
+  GLTFImageChannelAlpha,
+  GLTFImageChannelAll = 255
+};
+
+@protocol GLTFSCNAssetLoadingDelegate
+- (UIImage*)uiImageForGLTFImage:(GLTFImage *)image channelMask:(GLTFImageChannel)channelMask;
+@end
+
+@interface DefaultGLTFSCNAssetLoadingDelegate : NSObject <GLTFSCNAssetLoadingDelegate>
+@property (nonatomic, strong) NSMutableDictionary<NSString *, id> *cgImagesForImagesAndChannels;
+
+- (CGImageRef)cgImageForGLTFImage:(GLTFImage *)image channelMask:(GLTFImageChannel)channelMask;
+- (CGImageRef)newCGImageByExtractingChannel:(NSInteger)channelIndex fromCGImage:(CGImageRef)sourceImage;
+
+@end
+
+
 @interface GLTFSCNAsset : NSObject
 @property (nonatomic, copy) NSArray<SCNScene *> *scenes;
 @property (nonatomic, strong) SCNScene * _Nullable defaultScene;
@@ -36,7 +58,12 @@ NS_ASSUME_NONNULL_BEGIN
 @interface SCNScene (GLTF)
 
 + (GLTFSCNAsset *)assetFromGLTFAsset:(GLTFAsset *)asset options:(NSDictionary<id<NSCopying>, id> *)options;
++ (GLTFSCNAsset *)assetFromGLTFAsset:(GLTFAsset *)asset delegate:(id<GLTFSCNAssetLoadingDelegate>)delegate options:(NSDictionary<id<NSCopying>, id> *)options;
 
 @end
+
+
+
+
 
 NS_ASSUME_NONNULL_END

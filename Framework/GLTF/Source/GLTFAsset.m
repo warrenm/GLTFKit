@@ -103,6 +103,57 @@
     return self;
 }
 
++ (instancetype)loadAssetWithData:(NSData *)assetData dataUrl:(NSURL *)url bufferAllocator:(id<GLTFBufferAllocator>)bufferAllocator delegate:(id<GLTFAssetLoadingDelegate>)delegate {
+    return [[GLTFAsset alloc] initWithData:assetData dataUrl:url bufferAllocator:bufferAllocator delegate:delegate];
+}
+
+- (instancetype)initWithData:(NSData *)assetData dataUrl:(NSURL *)url bufferAllocator:(id<GLTFBufferAllocator>)bufferAllocator delegate:(id<GLTFAssetLoadingDelegate>)delegate {
+    if ((self = [super init])) {
+        _url = url;
+        _bufferAllocator = bufferAllocator;
+        _delegate = delegate;
+        
+        NSError *error = nil;
+        NSError *errorOrNil = nil;
+        
+        [self parseData:assetData error:error outError:&errorOrNil];
+    }
+    return self;
+}
+
++ (NSMutableArray*)findDependentAssets:(NSData*)assetData parentUrl:(NSURL*)parentUrl {
+    NSError *error = nil;
+    NSMutableArray* dependentURLs = [NSMutableArray array];
+    
+    if (![self assetIsGLB:assetData]) {
+        NSDictionary *rootObject = [NSJSONSerialization JSONObjectWithData:assetData options:0 error:&error];
+        NSArray* buffersMap = rootObject[@"buffers"];
+        NSArray* imagesMap = rootObject[@"images"];
+        
+        // Get the dependent buffer uris
+        for (NSDictionary *properties in buffersMap) {
+            NSString *uri = properties[@"uri"];
+            
+            if (![uri hasPrefix:@"data:"] && uri.length > 0) {
+                NSURL *bufferURL = [[parentUrl URLByDeletingLastPathComponent] URLByAppendingPathComponent:uri];
+                [dependentURLs addObject:bufferURL];
+            }
+        }
+        
+        // Get the dependent image uris
+        for (NSDictionary *properties in imagesMap) {
+            NSString *uri = properties[@"uri"];
+            
+            if (![uri hasPrefix:@"data:image/"] && uri.length > 0) {
+                NSURL *imageURL = [[parentUrl URLByDeletingLastPathComponent] URLByAppendingPathComponent:uri];
+                [dependentURLs addObject:imageURL];
+            }
+        }
+    }
+    
+    return dependentURLs;
+}
+
 - (void)addLight:(GLTFKHRLight *)light {
     [_lights addObject:light];
 }
@@ -148,21 +199,25 @@
     if (internalError != nil && error != nil) {
         *error = internalError;
     }
-
+    
     return urlData;
 }
 
 - (BOOL)loadWithError:(NSError **)errorOrNil {
     NSError *error = nil;
-    NSDictionary *rootObject = nil;
     
     NSData *assetData = [self _contentsOfURL:_url error:&error];
     if (assetData == nil) {
         return NO;
     }
+    return [self parseData:assetData error:error outError:errorOrNil];
+}
+
+- (BOOL)parseData:(NSData *)assetData error:error outError:(NSError **)errorOrNil {
+    NSDictionary *rootObject = nil;
     
-    if ([self assetIsGLB:assetData]) {
-        [self readBinaryChunks:assetData];
+    if ([GLTFAsset assetIsGLB:assetData]) {
+        _chunks = [GLTFAsset readBinaryChunks:assetData];
         rootObject = [NSJSONSerialization JSONObjectWithData:_chunks.firstObject.data options:0 error:&error];
     } else {
         rootObject = [NSJSONSerialization JSONObjectWithData:assetData options:0 error:&error];
@@ -176,7 +231,7 @@
     _extensionsUsed = [rootObject[@"extensionsUsed"] ?: @[] copy];
     
     [self toggleExtensionFeatureFlags];
-
+    
     _defaultSampler =  [GLTFTextureSampler new];
     
     _defaultMaterial = [GLTFMaterial new];
@@ -214,7 +269,7 @@
     [self loadAnimations:rootObject[@"animations"]];
     [self loadScenes:rootObject[@"scenes"]];
     [self loadDefaultScene:rootObject[@"scene"]];
-
+    
     return YES;
 }
 
@@ -237,7 +292,7 @@
     }
 }
 
-- (BOOL)assetIsGLB:(NSData *)assetData {
++ (BOOL)assetIsGLB:(NSData *)assetData {
     if (assetData.length < sizeof(GLTFBinaryHeader)) {
         return NO;
     } else {
@@ -247,7 +302,7 @@
     }
 }
 
-- (void)readBinaryChunks:(NSData *)assetData {
++ (NSMutableArray *)readBinaryChunks:(NSData *)assetData {
     NSMutableArray *chunks = [NSMutableArray array];
     
     GLTFBinaryHeader header;
@@ -274,10 +329,11 @@
         offset += sizeof(chunkHeader) + chunkHeader.length;
     }
     
-    _chunks = [chunks copy];
+    NSMutableArray * chunksCopy = [chunks copy];
+    NSAssert(((GLTFBinaryChunk*)(chunksCopy.firstObject)).chunkType == GLTFChunkTypeJSON, @"First chunk in GLB file had type %u rather than expected %u",
+             (unsigned int)((GLTFBinaryChunk*)(chunksCopy.firstObject)).chunkType, (unsigned int)GLTFChunkTypeJSON);
     
-    NSAssert(_chunks.firstObject.chunkType == GLTFChunkTypeJSON, @"First chunk in GLB file had type %u rather than expected %u",
-             (unsigned int)_chunks.firstObject.chunkType, (unsigned int)GLTFChunkTypeJSON);
+    return chunksCopy;
 }
 
 - (BOOL)loadAssetProperties:(NSDictionary *)propertiesMap {
@@ -317,18 +373,18 @@
                 id<GLTFBuffer> buffer = [_bufferAllocator newBufferWithLength:length];
                 memcpy(buffer.contents, accessor.bufferView.buffer.contents + accessor.bufferView.offset + accessor.offset, buffer.length);
                 _buffers = [_buffers arrayByAddingObject:buffer];
-
+                
                 GLTFBufferView *bufferView = [GLTFBufferView new];
                 bufferView.buffer = buffer;
                 bufferView.offset = 0;
                 bufferView.stride = 0;
                 _bufferViews = [_bufferViews arrayByAddingObject:bufferView];
-
+                
                 accessor.bufferView = bufferView;
                 accessor.offset = 0;
             }
         }
-
+        
         __block GLTFValueRange valueRange = { 0 };
         NSArray *minValues = properties[@"min"];
         [minValues enumerateObjectsUsingBlock:^(NSNumber *num, NSUInteger index, BOOL *stop) {
@@ -356,7 +412,7 @@
     NSMutableArray *buffers = [NSMutableArray arrayWithCapacity:buffersMap.count];
     for (NSDictionary *properties in buffersMap) {
         NSUInteger byteLength = [properties[@"byteLength"] integerValue];
-
+        
         NSString *uri = properties[@"uri"];
         NSData *data = nil;
         
@@ -409,16 +465,16 @@
         bufferView.stride = [properties[@"byteStride"] integerValue];
         bufferView.offset = [properties[@"byteOffset"] integerValue];
         bufferView.target = [properties[@"target"] integerValue];
-
-//        if ((bufferView.buffer != nil) && (bufferView.offset % 16 != 0)) {
-//            NSLog(@"WARNING: Buffer view %d had misaligned offset of %d. Creating auxilliary buffer of length %d and continuing...",
-//                  (int)index, (int)bufferView.offset, (int)bufferView.length);
-//            id<GLTFBuffer> alignedBuffer = [_bufferAllocator newBufferWithLength:bufferView.length];
-//            _buffers = [_buffers arrayByAddingObject:alignedBuffer];
-//            memcpy([alignedBuffer contents], bufferView.buffer.contents + bufferView.offset, bufferView.length);
-//            bufferView.buffer = alignedBuffer;
-//            bufferView.offset = 0;
-//        }
+        
+        //        if ((bufferView.buffer != nil) && (bufferView.offset % 16 != 0)) {
+        //            NSLog(@"WARNING: Buffer view %d had misaligned offset of %d. Creating auxilliary buffer of length %d and continuing...",
+        //                  (int)index, (int)bufferView.offset, (int)bufferView.length);
+        //            id<GLTFBuffer> alignedBuffer = [_bufferAllocator newBufferWithLength:bufferView.length];
+        //            _buffers = [_buffers arrayByAddingObject:alignedBuffer];
+        //            memcpy([alignedBuffer contents], bufferView.buffer.contents + bufferView.offset, bufferView.length);
+        //            bufferView.buffer = alignedBuffer;
+        //            bufferView.offset = 0;
+        //        }
         
         [bufferViews addObject: bufferView];
     }];
@@ -431,7 +487,7 @@
     if (samplersMap.count == 0) {
         _samplers = @[];
     }
-
+    
     NSMutableArray *samplers = [NSMutableArray arrayWithCapacity:samplersMap.count];
     for (NSDictionary *properties in samplersMap) {
         GLTFTextureSampler *sampler = [[GLTFTextureSampler alloc] init];
@@ -442,10 +498,10 @@
         sampler.name = properties[@"name"];
         sampler.extensions = properties[@"extensions"];
         sampler.extras = properties[@"extras"];
-
+        
         [samplers addObject:sampler];
     }
-
+    
     _samplers = [samplers copy];
     return YES;
 }
@@ -481,7 +537,7 @@
         image.name = properties[@"name"];
         image.extensions = properties[@"extensions"];
         image.extras = properties[@"extras"];
-
+        
         [images addObject:image];
     }
     
@@ -493,23 +549,23 @@
     if (texturesMap.count == 0) {
         _textures = @[];
     }
-
+    
     NSMutableArray *textures = [NSMutableArray arrayWithCapacity:texturesMap.count];
     for (NSDictionary *properties in texturesMap) {
         GLTFTexture *texture = [[GLTFTexture alloc] init];
-
+        
         NSUInteger samplerIndex = [properties[@"sampler"] intValue];
         if (samplerIndex < _samplers.count) {
             texture.sampler = _samplers[samplerIndex];
         } else {
             texture.sampler = _defaultSampler;
         }
-
+        
         NSUInteger imageIndex = [properties[@"source"] intValue];
         if (imageIndex < _images.count) {
             texture.image = _images[imageIndex];
         }
-
+        
         texture.format = [properties[@"format"] integerValue] ?: texture.format;
         texture.internalFormat = [properties[@"internalFormat"] integerValue] ?: texture.internalFormat;
         texture.target = [properties[@"target"] integerValue] ?: texture.target;
@@ -520,7 +576,7 @@
         
         [textures addObject: texture];
     }
-
+    
     _textures = [textures copy];
     return YES;
 }
@@ -561,10 +617,10 @@
         } else {
             camera.zfar = [params[@"zfar"] floatValue];
         }
-
+        
         camera.extensions = properties[@"extensions"];
         camera.extras = properties[@"extras"];
-
+        
         [_cameras addObject: camera];
     }
     
@@ -604,7 +660,7 @@
         if (intensityValue != nil) {
             light.intensity = [intensityValue floatValue];
         }
-
+        
         if (light.type == GLTFKHRLightTypeSpot) {
             NSDictionary *spotProperties = properties[@"spot"];
             NSNumber *innerConeAngleValue = spotProperties[@"innerConeAngle"];
@@ -619,7 +675,7 @@
         
         [_lights addObject:light];
     }];
-
+    
     return YES;
 }
 
@@ -652,7 +708,7 @@
                     attributeAccessors[attributeName] = accessor;
                 }
             }];
-
+            
             submesh.accessorsForAttributes = attributeAccessors;
             
             NSUInteger materialIndex = [submeshProperties[@"material"] intValue];
@@ -738,7 +794,7 @@
     NSMutableArray *materials = [NSMutableArray arrayWithCapacity:materialsMap.count];
     for (NSDictionary *properties in materialsMap) {
         GLTFMaterial *material = [[GLTFMaterial alloc] init];
-
+        
         NSDictionary *pbrValuesMap = properties[@"pbrMetallicRoughness"];
         if (pbrValuesMap) {
             NSDictionary *baseColorTextureMap = pbrValuesMap[@"baseColorTexture"];
@@ -757,7 +813,7 @@
             
             material.baseColorTexture.extras = baseColorTextureMap[@"extras"];
             material.baseColorTexture.extensions = baseColorTextureMap[@"extensions"];
-
+            
             NSArray *baseColorFactorComponents = pbrValuesMap[@"baseColorFactor"];
             if (baseColorFactorComponents.count == 4) {
                 material.baseColorFactor = GLTFVectorFloat4FromArray(baseColorFactorComponents);
@@ -767,12 +823,12 @@
             if (metallicFactor != nil) {
                 material.metalnessFactor = metallicFactor.floatValue;
             }
-
+            
             NSNumber *roughnessFactor = pbrValuesMap[@"roughnessFactor"];
             if (roughnessFactor != nil) {
                 material.roughnessFactor = roughnessFactor.floatValue;
             }
-
+            
             NSDictionary *metallicRoughnessTextureMap = pbrValuesMap[@"metallicRoughnessTexture"];
             NSNumber *metallicRoughnessTextureIndexValue = metallicRoughnessTextureMap[@"index"];
             if (metallicRoughnessTextureIndexValue != nil) {
@@ -782,12 +838,12 @@
                     material.metallicRoughnessTexture.texture = _textures[metallicRoughnessTextureIndex];
                 }
             }
-
+            
             NSNumber *metallicRoughnessTexCoordValue = metallicRoughnessTextureMap[@"texCoord"];
             if (metallicRoughnessTexCoordValue != nil) {
                 material.metallicRoughnessTexture.texCoord = metallicRoughnessTexCoordValue.integerValue;
             }
-
+            
             material.metallicRoughnessTexture.extras = metallicRoughnessTextureMap[@"extras"];
             material.metallicRoughnessTexture.extensions = metallicRoughnessTextureMap[@"extensions"];
         }
@@ -802,7 +858,7 @@
             }
             NSNumber *normalTextureScaleValue = normalTextureMap[@"scale"];
             material.normalTextureScale = (normalTextureScaleValue != nil) ? normalTextureScaleValue.floatValue : 1.0;
-
+            
             NSNumber *normalTexCoordValue = normalTextureMap[@"texCoord"];
             if (normalTexCoordValue != nil) {
                 material.normalTexture.texCoord = normalTexCoordValue.integerValue;
@@ -811,7 +867,7 @@
             material.normalTexture.extras = normalTextureMap[@"extras"];
             material.normalTexture.extensions = normalTextureMap[@"extensions"];
         }
-
+        
         NSDictionary *emissiveTextureMap = properties[@"emissiveTexture"];
         if (emissiveTextureMap) {
             material.emissiveTexture = [[GLTFTextureInfo alloc] init];
@@ -824,7 +880,7 @@
             if (emissiveTexCoordValue != nil) {
                 material.emissiveTexture.texCoord = emissiveTexCoordValue.integerValue;
             }
-
+            
             material.emissiveTexture.extras = emissiveTextureMap[@"extras"];
             material.emissiveTexture.extensions = emissiveTextureMap[@"extensions"];
         }
@@ -850,7 +906,7 @@
             if (occlusionStrengthValue != nil) {
                 material.occlusionStrength = occlusionStrengthValue.floatValue;
             }
-
+            
             material.occlusionTexture.extras = occlusionTextureMap[@"extras"];
             material.occlusionTexture.extensions = occlusionTextureMap[@"extensions"];
         }
@@ -871,11 +927,11 @@
         if (alphaCutoffValue != nil) {
             material.alphaCutoff = alphaCutoffValue.floatValue;
         }
-
+        
         material.name = properties[@"name"];
         material.extensions = properties[@"extensions"];
         material.extras = properties[@"extras"];
-
+        
         if (_usesPBRSpecularGlossiness) {
             NSDictionary *pbrSpecularGlossinessProperties = material.extensions[GLTFExtensionKHRMaterialsPBRSpecularGlossiness];
             if (pbrSpecularGlossinessProperties != nil) {
@@ -899,7 +955,7 @@
                 // TODO: Support specularGlossinessTexture
                 
                 // TODO: Support texture transform of specular-glossiness map
-
+                
                 NSArray *diffuseFactorComponents = pbrSpecularGlossinessProperties[@"diffuseFactor"];
                 if (diffuseFactorComponents.count == 4) {
                     material.baseColorFactor = GLTFVectorFloat4FromArray(diffuseFactorComponents);
@@ -907,7 +963,7 @@
                 
                 NSNumber *glossinessFactorValue = pbrSpecularGlossinessProperties[@"glossinessFactor"];
                 material.glossinessFactor = (glossinessFactorValue != nil) ? glossinessFactorValue.floatValue : 0.0;
-
+                
                 NSArray *specularFactorComponents = pbrSpecularGlossinessProperties[@"specularFactor"];
                 if (specularFactorComponents.count == 3) {
                     material.specularFactor = GLTFVectorFloat3FromArray(specularFactorComponents);
@@ -925,12 +981,12 @@
         if (_usesKHRTextureTransform) {
             [self _fixMaterialTextureTransforms:material];
         }
-
+        
         [materials addObject: material];
     }
-
+    
     _materials = [materials copy];
-
+    
     return YES;
 }
 
@@ -1001,11 +1057,11 @@
         _nodes = @[];
         return YES;
     }
-
+    
     NSMutableArray *nodes = [NSMutableArray arrayWithCapacity:nodesMap.count];
     for (NSDictionary *properties in nodesMap) {
         GLTFNode *node = [[GLTFNode alloc] init];
-
+        
         NSString *cameraIdentifierString = properties[@"camera"];
         if (cameraIdentifierString) {
             NSUInteger cameraIndex = cameraIdentifierString.integerValue;
@@ -1015,10 +1071,10 @@
                 camera.referencingNodes = [camera.referencingNodes arrayByAddingObject:node];
             }
         }
-
+        
         // Copy array of indices for now; we fix this up later in another pass once all nodes are in memory.
         node.children = [properties[@"children"] copy];
-
+        
         NSNumber *skinIndexValue = properties[@"skin"];
         if (skinIndexValue != nil) {
             NSUInteger skinIndex = skinIndexValue.integerValue;
@@ -1026,9 +1082,9 @@
                 node.skin = _skins[skinIndex];
             }
         }
-
+        
         node.jointName = properties[@"jointName"];
-
+        
         NSNumber *meshIndexValue = properties[@"mesh"];
         if (meshIndexValue != nil) {
             NSUInteger meshIndex = meshIndexValue.integerValue;
@@ -1036,22 +1092,22 @@
                 node.mesh = _meshes[meshIndex];
             }
         }
-
+        
         NSArray *matrixArray = properties[@"matrix"];
         if (matrixArray) {
             node.localTransform = GLTFMatrixFloat4x4FromArray(matrixArray);
         }
-
+        
         NSArray *rotationArray = properties[@"rotation"];
         if (rotationArray) {
             node.rotationQuaternion = GLTFQuaternionFromArray(rotationArray);
         }
-
+        
         NSArray *scaleArray = properties[@"scale"];
         if (scaleArray) {
             node.scale = GLTFVectorFloat3FromArray(scaleArray);
         }
-
+        
         NSArray *translationArray = properties[@"translation"];
         if (translationArray) {
             node.translation = GLTFVectorFloat3FromArray(translationArray);
@@ -1071,7 +1127,7 @@
         
         [nodes addObject: node];
     }
-
+    
     _nodes = [nodes copy];
     
     return [self fixNodeRelationships];
@@ -1101,7 +1157,7 @@
             }
         }
         skin.jointNodes = [nodes copy];
-
+        
         NSNumber *skeletonIndexValue = (NSNumber *)skin.skeletonRootNode;
         if (skeletonIndexValue != nil && skeletonIndexValue.intValue < _nodes.count) {
             skin.skeletonRootNode = _nodes[skeletonIndexValue.intValue];
@@ -1116,11 +1172,11 @@
         _animations = @[];
         return YES;
     }
-
+    
     NSArray *interpolationModes = @[ @"STEP", @"LINEAR", @"CUBICSPLINE" ];
-
+    
     NSMutableArray *animations = [NSMutableArray arrayWithCapacity:animationsMap.count];
-
+    
     for (NSDictionary *properties in animationsMap) {
         GLTFAnimation *animation = [[GLTFAnimation alloc] init];
         
@@ -1141,9 +1197,9 @@
             }
             [samplers addObject:sampler];
         }];
-
+        
         animation.samplers = [samplers copy];
-
+        
         NSArray *channelsProperties = properties[@"channels"];
         NSMutableArray *channels = [NSMutableArray arrayWithCapacity:channelsProperties.count];
         [channelsProperties enumerateObjectsUsingBlock:^(NSDictionary *channelProperties, NSUInteger index, BOOL *stop) {
@@ -1160,9 +1216,9 @@
             channel.targetPath = targetProperties[@"path"];
             [channels addObject:channel];
         }];
-
+        
         animation.channels = [channels copy];
-
+        
         animation.name = properties[@"name"];
         animation.extensions = properties[@"extensions"];
         animation.extras = properties[@"extras"];
@@ -1220,11 +1276,11 @@
         _scenes = @[];
         return YES;
     }
-
+    
     NSMutableArray *scenes = [NSMutableArray arrayWithCapacity:scenesMap.count];
     for (NSDictionary *properties in scenesMap) {
         GLTFScene *scene = [[GLTFScene alloc] init];
-
+        
         NSArray *rootNodeIndices = properties[@"nodes"];
         NSMutableArray *rootNodes = [NSMutableArray arrayWithCapacity:rootNodeIndices.count];
         for (NSNumber *nodeIndexValue in rootNodeIndices) {
@@ -1235,7 +1291,7 @@
             }
         }
         scene.nodes = [rootNodes copy];
-
+        
         scene.name = properties[@"name"];
         scene.extensions = properties[@"extensions"];
         scene.extras = properties[@"extras"];
@@ -1247,12 +1303,12 @@
                 scene.ambientLight = _lights[lightIdentifierValue.integerValue];
             }
         }
-
+        
         [scenes addObject:scene];
     }
-
+    
     _scenes = [scenes copy];
-
+    
     return YES;
 }
 
@@ -1266,7 +1322,7 @@
     } else {
         _defaultScene = _scenes.firstObject;
     }
-
+    
     return YES;
 }
 
