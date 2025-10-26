@@ -1,4 +1,4 @@
-# GLTFKit
+# GLTFKit is now archived and will not receive any future updates. Please consider adopting [GLTFKit2](https://github.com/warrenm/GLTFKit2).
 
 An Objective-C glTF 2.0 loader and Metal-based renderer
 
