@@ -82,11 +82,11 @@
     });
 }
 
-- (instancetype)initWithURL:(NSURL *)url bufferAllocator:(id<GLTFBufferAllocator>)bufferAllocator {
+- (instancetype _Nullable)initWithURL:(NSURL *)url bufferAllocator:(id<GLTFBufferAllocator>)bufferAllocator {
     return [self _initWithURL:url bufferAllocator:bufferAllocator delegate:nil];
 }
 
-- (instancetype)_initWithURL:(NSURL *)url bufferAllocator:(id<GLTFBufferAllocator>)bufferAllocator delegate:(id<GLTFAssetLoadingDelegate>)delegate {
+- (instancetype _Nullable)_initWithURL:(NSURL *)url bufferAllocator:(id<GLTFBufferAllocator>)bufferAllocator delegate:(id<GLTFAssetLoadingDelegate>)delegate {
     if ((self = [super init])) {
         _url = url;
         _bufferAllocator = bufferAllocator;
