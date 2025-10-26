@@ -287,6 +287,124 @@
     return YES;
 }
 
+- (GLTFBufferView *)createNewBufferViewForAccessor:(GLTFAccessor*)accessor fromData:(void*)data {
+    NSInteger stride = accessor.bufferView.stride;
+    size_t elementSize = GLTFSizeOfComponentTypeWithDimension(accessor.componentType, accessor.dimension);
+    size_t length = accessor.count * elementSize;
+    id<GLTFBuffer> buffer = [_bufferAllocator newBufferWithLength:length];
+    if (data) {
+        memcpy(buffer.contents, data, buffer.length);
+    } else {
+        memset(buffer.contents, 0, buffer.length);
+    }
+    _buffers = [_buffers arrayByAddingObject:buffer];
+    
+    GLTFBufferView *bufferView = [GLTFBufferView new];
+    bufferView.buffer = buffer;
+    bufferView.length = length;
+    bufferView.offset = 0;
+    bufferView.stride = stride;
+    _bufferViews = [_bufferViews arrayByAddingObject:bufferView];
+    
+    return bufferView;
+}
+
+- (BOOL)considerToCreateNewBufferView:(GLTFAccessor*)accessor currentBufferViewIndex:(NSUInteger)index force:(BOOL)forceCreate {
+    if (index < _bufferViews.count) {
+        accessor.bufferView = _bufferViews[index];
+#if USE_AGGRESSIVE_ALIGNMENT
+        size_t alignment = GLTFSizeOfComponentTypeWithDimension(accessor.componentType, accessor.dimension);
+#else
+        size_t alignment = GLTFSizeOfDataType(accessor.componentType);
+#endif
+        NSInteger dataOffset = accessor.offset + accessor.bufferView.offset;
+        if (dataOffset % alignment != 0) {
+            size_t elementSize = GLTFSizeOfComponentTypeWithDimension(accessor.componentType, accessor.dimension);
+            size_t length = accessor.count * elementSize;
+            NSLog(@"WARNING: Accessor had misaligned offset %d, which is not a multiple of %d. Building auxiliary buffer of length %d and continuing...",
+                  (int)dataOffset, (int)alignment, (int)length);
+            accessor.bufferView = [self createNewBufferViewForAccessor:accessor fromData:accessor.bufferView.buffer.contents + accessor.bufferView.offset + accessor.offset];
+            accessor.offset = 0;
+            return true;
+        } else if (forceCreate) {
+            accessor.bufferView = [self createNewBufferViewForAccessor:accessor fromData:accessor.bufferView.buffer.contents + accessor.bufferView.offset + accessor.offset];
+            accessor.offset = 0;
+            return true;
+        }
+    } else {
+        if (forceCreate) {
+            accessor.bufferView = [self createNewBufferViewForAccessor:accessor fromData:nil];
+            accessor.offset = 0;
+            return true;
+        }
+    }
+    return false;
+}
+
+- (GLTFAccessor*)createAccessorFromProperties:(NSDictionary*)properties {
+    GLTFAccessor *accessor = [[GLTFAccessor alloc] init];
+    accessor.componentType = [properties[@"componentType"] integerValue];
+    accessor.dimension = GLTFDataDimensionForName(properties[@"type"]);
+    accessor.offset = [properties[@"byteOffset"] integerValue];
+    accessor.count = [properties[@"count"] integerValue];
+    NSUInteger bufferViewIndex = [properties[@"bufferView"] intValue];
+    BOOL isSparse = properties[@"sparse"] != nil;
+    [self considerToCreateNewBufferView:accessor currentBufferViewIndex:bufferViewIndex force:isSparse];
+    
+    if (isSparse) {
+        NSDictionary *sparseProperties = properties[@"sparse"];
+        int sparseCount = [sparseProperties[@"count"] intValue];
+        
+        NSDictionary *sparseValuesProperties = sparseProperties[@"values"];
+        GLTFAccessor *sparseValuesAccessor = [[GLTFAccessor alloc] init];
+        sparseValuesAccessor.componentType = accessor.componentType;
+        sparseValuesAccessor.dimension = accessor.dimension;
+        sparseValuesAccessor.offset = [sparseValuesProperties[@"byteOffset"] integerValue];
+        sparseValuesAccessor.count = sparseCount;
+        NSUInteger bufferViewSparseValuesIndex = [sparseValuesProperties[@"bufferView"] intValue];
+        if (bufferViewSparseValuesIndex < _bufferViews.count) {
+            sparseValuesAccessor.bufferView = _bufferViews[bufferViewSparseValuesIndex];
+        }
+        
+        NSDictionary *sparseIndicesProperties = sparseProperties[@"indices"];
+        GLTFAccessor *sparseIndicesAccessor = [[GLTFAccessor alloc] init];
+        sparseIndicesAccessor.componentType = [sparseIndicesProperties[@"componentType"] integerValue];
+        sparseIndicesAccessor.dimension = GLTFDataDimensionScalar;
+        sparseIndicesAccessor.offset = [sparseIndicesProperties[@"byteOffset"] integerValue];
+        sparseIndicesAccessor.count = sparseCount;
+        NSUInteger bufferViewSparseIndicesIndex = [sparseIndicesProperties[@"bufferView"] intValue];
+        if (bufferViewSparseIndicesIndex < _bufferViews.count) {
+            sparseIndicesAccessor.bufferView = _bufferViews[bufferViewSparseIndicesIndex];
+        }
+        
+        size_t elementSize = GLTFSizeOfComponentTypeWithDimension(accessor.componentType, accessor.dimension);
+        size_t indexSize = GLTFSizeOfDataType(sparseIndicesAccessor.componentType);
+        size_t sparseValuesStride = sparseValuesAccessor.bufferView.stride > 0 ? sparseValuesAccessor.bufferView.stride : elementSize;
+        size_t valuesStride = accessor.bufferView.stride > 0 ? accessor.bufferView.stride : elementSize;
+        size_t sparseIndexStride = sparseIndicesAccessor.bufferView.stride > 0 ? sparseIndicesAccessor.bufferView.stride : indexSize;
+        for (int i = 0; i < sparseCount; i++) {
+            int baseIndex = 0;
+            memcpy(&baseIndex, sparseIndicesAccessor.bufferView.buffer.contents + sparseIndicesAccessor.bufferView.offset + sparseIndicesAccessor.offset + i * sparseIndexStride, indexSize);
+            void *sparseValueData = sparseValuesAccessor.bufferView.buffer.contents + sparseValuesAccessor.bufferView.offset + sparseValuesAccessor.offset + i * sparseValuesStride;
+            void *valueData = accessor.bufferView.buffer.contents + accessor.bufferView.offset + accessor.offset + baseIndex * valuesStride;
+            memcpy(valueData, sparseValueData, elementSize);
+        }
+    }
+    
+    __block GLTFValueRange valueRange = { 0 };
+    NSArray *minValues = properties[@"min"];
+    [minValues enumerateObjectsUsingBlock:^(NSNumber *num, NSUInteger index, BOOL *stop) {
+        valueRange.minValue[index] = num.floatValue;
+    }];
+    NSArray *maxValues = properties[@"max"];
+    [maxValues enumerateObjectsUsingBlock:^(NSNumber *num, NSUInteger index, BOOL *stop) {
+        valueRange.maxValue[index] = num.floatValue;
+    }];
+    accessor.valueRange = valueRange;
+    
+    return accessor;
+}
+
 - (BOOL)loadAccessors:(NSArray *)accessorsMap {
     if (accessorsMap.count == 0) {
         _accessors = @[];
@@ -295,54 +413,9 @@
     
     NSMutableArray *accessors = [NSMutableArray arrayWithCapacity:accessorsMap.count];
     for (NSDictionary *properties in accessorsMap) {
-        GLTFAccessor *accessor = [[GLTFAccessor alloc] init];
-        accessor.componentType = [properties[@"componentType"] integerValue];
-        accessor.dimension = GLTFDataDimensionForName(properties[@"type"]);
-        accessor.offset = [properties[@"byteOffset"] integerValue];
-        accessor.count = [properties[@"count"] integerValue];
-        NSUInteger bufferViewIndex = [properties[@"bufferView"] intValue];
-        if (bufferViewIndex < _bufferViews.count) {
-            accessor.bufferView = _bufferViews[bufferViewIndex];
-#if USE_AGGRESSIVE_ALIGNMENT
-            size_t alignment = GLTFSizeOfComponentTypeWithDimension(accessor.componentType, accessor.dimension);
-#else
-            size_t alignment = GLTFSizeOfDataType(accessor.componentType);
-#endif
-            NSInteger dataOffset = accessor.offset + accessor.bufferView.offset;
-            if (dataOffset % alignment != 0) {
-                size_t elementSize = GLTFSizeOfComponentTypeWithDimension(accessor.componentType, accessor.dimension);
-                size_t length = accessor.count * elementSize;
-                NSLog(@"WARNING: Accessor had misaligned offset %d, which is not a multiple of %d. Building auxiliary buffer of length %d and continuing...",
-                      (int)dataOffset, (int)alignment, (int)length);
-                id<GLTFBuffer> buffer = [_bufferAllocator newBufferWithLength:length];
-                memcpy(buffer.contents, accessor.bufferView.buffer.contents + accessor.bufferView.offset + accessor.offset, buffer.length);
-                _buffers = [_buffers arrayByAddingObject:buffer];
-
-                GLTFBufferView *bufferView = [GLTFBufferView new];
-                bufferView.buffer = buffer;
-                bufferView.offset = 0;
-                bufferView.stride = 0;
-                _bufferViews = [_bufferViews arrayByAddingObject:bufferView];
-
-                accessor.bufferView = bufferView;
-                accessor.offset = 0;
-            }
-        }
-
-        __block GLTFValueRange valueRange = { 0 };
-        NSArray *minValues = properties[@"min"];
-        [minValues enumerateObjectsUsingBlock:^(NSNumber *num, NSUInteger index, BOOL *stop) {
-            valueRange.minValue[index] = num.floatValue;
-        }];
-        NSArray *maxValues = properties[@"max"];
-        [maxValues enumerateObjectsUsingBlock:^(NSNumber *num, NSUInteger index, BOOL *stop) {
-            valueRange.maxValue[index] = num.floatValue;
-        }];
-        accessor.valueRange = valueRange;
-        
+        GLTFAccessor *accessor = [self createAccessorFromProperties:properties];
         [accessors addObject:accessor];
     }
-    
     _accessors = [accessors copy];
     
     return YES;
